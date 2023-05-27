@@ -7,6 +7,8 @@ import it.ayyjava.storage.annotations.MongoObject;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Member;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -16,12 +18,13 @@ import java.util.function.Consumer;
 
 @Getter
 @MongoObject(database = "Maggiordomo", collection = "VCs")
-public class VC {
+public class VC implements Comparable<VC> {
 
     @MongoKey private final String guild;
     @MongoKey private final String user;
     @Setter private String channel;
     @Setter private Instant lastJoin;
+    private Instant lastModification;
 
     // Questi sono i permessi
     private final Set<PlayerRecord> trusted;
@@ -95,6 +98,14 @@ public class VC {
         this.size = size;
     }
 
+    public void updateLastModification() {
+        updateLastModification(Instant.now());
+    }
+
+    public void updateLastModification(@Nullable Instant instant) {
+        lastModification = instant == null ? Instant.EPOCH : instant;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -111,5 +122,10 @@ public class VC {
         int result = guild.hashCode();
         result = 31 * result + user.hashCode();
         return result;
+    }
+
+    @Override
+    public int compareTo(@NotNull VC o) {
+        return lastModification.compareTo(o.getLastModification());
     }
 }

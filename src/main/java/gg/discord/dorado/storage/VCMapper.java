@@ -17,26 +17,25 @@ import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @Getter
 public class VCMapper implements IMapper<VC> {
 
-    @Getter(AccessLevel.NONE) private final VCGateway gateway;
+    @Getter(AccessLevel.NONE)
+    private final VCGateway gateway;
 
-    private final Map<String, List<VC>> pinnedChannels;
-    private final Map<String, List<VC>> normalChannels;
+    private final SortedSet<VC> normalChannels;
+    private final SortedSet<VC> pinnedChannels;
     private final Set<String> scheduledForDeletion;
 
     public VCMapper(MongoStorage storage) {
         gateway = new VCGateway(storage);
 
-        pinnedChannels = new ConcurrentHashMap<>();
-        normalChannels = new ConcurrentHashMap<>();
+        normalChannels = Collections.synchronizedSortedSet(new TreeSet<>());
+        pinnedChannels = Collections.synchronizedSortedSet(new TreeSet<>());
         scheduledForDeletion = new LinkedHashSet<>();
     }
 
@@ -51,6 +50,7 @@ public class VCMapper implements IMapper<VC> {
         Optional<VC> cache = search(query);
         if (cache.isPresent()) return false; // Si deve usare update() per aggiornare un valore
 
+        value.updateLastModification();
         boolean result = gateway.insert(value);
         if (result) {
             addToCache(value);
@@ -61,17 +61,20 @@ public class VCMapper implements IMapper<VC> {
 
     @Override
     public void update(VC value) {
+        value.updateLastModification();
         gateway.update(value);
 
-        runOperationOnCache((normal, pinned) -> {
-            if (value.isPinned()) {
+        if (value.isPinned()) {
+            runPinnedCacheOperation(pinned -> {
                 pinned.remove(value);
                 pinned.add(value);
-            } else {
+            });
+        } else {
+            runNormalCacheOperation(normal -> {
                 normal.remove(value);
                 normal.add(value);
-            }
-        }, value.getGuild());
+            });
+        }
     }
 
     @Override
@@ -123,15 +126,11 @@ public class VCMapper implements IMapper<VC> {
     }
 
     public void togglePinStatus(Guild guild, Settings settings, VC vc) {
-        if(scheduledForDeletion.contains(vc.getChannel())) return;
-
-        // Aggiorna la stanza in sè
-        boolean isPinned = pinnedChannels.getOrDefault(guild.getId(), new ArrayList<>())
-                .stream()
-                .anyMatch(pinnedVC -> pinnedVC.getChannel().equals(vc.getChannel()));
+        if (scheduledForDeletion.contains(vc.getChannel())) return;
 
         // Modifica i dati dell'oggetto stanza
-        boolean reverse = !vc.isPinned();
+        boolean isPinned = getPartialList(guild.getId(), true).contains(vc);
+        boolean reverse = !isPinned;
         vc.setPinned(reverse);
 
         if (isPinned) {
@@ -148,15 +147,15 @@ public class VCMapper implements IMapper<VC> {
             pin(guild, vc.getChannel(), settings);
         }
 
-        runOperationOnCache((normal, pinned) -> {
-            if (isPinned) {
-                pinned.remove(vc);
-                normal.add(vc);
-            } else {
-                normal.remove(vc);
-                pinned.add(vc);
-            }
-        }, vc.getGuild());
+        runNormalCacheOperation(normal -> {
+            if(isPinned) normal.add(vc);
+            else normal.remove(vc);
+        });
+
+        runPinnedCacheOperation(pinned -> {
+            if (isPinned) pinned.remove(vc);
+            else pinned.add(vc);
+        });
 
         gateway.update(vc);
     }
@@ -228,15 +227,7 @@ public class VCMapper implements IMapper<VC> {
 
         scheduledForDeletion.add(id);
 
-        if(vc != null) {
-            runOperationOnCache((normal, pinned) -> {
-                if (vc.isPinned()) {
-                    pinned.remove(vc);
-                } else {
-                    normal.remove(vc);
-                }
-            }, vc.getGuild());
-        }
+        if (vc != null) removeFromCache(vc);
 
         queueDeletion(channel.delete(), success, Duration.ofSeconds(-1L), id);
     }
@@ -254,27 +245,30 @@ public class VCMapper implements IMapper<VC> {
     // Utility methods used in all the class
 
     public void addToCache(VC vc) {
-        runOperationOnCache((normal, pinned) -> {
-            if (vc.isPinned()) {
-                pinned.add(vc);
-            } else {
-                normal.add(vc);
-            }
-        }, vc.getGuild());
+        if(vc.isPinned()) {
+            runPinnedCacheOperation(pinned -> pinned.add(vc));
+        } else {
+            runNormalCacheOperation(normal -> normal.add(vc));
+        }
     }
 
     public void removeFromCache(VC vc) {
-        runOperationOnCache((normal, pinned) -> {
-            if (vc.isPinned()) {
-                pinned.remove(vc);
-            } else {
-                normal.remove(vc);
-            }
-        }, vc.getGuild());
+        if(vc.isPinned()) {
+            runPinnedCacheOperation(pinned -> pinned.remove(vc));
+        } else {
+            runNormalCacheOperation(normal -> normal.remove(vc));
+        }
     }
 
-    public List<VC> getPartialList(String guild, boolean pinned) {
-        return (pinned ? pinnedChannels : normalChannels).getOrDefault(guild, new CopyOnWriteArrayList<>());
+    // These getter methods below are for read-only
+
+    public Set<VC> getPartialList(String guild, boolean pinned) {
+        Set<VC> copy;
+        synchronized (pinned ? this.pinnedChannels : this.normalChannels) {
+            copy = new LinkedHashSet<>(pinned ? this.pinnedChannels : this.normalChannels);
+        }
+
+        return copy.stream().filter(vc -> vc.getGuild().equals(guild)).collect(Collectors.toUnmodifiableSet());
     }
 
     private List<VC> getFullList(String guild) {
@@ -285,19 +279,17 @@ public class VCMapper implements IMapper<VC> {
         return vcs;
     }
 
-    private void runOperationOnCache(BiConsumer<List<VC>, List<VC>> action, String guild) {
-        List<VC> normal = getPartialList(guild, false);
-        List<VC> pinned = getPartialList(guild, true);
+    // Utility methods to synchronize read/write operations
 
-        action.andThen((normalVCs, pinnedVCs) -> {
-            normalChannels.put(guild, normalVCs);
-            pinnedChannels.put(guild, pinnedVCs);
-        }).accept(normal, pinned);
+    private void runNormalCacheOperation(Consumer<Set<VC>> action) {
+        synchronized (normalChannels) {
+            action.accept(normalChannels);
+        }
     }
 
-    private int getVCNumberExcludingSelf(List<VC> in, String id) {
-        return Math.toIntExact(in.stream()
-                .filter(vc -> vc.getChannel().equals(id))
-                .count());
+    private void runPinnedCacheOperation(Consumer<Set<VC>> action) {
+        synchronized (pinnedChannels) {
+            action.accept(pinnedChannels);
+        }
     }
 }
