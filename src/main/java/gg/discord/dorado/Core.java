@@ -54,8 +54,10 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.*;
+import java.util.Optional;
+import java.util.Stack;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -66,7 +68,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Core implements Module {
 
     private final MongoStorage storage;
-    private final ExecutorService createService;
     private final ScheduledExecutorService activityService;
 
     @Getter
@@ -78,7 +79,6 @@ public class Core implements Module {
 
     public Core(Config config) {
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO));
-        createService = Executors.newCachedThreadPool();
         activityService = Executors.newScheduledThreadPool(3);
     }
 
@@ -204,6 +204,18 @@ public class Core implements Module {
     @Override
     public void onDisable(JDA jda) {
         jda.removeEventListener(this);
+
+        channelMapper.getCreateService().shutdown();
+        try {
+            boolean success = channelMapper.getCreateService().awaitTermination(15, TimeUnit.SECONDS);
+            if (!success) channelMapper.getCreateService().shutdownNow();
+
+            String debug = success ? "CreateService terminated successfully." : "CreateServices was interrupted forcefully!";
+            BotLogger.info(debug);
+        } catch (InterruptedException e) {
+            BotLogger.error("CreateService shutdown sequence was interrupted while waiting!");
+        }
+
         storage.close();
     }
 
@@ -357,14 +369,14 @@ public class Core implements Module {
                     if (voiceChannel != null) { // Se la sua vc è già stata creata
                         guild.moveVoiceMember(member, voiceChannel).complete(); // Sposta l'utente
                     } else {
-                        createVC(vc, publicRole, category); // Altrimenti creala
+                        channelMapper.createVC(vc, publicRole, category); // Altrimenti creala
                         return;
                     }
                 } else {
                     // ...oppure crea un nuovo oggetto VC e la stanza collegata
                     VC vc = new VC(member);
                     channelMapper.insert(vc);
-                    createVC(vc, publicRole, category);
+                    channelMapper.createVC(vc, publicRole, category);
                     return;
                 }
             }
@@ -427,72 +439,6 @@ public class Core implements Module {
         });
     }
 
-    private void createVC(VC vc, Role publicRole, Category category) {
-        createService.submit(() -> {
-            VoiceChannel newChannel = category.createVoiceChannel(vc.getTitle()).complete();
-            Member owner = newChannel.getGuild().getMemberById(vc.getUser());
-            if (owner == null) return; // Non dovrebbe mai accadere
-
-            // Permessi per l'owner come prima cosa, per il bot stesso
-            // e le preferenze dell'utente, dettate dall'oggetto VC
-            VoiceChannelManager manager = newChannel.getManager()
-                    .setName(vc.getTitle())
-                    .setUserLimit(vc.getSize())
-                    .putMemberPermissionOverride(category.getJDA().getSelfUser().getIdLong(),
-                            Arrays.asList(Perms.selfPerms),
-                            Collections.emptyList())
-                    .putMemberPermissionOverride(owner.getIdLong(),
-                            Arrays.asList(Perms.ownerPerms),
-                            Collections.emptyList());
-
-            // Aggiungi i permessi per @everyone tenendo in conto
-            // dello status della stanza
-            manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
-
-            // Trusta gli utenti
-            for (PlayerRecord record : vc.getTrusted()) {
-                Member member = category.getGuild().getMemberById(record.user());
-                if (member != null) manager = Perms.trust(member, manager);
-            }
-
-            // Banna gli utenti
-            for (PlayerRecord record : vc.getBanned()) {
-                Member member = category.getGuild().getMemberById(record.user());
-                if (member != null) manager = Perms.ban(member, manager);
-            }
-
-            // Manda l'aggiornamento a discord
-            manager.queue();
-
-            // Aggiorna id della stanza e il database
-            vc.setChannel(newChannel.getId());
-
-            if (vc.isPinned()) {
-                newChannel.getGuild()
-                        .moveVoiceMember(owner, newChannel)
-                        .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
-            } else {
-                int movement = channelMapper.getPartialList(category.getGuild().getId(), true).size();
-
-                // Movva la stanza sopra alle non pinnate
-                category.modifyVoiceChannelPositions()
-                        .selectPosition(newChannel)
-                        .moveUp(movement)
-                        .queue(nothing -> {
-                            // Movva l'utente nella stanza
-                            newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(
-                                    RestUtils.emptyConsumer(),
-                                    throwable -> BotLogger.warn(owner.getUser().getAsTag() + " left before being moved to his room!"));
-                        });
-            }
-
-            BotLogger.info("%s just created his voice channel in guild '%s'!",
-                    References.user(vc.getUser()),
-                    category.getGuild().getName());
-
-            channelMapper.update(vc); // Aggiorna i dati
-        });
-    }
 
     // Command listener
 
@@ -592,6 +538,16 @@ public class Core implements Module {
                                         .ifPresent(vc -> {
                                             // Se ha il permesso
                                             if (command.hasPermission(event.getMember(), settings)) {
+                                                // Se non è in fase di creazione
+                                                if (channelMapper.isBeingCreated(vc)) {
+                                                    event.reply("""
+                                                                    La tua stanza è in fase di creazione.
+                                                                    Attendi un secondo! ⏳""")
+                                                            .setEphemeral(true)
+                                                            .queue();
+                                                    return;
+                                                }
+
                                                 boolean isOnCooldown = false;
                                                 // Esegui il comando
                                                 if (event instanceof ButtonInteractionEvent e) {

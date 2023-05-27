@@ -1,7 +1,11 @@
 package gg.discord.dorado.storage;
 
 import gg.discord.dorado.data.Settings;
+import gg.discord.dorado.data.user.PlayerRecord;
 import gg.discord.dorado.data.user.VC;
+import gg.discord.dorado.logging.BotLogger;
+import gg.discord.dorado.logging.References;
+import gg.discord.dorado.utils.discord.Perms;
 import gg.discord.dorado.utils.discord.RestUtils;
 import it.ayyjava.storage.MongoStorage;
 import it.ayyjava.storage.structures.Query;
@@ -10,13 +14,18 @@ import it.ayyjava.storage.structures.mapper.IMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -30,6 +39,9 @@ public class VCMapper implements IMapper<VC> {
     private final SortedSet<VC> normalChannels;
     private final SortedSet<VC> pinnedChannels;
     private final Set<String> scheduledForDeletion;
+    private final Set<Integer> scheduledForCreation;
+
+    @Getter private final ExecutorService createService;
 
     public VCMapper(MongoStorage storage) {
         gateway = new VCGateway(storage);
@@ -37,6 +49,9 @@ public class VCMapper implements IMapper<VC> {
         normalChannels = Collections.synchronizedSortedSet(new TreeSet<>());
         pinnedChannels = Collections.synchronizedSortedSet(new TreeSet<>());
         scheduledForDeletion = new LinkedHashSet<>();
+        scheduledForCreation = new LinkedHashSet<>();
+
+        createService = Executors.newCachedThreadPool();
     }
 
     @Override
@@ -123,6 +138,93 @@ public class VCMapper implements IMapper<VC> {
     @Override
     public List<VC> bulkSearch(Query query) {
         return gateway.lazyLoad(query);
+    }
+
+    public void createVC(VC vc, Role publicRole, Category category) {
+        int hashcode = vc.hashCode();
+        synchronized (scheduledForCreation) {
+            scheduledForCreation.add(hashcode);
+        }
+
+        createService.submit(() -> {
+            VoiceChannel newChannel = category.createVoiceChannel(vc.getTitle()).complete();
+            Member owner = newChannel.getGuild().getMemberById(vc.getUser());
+            if (owner == null) { // Non dovrebbe mai accadere
+                removeFromCreationCache(hashcode);
+                return;
+            }
+
+            // Permessi per l'owner come prima cosa, per il bot stesso
+            // e le preferenze dell'utente, dettate dall'oggetto VC
+            VoiceChannelManager manager = newChannel.getManager()
+                    .setName(vc.getTitle())
+                    .setUserLimit(vc.getSize())
+                    .putMemberPermissionOverride(category.getJDA().getSelfUser().getIdLong(),
+                            Arrays.asList(Perms.selfPerms),
+                            Collections.emptyList())
+                    .putMemberPermissionOverride(owner.getIdLong(),
+                            Arrays.asList(Perms.ownerPerms),
+                            Collections.emptyList());
+
+            // Aggiungi i permessi per @everyone tenendo in conto
+            // dello status della stanza
+            manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
+
+            // Trusta gli utenti
+            for (PlayerRecord record : vc.getTrusted()) {
+                Member member = category.getGuild().getMemberById(record.user());
+                if (member != null) manager = Perms.trust(member, manager);
+            }
+
+            // Banna gli utenti
+            for (PlayerRecord record : vc.getBanned()) {
+                Member member = category.getGuild().getMemberById(record.user());
+                if (member != null) manager = Perms.ban(member, manager);
+            }
+
+            // Manda l'aggiornamento a discord
+            manager.queue(nothing -> {
+                // Aggiorna id della stanza e il database
+                vc.setChannel(newChannel.getId());
+
+                if (vc.isPinned()) {
+                    removeFromCreationCache(hashcode);
+
+                    newChannel.getGuild()
+                            .moveVoiceMember(owner, newChannel)
+                            .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
+                } else {
+                    int movement = getPartialList(category.getGuild().getId(), true).size();
+
+                    // Movva la stanza sopra alle non pinnate
+                    category.modifyVoiceChannelPositions()
+                            .selectPosition(newChannel)
+                            .moveUp(movement)
+                            .queue(nothing2 -> {
+                                removeFromCreationCache(hashcode);
+
+                                // Movva l'utente nella stanza
+                                newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(
+                                        RestUtils.emptyConsumer(),
+                                        throwable -> BotLogger.warn(owner.getUser().getAsTag() + " left before being moved to his room!"));
+                            });
+                }
+
+                BotLogger.info("%s just created his voice channel in guild '%s'!",
+                        References.user(vc.getUser()),
+                        category.getGuild().getName());
+
+                update(vc); // Aggiorna i dati
+            }, throwable -> removeFromCreationCache(hashcode));
+        });
+    }
+
+    private synchronized void removeFromCreationCache(int hashcode) {
+        scheduledForCreation.remove(hashcode);
+    }
+
+    public synchronized boolean isBeingCreated(VC vc) {
+        return scheduledForCreation.add(vc.hashCode());
     }
 
     public void togglePinStatus(Guild guild, Settings settings, VC vc) {
