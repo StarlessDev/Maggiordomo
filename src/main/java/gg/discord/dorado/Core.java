@@ -69,8 +69,10 @@ public class Core implements Module {
     private final ExecutorService createService;
     private final ScheduledExecutorService activityService;
 
-    @Getter private VCMapper channelMapper;
-    @Getter private SettingsMapper settingsMapper;
+    @Getter
+    private VCMapper channelMapper;
+    @Getter
+    private SettingsMapper settingsMapper;
 
     private CommandManager commands;
 
@@ -226,7 +228,7 @@ public class Core implements Module {
 
         channelMapper.search(query).ifPresent(vc -> {
             VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
-            if(channel != null) {
+            if (channel != null) {
                 channelMapper.scheduleForDeletion(vc, channel);
             }
         });
@@ -414,9 +416,9 @@ public class Core implements Module {
                     // Setta i permessi nuovi
                     VoiceChannelManager manager = voiceChannel.getManager();
                     manager = Perms.setPublicPerms(manager,
-                                    vc.getStatus(),
-                                    guild.getRoleById(settings.getPublicRole()),
-                                    false);
+                            vc.getStatus(),
+                            guild.getRoleById(settings.getPublicRole()),
+                            false);
                     manager.queue();
                 });
             } else {
@@ -465,7 +467,7 @@ public class Core implements Module {
             // Aggiorna id della stanza e il database
             vc.setChannel(newChannel.getId());
 
-            if(vc.isPinned()) {
+            if (vc.isPinned()) {
                 newChannel.getGuild()
                         .moveVoiceMember(owner, newChannel)
                         .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
@@ -478,8 +480,9 @@ public class Core implements Module {
                         .moveUp(movement)
                         .queue(nothing -> {
                             // Movva l'utente nella stanza
-                            newChannel.getGuild().moveVoiceMember(owner, newChannel)
-                                    .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
+                            newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(
+                                    RestUtils.emptyConsumer(),
+                                    throwable -> BotLogger.warn(owner.getUser().getAsTag() + " left before being moved to his room!"));
                         });
             }
 
