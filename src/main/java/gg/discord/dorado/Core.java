@@ -59,6 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -204,19 +205,28 @@ public class Core implements Module {
     public void onDisable(JDA jda) {
         jda.removeEventListener(this);
 
-        jda.getGuilds().forEach(guild -> {
+        int interruputed = 0;
+        for (Guild guild : jda.getGuilds()) {
             LocalVCMapper localMapper = channelMapper.getMapper(guild);
-            localMapper.getCreateService().shutdown();
-            try {
-                boolean success = localMapper.getCreateService().awaitTermination(15, TimeUnit.SECONDS);
-                if (!success) localMapper.getCreateService().shutdownNow();
+            ExecutorService createService = localMapper.getCreateService();
 
-                String debug = success ? "CreateService terminated successfully." : "CreateServices was interrupted forcefully!";
-                BotLogger.info(debug);
+            createService.shutdown();
+            try {
+                boolean success = createService.awaitTermination(15, TimeUnit.SECONDS);
+                if (!success) {
+                    interruputed++;
+                    createService.shutdownNow();
+                }
+
             } catch (InterruptedException e) {
                 BotLogger.error("CreateService shutdown sequence was interrupted while waiting!");
             }
-        });
+        }
+
+        String debug = interruputed == 0
+                ? "CreateService terminated successfully."
+                : interruputed + " CreateService(s) got interrupted forcefully!";
+        BotLogger.info(debug);
 
         storage.close();
     }
