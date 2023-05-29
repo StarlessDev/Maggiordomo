@@ -8,6 +8,7 @@ import gg.discord.dorado.data.Settings;
 import gg.discord.dorado.data.enums.RecordType;
 import gg.discord.dorado.data.enums.VCStatus;
 import gg.discord.dorado.data.user.VC;
+import gg.discord.dorado.storage.vc.LocalVCMapper;
 import gg.discord.dorado.utils.discord.Embeds;
 import gg.discord.dorado.utils.discord.Perms;
 import it.ayyjava.storage.structures.QueryBuilder;
@@ -44,8 +45,11 @@ public class RecoverCommand implements Slash {
 
             VoiceChannel voiceChannel = voiceMapping.getAsChannel().asVoiceChannel();
             String guild = e.getGuild().getId();
-            boolean notFound = Bot.getInstance().getCore().getChannelMapper()
-                    .search(QueryBuilder.init()
+            LocalVCMapper localMapper = Bot.getInstance().getCore()
+                    .getChannelMapper()
+                    .getMapper(guild);
+
+            boolean notFound = localMapper.search(QueryBuilder.init()
                             .add("guild", guild)
                             .add("channel", voiceChannel.getId())
                             .create())
@@ -104,14 +108,12 @@ public class RecoverCommand implements Slash {
                 trusted.forEach(string -> vc.addRecordPlayer(RecordType.TRUST, string));
                 banned.forEach(string -> vc.addRecordPlayer(RecordType.BAN, string));
 
-                Bot.getInstance().getCore().getChannelMapper()
-                        .search(QueryBuilder.init()
+                localMapper.search(QueryBuilder.init()
                                 .add("guild", e.getGuild().getId())
                                 .add("user", user)
                                 .create())
-                        .ifPresent(otherVC -> Bot.getInstance().getCore().getChannelMapper().delete(otherVC));
-
-                Bot.getInstance().getCore().getChannelMapper().insert(vc);
+                        .ifPresent(localMapper::delete);
+                localMapper.insert(vc);
 
                 e.replyEmbeds(new EmbedBuilder()
                                 .setDescription(String.format("Recuperata la stanza %s", vc.getTitle()))

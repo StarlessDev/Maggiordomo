@@ -14,8 +14,9 @@ import gg.discord.dorado.data.user.VC;
 import gg.discord.dorado.interfaces.Module;
 import gg.discord.dorado.logging.BotLogger;
 import gg.discord.dorado.logging.References;
-import gg.discord.dorado.storage.SettingsMapper;
-import gg.discord.dorado.storage.VCMapper;
+import gg.discord.dorado.storage.VCManager;
+import gg.discord.dorado.storage.settings.SettingsMapper;
+import gg.discord.dorado.storage.vc.LocalVCMapper;
 import gg.discord.dorado.utils.discord.Embeds;
 import gg.discord.dorado.utils.discord.Perms;
 import gg.discord.dorado.utils.discord.RestUtils;
@@ -58,7 +59,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -70,10 +70,8 @@ public class Core implements Module {
     private final MongoStorage storage;
     private final ScheduledExecutorService activityService;
 
-    @Getter
-    private VCMapper channelMapper;
-    @Getter
-    private SettingsMapper settingsMapper;
+    @Getter private VCManager channelMapper;
+    @Getter private SettingsMapper settingsMapper;
 
     private CommandManager commands;
 
@@ -86,7 +84,7 @@ public class Core implements Module {
     public void onEnable(JDA jda) {
         storage.init();
 
-        channelMapper = new VCMapper(storage);
+        channelMapper = new VCManager(storage);
         settingsMapper = new SettingsMapper(storage);
 
         jda.getGuilds().forEach(guild -> {
@@ -95,6 +93,7 @@ public class Core implements Module {
                     .add("guild", id)
                     .create());
 
+            LocalVCMapper localMapper = channelMapper.getMapper(guild);
             Settings settings;
             if (cachedSettings.isPresent()) {
                 settings = cachedSettings.get();
@@ -115,7 +114,7 @@ public class Core implements Module {
                                 .add("channel", voiceChannel.getId())
                                 .create();
 
-                        Optional<VC> optionalVC = channelMapper.searchByID(query);
+                        Optional<VC> optionalVC = localMapper.searchByID(query);
                         if (optionalVC.isPresent()) {
                             VC vc = optionalVC.get();
                             vc.setTitle(voiceChannel.getName());
@@ -124,12 +123,12 @@ public class Core implements Module {
                             // Se non è lockata è non ci sono persone dentro,
                             // elimina la stanza
                             if (!vc.isPinned() && voiceChannel.getMembers().size() == 0) {
-                                Bot.getInstance().getCore().getChannelMapper().scheduleForDeletion(vc, voiceChannel);
+                                localMapper.scheduleForDeletion(vc, voiceChannel);
                             }
 
-                            channelMapper.update(vc);
+                            localMapper.update(vc);
                         } else {
-                            Bot.getInstance().getCore().getChannelMapper().scheduleForDeletion(null, voiceChannel);
+                            localMapper.scheduleForDeletion(null, voiceChannel);
                             BotLogger.info("Found an invalid vc %s in '%s'", voiceChannel.getName(), guild.getName());
                         }
                     });
@@ -151,7 +150,7 @@ public class Core implements Module {
 
                 Instant now = Instant.now();
                 AtomicInteger cleaned = new AtomicInteger(0);
-                channelMapper.bulkSearch(QueryBuilder.init()
+                localMapper.bulkSearch(QueryBuilder.init()
                                 .add("guild", id)
                                 .create())
                         .stream()
@@ -159,12 +158,12 @@ public class Core implements Module {
                         .filter(vc -> now.isAfter(vc.getLastJoin().plus(5, ChronoUnit.DAYS)))
                         .forEach(vc -> Optional.ofNullable(guild.getVoiceChannelById(vc.getChannel()))
                                 .ifPresent(voiceChannel ->
-                                        channelMapper.scheduleForDeletion(
+                                        localMapper.scheduleForDeletion(
                                                 vc,
                                                 voiceChannel,
                                                 success -> {
                                                     vc.setPinned(false);
-                                                    channelMapper.update(vc);
+                                                    localMapper.update(vc);
 
                                                     cleaned.incrementAndGet();
                                                 })));
@@ -205,16 +204,19 @@ public class Core implements Module {
     public void onDisable(JDA jda) {
         jda.removeEventListener(this);
 
-        channelMapper.getCreateService().shutdown();
-        try {
-            boolean success = channelMapper.getCreateService().awaitTermination(15, TimeUnit.SECONDS);
-            if (!success) channelMapper.getCreateService().shutdownNow();
+        jda.getGuilds().forEach(guild -> {
+            LocalVCMapper localMapper = channelMapper.getMapper(guild);
+            localMapper.getCreateService().shutdown();
+            try {
+                boolean success = localMapper.getCreateService().awaitTermination(15, TimeUnit.SECONDS);
+                if (!success) localMapper.getCreateService().shutdownNow();
 
-            String debug = success ? "CreateService terminated successfully." : "CreateServices was interrupted forcefully!";
-            BotLogger.info(debug);
-        } catch (InterruptedException e) {
-            BotLogger.error("CreateService shutdown sequence was interrupted while waiting!");
-        }
+                String debug = success ? "CreateService terminated successfully." : "CreateServices was interrupted forcefully!";
+                BotLogger.info(debug);
+            } catch (InterruptedException e) {
+                BotLogger.error("CreateService shutdown sequence was interrupted while waiting!");
+            }
+        });
 
         storage.close();
     }
@@ -238,10 +240,11 @@ public class Core implements Module {
                 .add("user", event.getUser().getId())
                 .create();
 
-        channelMapper.search(query).ifPresent(vc -> {
+        LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
+        localMapper.search(query).ifPresent(vc -> {
             VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) {
-                channelMapper.scheduleForDeletion(vc, channel);
+                localMapper.scheduleForDeletion(vc, channel);
             }
         });
     }
@@ -258,15 +261,16 @@ public class Core implements Module {
     public void onRoleRemoved(@NotNull GuildMemberRoleRemoveEvent event) {
         QueryBuilder builder = QueryBuilder.init().add("guild", event.getGuild().getId());
 
-        settingsMapper.search(builder.create()).ifPresent(guild -> {
+        settingsMapper.search(builder.create()).ifPresent(settings -> {
             boolean isNotPremium = event.getMember()
                     .getRoles()
                     .stream()
-                    .noneMatch(role -> guild.getPremiumRoles().contains(role.getId()));
+                    .noneMatch(role -> settings.getPremiumRoles().contains(role.getId()));
 
             if (isNotPremium) {
-                channelMapper.search(builder.add("user", event.getMember().getId()).create()).ifPresent(vc -> {
-                    if (vc.isPinned()) channelMapper.togglePinStatus(event.getGuild(), guild, vc);
+                LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
+                localMapper.search(builder.add("user", event.getMember().getId()).create()).ifPresent(vc -> {
+                    if (vc.isPinned()) localMapper.togglePinStatus(event.getGuild(), settings, vc);
                 });
             }
         });
@@ -282,7 +286,7 @@ public class Core implements Module {
                     .add("channel", event.getChannel().getId())
                     .create();
 
-            channelMapper.searchByID(query).ifPresent(vc -> {
+            channelMapper.getMapper(event.getGuild()).searchByID(query).ifPresent(vc -> {
                 List<String> joinedMembers = voiceChannel.getMembers()
                         .stream()
                         .map(Member::getId)
@@ -346,7 +350,8 @@ public class Core implements Module {
     }
 
     private void handleJoin(Guild guild, AudioChannel channel, Member member) {
-        if (channel == null || channelMapper.isBeingDeleted(channel)) return;
+        LocalVCMapper localMapper = channelMapper.getMapper(guild);
+        if (channel == null || localMapper.isBeingDeleted(channel)) return;
 
         String id = guild.getId();
         QueryBuilder builder = QueryBuilder.init().add("guild", id);
@@ -358,7 +363,7 @@ public class Core implements Module {
             if (publicRole == null || category == null) return;
 
             // Cerca una vc nel database che corrisponda all'utente
-            Optional<VC> cachedMemberVC = channelMapper.search(builder.add("user", member.getId()).create());
+            Optional<VC> cachedMemberVC = localMapper.search(builder.add("user", member.getId()).create());
 
             // Se il canale è il canale di creazione della vc
             if (channel.getId().equals(settings.getVoiceID())) {
@@ -369,19 +374,19 @@ public class Core implements Module {
                     if (voiceChannel != null) { // Se la sua vc è già stata creata
                         guild.moveVoiceMember(member, voiceChannel).complete(); // Sposta l'utente
                     } else {
-                        channelMapper.createVC(vc, publicRole, category); // Altrimenti creala
+                        localMapper.createVC(vc, publicRole, category); // Altrimenti creala
                         return;
                     }
                 } else {
                     // ...oppure crea un nuovo oggetto VC e la stanza collegata
                     VC vc = new VC(member);
-                    channelMapper.insert(vc);
-                    channelMapper.createVC(vc, publicRole, category);
+                    localMapper.insert(vc);
+                    localMapper.createVC(vc, publicRole, category);
                     return;
                 }
             }
 
-            Optional<VC> cachedChannelVC = channelMapper.searchByID(builder.add("channel", channel.getId()).create());
+            Optional<VC> cachedChannelVC = localMapper.searchByID(builder.add("channel", channel.getId()).create());
             cachedChannelVC.flatMap(vc -> Optional.ofNullable(guild.getVoiceChannelById(vc.getChannel())))
                     .ifPresent(voiceChannel -> { // Se questa vc esiste
                         // Se è il primo a entrare (cioè prima non c'era nessuno)
@@ -396,7 +401,7 @@ public class Core implements Module {
 
         // Check anti-move
         // Controlla se questa è una vc
-        channelMapper.searchByID(builder.add("channel", channel.getId()).create()).ifPresent(vc -> {
+        localMapper.searchByID(builder.add("channel", channel.getId()).create()).ifPresent(vc -> {
             boolean isBanned = vc.getTotalRecords() // Prende tutti i record della vc
                     .stream()
                     .filter(record -> record.type().equals(RecordType.BAN)) // Prende solo quelli relativi ai ban
@@ -408,15 +413,16 @@ public class Core implements Module {
             }
 
             vc.setLastJoin(Instant.now());
-            channelMapper.update(vc);
+            localMapper.update(vc);
         });
     }
 
     private void handleQuit(Guild guild, AudioChannel channel) {
-        if (channel == null || channelMapper.isBeingDeleted(channel)) return;
+        LocalVCMapper localMapper = channelMapper.getMapper(guild);
+        if (channel == null || localMapper.isBeingDeleted(channel)) return;
 
         QueryBuilder builder = QueryBuilder.init().add("guild", guild.getId());
-        channelMapper.searchByID(builder.add("channel", channel.getId()).create()).ifPresent(vc -> {
+        localMapper.searchByID(builder.add("channel", channel.getId()).create()).ifPresent(vc -> {
             // Se il canale lasciato non è una vc oppure se il canale non è vuoto, ritorna
             if (channel.getMembers().size() != 0) return;
 
@@ -434,7 +440,7 @@ public class Core implements Module {
                     manager.queue();
                 });
             } else {
-                channelMapper.scheduleForDeletion(vc, channel);
+                localMapper.scheduleForDeletion(vc, channel);
             }
         });
     }
@@ -529,17 +535,18 @@ public class Core implements Module {
         AtomicBoolean success = new AtomicBoolean(false);
         QueryBuilder builder = QueryBuilder.init().add("guild", guild);
 
+        LocalVCMapper localMapper = channelMapper.getMapper(guild);
         settingsMapper.search(builder.create())
                 .ifPresent(settings ->
                         commands.getMenuCommands().stream() // Cerca il comando corrispondente
                                 .filter(buttonCommand -> id.startsWith(buttonCommand.getName()))
                                 .findFirst()
-                                .ifPresent(command -> channelMapper.search(builder.add("user", user).create())
+                                .ifPresent(command -> localMapper.search(builder.add("user", user).create())
                                         .ifPresent(vc -> {
                                             // Se ha il permesso
                                             if (command.hasPermission(event.getMember(), settings)) {
                                                 // Se non è in fase di creazione
-                                                if (channelMapper.isBeingCreated(vc)) {
+                                                if (localMapper.isBeingCreated(vc)) {
                                                     event.reply("""
                                                                     La tua stanza è in fase di creazione.
                                                                     Attendi un secondo! ⏳""")
@@ -591,7 +598,7 @@ public class Core implements Module {
                                                 // Se ritorna null, significa che non c'è
                                                 // bisogno di alcun update al database
                                                 if (vc != null) {
-                                                    channelMapper.update(vc); // Aggiorna il database
+                                                    localMapper.update(vc); // Aggiorna il database
                                                 }
                                             } else {
                                                 // Mostra un messaggio di errore

@@ -7,6 +7,7 @@ import gg.discord.dorado.data.Settings;
 import gg.discord.dorado.data.enums.RecordType;
 import gg.discord.dorado.data.user.PlayerRecord;
 import gg.discord.dorado.logging.BotLogger;
+import gg.discord.dorado.storage.vc.LocalVCMapper;
 import gg.discord.dorado.utils.discord.Perms;
 import it.ayyjava.storage.structures.QueryBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -29,9 +30,11 @@ public class ReloadPermsCommand implements Slash {
     public void execute(Settings settings, SlashCommandInteractionEvent e) {
         AtomicInteger count = new AtomicInteger(0);
 
-        Bot.getInstance().getCore()
+        LocalVCMapper localMapper = Bot.getInstance().getCore()
                 .getChannelMapper()
-                .bulkSearch(QueryBuilder.init()
+                .getMapper(e.getGuild());
+
+        localMapper.bulkSearch(QueryBuilder.init()
                         .add("guild", e.getGuild().getId())
                         .create())
                 .forEach(vc -> Optional.ofNullable(e.getGuild().getVoiceChannelById(vc.getChannel()))
@@ -46,8 +49,8 @@ public class ReloadPermsCommand implements Slash {
                                         Collections.emptyList());
                             } else {
                                 BotLogger.warn("Deleting %s since the owner left!");
-                                Bot.getInstance().getCore().getChannelMapper().scheduleForDeletion(vc, channel);
-                                Bot.getInstance().getCore().getChannelMapper().delete(vc);
+                                localMapper.scheduleForDeletion(vc, channel);
+                                localMapper.delete(vc);
                                 return;
                             }
 

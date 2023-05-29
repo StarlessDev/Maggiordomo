@@ -1,4 +1,4 @@
-package gg.discord.dorado.storage;
+package gg.discord.dorado.storage.settings;
 
 import gg.discord.dorado.data.Settings;
 import it.ayyjava.storage.MongoStorage;

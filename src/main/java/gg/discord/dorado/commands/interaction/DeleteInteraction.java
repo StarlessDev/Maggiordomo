@@ -5,6 +5,7 @@ import gg.discord.dorado.commands.CommandInfo;
 import gg.discord.dorado.commands.types.Interaction;
 import gg.discord.dorado.data.Settings;
 import gg.discord.dorado.data.user.VC;
+import gg.discord.dorado.storage.vc.LocalVCMapper;
 import gg.discord.dorado.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -39,11 +40,15 @@ public class DeleteInteraction implements Interaction {
                     .setEphemeral(true)
                     .queue();
         } else if (mapping.getAsString().equalsIgnoreCase("si")) {
-            Bot.getInstance().getCore().getChannelMapper().delete(vc);
+            LocalVCMapper localMapper = Bot.getInstance().getCore()
+                    .getChannelMapper()
+                    .getMapper(e.getGuild());
+
+            localMapper.delete(vc);
 
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) { // Risparmiamo query importanti in questo modo...
-                Bot.getInstance().getCore().getChannelMapper().scheduleForDeletion(vc, channel);
+                localMapper.scheduleForDeletion(vc, channel);
             }
 
             e.reply("La tua stanza è stata cancellata con successo. :white_check_mark:")

@@ -1,4 +1,4 @@
-package gg.discord.dorado.storage;
+package gg.discord.dorado.storage.vc;
 
 import gg.discord.dorado.data.Settings;
 import gg.discord.dorado.data.user.PlayerRecord;
@@ -31,19 +31,19 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Getter
-public class VCMapper implements IMapper<VC> {
+public class LocalVCMapper implements IMapper<VC> {
 
-    @Getter(AccessLevel.NONE)
-    private final VCGateway gateway;
+    @Getter(AccessLevel.NONE) private final VCGateway gateway;
 
     private final SortedSet<VC> normalChannels;
     private final SortedSet<VC> pinnedChannels;
+
     private final Set<String> scheduledForDeletion;
     private final Set<Integer> scheduledForCreation;
 
-    @Getter private final ExecutorService createService;
+    private final ExecutorService createService;
 
-    public VCMapper(MongoStorage storage) {
+    public LocalVCMapper(MongoStorage storage) {
         gateway = new VCGateway(storage);
 
         normalChannels = Collections.synchronizedSortedSet(new TreeSet<>());
@@ -56,16 +56,8 @@ public class VCMapper implements IMapper<VC> {
 
     @Override
     public boolean insert(VC value) {
-        // Guarda se nella cache c'è già un valore
-        Query query = QueryBuilder.init()
-                .add("guild", value.getGuild())
-                .add("user", value.getUser())
-                .create();
-
-        Optional<VC> cache = search(query);
-        if (cache.isPresent()) return false; // Si deve usare update() per aggiornare un valore
-
         value.updateLastModification();
+
         boolean result = gateway.insert(value);
         if (result) {
             addToCache(value);
@@ -76,20 +68,18 @@ public class VCMapper implements IMapper<VC> {
 
     @Override
     public void update(VC value) {
-        value.updateLastModification();
-        gateway.update(value);
+        Consumer<SortedSet<VC>> transferProperties = list -> {
+            list.remove(value);
+            list.add(value);
+        };
 
         if (value.isPinned()) {
-            runPinnedCacheOperation(pinned -> {
-                pinned.remove(value);
-                pinned.add(value);
-            });
+            runPinnedCacheOperation(transferProperties);
         } else {
-            runNormalCacheOperation(normal -> {
-                normal.remove(value);
-                normal.add(value);
-            });
+            runNormalCacheOperation(transferProperties);
         }
+
+        gateway.update(value);
     }
 
     @Override
@@ -194,7 +184,7 @@ public class VCMapper implements IMapper<VC> {
                             .moveVoiceMember(owner, newChannel)
                             .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
                 } else {
-                    int movement = getPartialList(category.getGuild().getId(), true).size();
+                    int movement = getPartialList(true).size();
 
                     // Movva la stanza sopra alle non pinnate
                     category.modifyVoiceChannelPositions()
@@ -231,7 +221,7 @@ public class VCMapper implements IMapper<VC> {
         if (scheduledForDeletion.contains(vc.getChannel())) return;
 
         // Modifica i dati dell'oggetto stanza
-        boolean isPinned = getPartialList(guild.getId(), true).contains(vc);
+        boolean isPinned = getPartialList(true).contains(vc);
         boolean reverse = !isPinned;
         vc.setPinned(reverse);
 
@@ -301,7 +291,7 @@ public class VCMapper implements IMapper<VC> {
 
                     int channelIndex = channels.indexOf(channel); // Qua non serve il +1, perchè devo mettere la stanza sotto ad un'altra
                     int totalChannels = channels.size() - 1;
-                    int pinnedChannels = getPartialList(guild.getId(), true).size();
+                    int pinnedChannels = getPartialList(true).size();
 
                     int movement = channelIndex - (totalChannels - pinnedChannels);
                     if (movement == 0) return;
@@ -364,32 +354,29 @@ public class VCMapper implements IMapper<VC> {
 
     // These getter methods below are for read-only
 
-    public Set<VC> getPartialList(String guild, boolean pinned) {
-        Set<VC> copy;
+    public Set<VC> getPartialList(boolean pinned) {
         synchronized (pinned ? this.pinnedChannels : this.normalChannels) {
-            copy = new LinkedHashSet<>(pinned ? this.pinnedChannels : this.normalChannels);
+            return new LinkedHashSet<>(pinned ? this.pinnedChannels : this.normalChannels);
         }
-
-        return copy.stream().filter(vc -> vc.getGuild().equals(guild)).collect(Collectors.toUnmodifiableSet());
     }
 
     private List<VC> getFullList(String guild) {
         List<VC> vcs = new ArrayList<>();
-        vcs.addAll(getPartialList(guild, false)); // Stanze temporanee
-        vcs.addAll(getPartialList(guild, true)); // Stanze pinnate
+        vcs.addAll(getPartialList(false)); // Stanze temporanee
+        vcs.addAll(getPartialList(true)); // Stanze pinnate
 
         return vcs;
     }
 
     // Utility methods to synchronize read/write operations
 
-    private void runNormalCacheOperation(Consumer<Set<VC>> action) {
+    private void runNormalCacheOperation(Consumer<SortedSet<VC>> action) {
         synchronized (normalChannels) {
             action.accept(normalChannels);
         }
     }
 
-    private void runPinnedCacheOperation(Consumer<Set<VC>> action) {
+    private void runPinnedCacheOperation(Consumer<SortedSet<VC>> action) {
         synchronized (pinnedChannels) {
             action.accept(pinnedChannels);
         }

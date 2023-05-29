@@ -41,7 +41,10 @@ public class ResetDataInteraction implements Interaction {
         } else if (mapping.getAsString().equalsIgnoreCase("si")) {
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) { // Risparmiamo query importanti in questo modo...
-                Bot.getInstance().getCore().getChannelMapper().scheduleForDeletion(vc, channel);
+                Bot.getInstance().getCore()
+                        .getChannelMapper()
+                        .getMapper(e.getGuild())
+                        .scheduleForDeletion(vc, channel);
             }
 
             vc.getTrusted().clear();
