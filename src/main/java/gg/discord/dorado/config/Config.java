@@ -37,9 +37,10 @@ public class Config {
         if (!configExisting) {
             // Se non esiste, cerchiamo di crearla
             try {
-                if (!configFile.createNewFile()) {
+                if (configFile.createNewFile()) {
+                    BotLogger.info("La configurazione è stata creata. Modificala e riavvia il bot");
+                } else {
                     BotLogger.error("Impossibile creare la configurazione");
-                    return false;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -92,7 +93,7 @@ public class Config {
         save();
         initialized = true;
 
-        return true;
+        return configExisting;
     }
 
     public void save() {
