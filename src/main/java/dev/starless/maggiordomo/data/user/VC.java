@@ -60,10 +60,7 @@ public class VC implements Comparable<VC> {
 
     public void addRecordPlayer(RecordType type, String id) {
         PlayerRecord record = new PlayerRecord(type, guild, channel, id);
-        consumeSet(type, set -> {
-            if (set.size() == 25) return;
-            set.add(record);
-        });
+        consumeSet(type, set -> set.add(record));
     }
 
     public void removeRecordPlayer(RecordType type, String id) {
