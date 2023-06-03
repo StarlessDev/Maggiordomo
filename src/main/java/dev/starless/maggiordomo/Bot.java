@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
+import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
@@ -31,7 +32,7 @@ public class Bot implements Service {
     private boolean ready;
 
     @Override
-    public void start() {
+    public void start() throws InvalidTokenException, IllegalArgumentException {
         ready = false;
         BotLogger.setup();
 

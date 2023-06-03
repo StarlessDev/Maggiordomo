@@ -1,8 +1,8 @@
 package dev.starless.maggiordomo.config;
 
 import com.vdurmont.semver4j.Semver;
-import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.Main;
+import dev.starless.maggiordomo.logging.BotLogger;
 import lombok.Getter;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -33,7 +33,7 @@ public class Config {
         File configFile = new File(configDirectory, "maggiordomo.yml");
 
         boolean configExisting = configFile.exists(); // Controlliamo se esiste il file della configurazione
-        boolean configUpdating; // Verrà impostata su true se la config deve essere aggiornata
+        boolean configUpdating = false; // Verrà impostata su true se la config deve essere aggiornata
         if (!configExisting) {
             // Se non esiste, cerchiamo di crearla
             try {
@@ -61,7 +61,7 @@ public class Config {
             return false;
         }
 
-        Map<Object, CommentedConfigurationNode> oldValues = new HashMap<>();
+        Map<String, Object> oldValues = new HashMap<>();
         if (configExisting) {
             // Controlliamo se la versione della config è minore della versione del plugin
             // usando la libreria semver4j
@@ -69,11 +69,10 @@ public class Config {
             if (configUpdating) {
                 BotLogger.info(String.format("Aggiornamento della config alla versione %s.", Main.getVersion()));
 
-                // Prendiamo i valori della vecchia configurazione e li mettiamo nella cache
-                getAllNodes(oldValues, root);
-                // Rimuoviamoli dalla configurazione
-                oldValues.forEach((obj, node) -> root.removeChild(obj));
+                // Get and delete the old nodes
+                getNodeValues(oldValues, root);
 
+                // Insert the new config version
                 set(ConfigEntry.CONFIG_VERSION, Main.getVersion(), true); // Imposta la nuova versione della config
             } else {
                 BotLogger.info("La config è già aggiornata.");
@@ -85,9 +84,12 @@ public class Config {
         for (ConfigEntry entry : ConfigEntry.values()) {
             if (entry.equals(ConfigEntry.CONFIG_VERSION)) continue;
 
-            // Se la config si deve aggiornare, vai nella cache a cercare il valore della key (si usa il valore default se non esiste)
-            // Altrimenti, aggiunge un valore default alla config per assicurarsi che sia presente
-            set(entry, entry.getDefaultValue(), false);
+            if (configUpdating) {
+                Object value = oldValues.getOrDefault(entry.getPath(), entry.getDefaultValue());
+                set(entry, value, true);
+            } else {
+                set(entry, entry.getDefaultValue(), false);
+            }
         }
 
         save();
@@ -115,13 +117,28 @@ public class Config {
         }
     }
 
-    private void getAllNodes(Map<Object, CommentedConfigurationNode> map, CommentedConfigurationNode node) {
+    private void getNodeValues(Map<String, Object> map, CommentedConfigurationNode node) {
         node.childrenMap().forEach((obj, subNode) -> {
-            if (node.childrenMap().size() != 0) {
-                getAllNodes(map, subNode);
+            // if the subnode has a children, run the function recursively
+            if (subNode.childrenMap().size() != 0) {
+                getNodeValues(map, subNode);
             } else {
-                map.put(obj, subNode);
+                // Build the node string path
+                StringBuilder sb = new StringBuilder();
+                Object[] pathParts = subNode.path().array();
+                for (Object part : pathParts) {
+                    sb.append(part).append(".");
+                }
+
+                try {
+                    // leave the last character out of the key
+                    map.put(sb.substring(0, sb.length() - 1), subNode.get(Object.class));
+                } catch (SerializationException e) {
+                    BotLogger.error("Something could not be serialized as object? " + e.getMessage());
+                }
             }
+
+            node.removeChild(obj);
         });
     }
 
