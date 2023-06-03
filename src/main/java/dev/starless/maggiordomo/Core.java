@@ -49,9 +49,11 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
+import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -321,11 +323,6 @@ public class Core implements Module {
     }
 
     public void sendMenu(TextChannel channel) {
-        // Forma messaggi di aiuto
-        List<String> commandsHelp = commands.getMenuCommands().stream()
-                .map(cmd -> String.format("%s ⇢ *%s*", cmd.emoji(), cmd.getDescription()))
-                .toList();
-
         // Crea la lista di bottoni
         List<ActionRow> buttonRows = new ArrayList<>();
         Stack<Button> row = new Stack<>();
@@ -340,21 +337,21 @@ public class Core implements Module {
             }
         }
 
-        // Crea l'embed di base
-        EmbedBuilder msgBuilder = new EmbedBuilder()
-                .setTitle(":question: Comandi disponibili")
-                .setColor(Color.decode("#D5D5DA"))
-                .setFooter("Usa i pulsanti qua sotto per interagire. 👇");
-
         // Crea il messaggio di aiuto
-        StringBuilder sb = new StringBuilder();
-        sb.append("Puoi usare questo pannello per **personalizzare** la tua stanza privata.\n")
-                .append("Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.\n\n");
-        commandsHelp.forEach(str -> sb.append(str).append("\n"));
-        msgBuilder.setDescription(sb.toString());
+        String content = """
+                :question: **Comandi disponibili**
+                
+                Puoi usare questo pannello per **personalizzare** la tua stanza privata.
+                Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
+                """;
+
+        // Crea il messaggio d'aito
+        MessageCreateBuilder builder = new MessageCreateBuilder()
+                .setContent(content)
+                .addFiles(FileUpload.fromData(getClass().getResourceAsStream("/guide.png"), "guide.png"));
 
         // Setta i bottoni
-        channel.sendMessageEmbeds(msgBuilder.build())
+        channel.sendMessage(builder.build())
                 .addComponents(buttonRows)
                 .queue();
     }

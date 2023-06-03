@@ -6,7 +6,7 @@ public enum ConfigEntry {
 
     CONFIG_VERSION("config_version", Main.getVersion()),
     TOKEN("token", "discord-bot-token"),
-    MONGO("mongo.uri", "mongodb://");
+    MONGO("mongo", "mongodb://");
 
     private final String path;
     private final Object defaultValue;
