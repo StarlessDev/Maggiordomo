@@ -9,7 +9,7 @@ Quindi gli unici requisiti del bot sono:
 
 ## Come avviare il bot
 
-Tutte le releases sono compilate con i JDK Eclipse Temurin, scaricabili su [adoptium.net](https://adoptium.net), per la precisione questo bot è compatibile con le versioni `17.0.5` e superiori.
+Tutte le releases sono compilate con i JDK Eclipse Temurin, scaricabili su [adoptium.net](https://adoptium.net), la versione consigliata per questo bot è OpenJDK 17.
 
 Per avviare il jar basta usare il solito comando `java -jar Maggiordomo-*-all.jar`.
 
