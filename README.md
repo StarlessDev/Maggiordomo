@@ -8,7 +8,7 @@ Quindi gli unici requisiti del bot sono:
 - Java 17
 - MongoDB
 
-Potete scaricare il .jar dalle releases, se non sapete dove sono [clicca qui](github.com/StarlessDev/Maggiordomo/releases/latest) per scaricare la versione più recente. 
+Potete scaricare il .jar dalle releases, se non sapete dove sono [clicca qui](https://github.com/StarlessDev/Maggiordomo/releases/latest) per scaricare la versione più recente. 
 
 Tutte le build sono compilate con i JDK Eclipse Temurin, scaricabili su [adoptium.net](https://adoptium.net), per la precisione la build è `17.0.5_8`.
 Per avviare il jar basta usare il solito comando `java -jar Maggiordomo-<version>-all.jar`
