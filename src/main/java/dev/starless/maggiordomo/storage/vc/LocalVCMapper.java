@@ -2,13 +2,14 @@ package dev.starless.maggiordomo.storage.vc;
 
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.PlayerRecord;
+import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.logging.References;
-import dev.starless.maggiordomo.utils.discord.RestUtils;
-import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.utils.discord.Perms;
+import dev.starless.maggiordomo.utils.discord.RestUtils;
 import it.ayyjava.storage.MongoStorage;
 import it.ayyjava.storage.structures.Query;
+import it.ayyjava.storage.structures.QueryBuilder;
 import it.ayyjava.storage.structures.mapper.IMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -68,17 +69,17 @@ public class LocalVCMapper implements IMapper<VC> {
 
     @Override
     public void update(VC value) {
-        Consumer<SortedSet<VC>> transferProperties = list -> {
-            list.remove(value);
-            list.add(value);
-        };
+        value.updateLastModification();
 
-        if (value.isPinned()) {
-            operateOnPinned(transferProperties);
-        } else {
-            operateOnNormal(transferProperties);
-        }
+        // Ricerca l'oggetto nella cache
+        Optional<VC> cachedVC = searchImpl(vc -> vc.equals(value), Optional::empty);
+        if(cachedVC.isEmpty()) return; // dovrebbe essere usato insert in questo caso
 
+        // Aggiorna i TreeSet
+        removeFromCache(cachedVC.get());
+        addToCache(value);
+
+        // Aggiorna il database
         gateway.update(value);
     }
 
@@ -108,14 +109,14 @@ public class LocalVCMapper implements IMapper<VC> {
     }
 
     private Optional<VC> searchImpl(Predicate<VC> searchCondition,
-                                   Supplier<Optional<VC>> vcSupplier) {
+                                    Supplier<Optional<VC>> vcSupplier) {
 
         return searchImpl(searchCondition, vcSupplier, false).or(() -> searchImpl(searchCondition, vcSupplier, true));
     }
 
     private Optional<VC> searchImpl(Predicate<VC> searchCondition,
-                                   Supplier<Optional<VC>> database,
-                                   boolean pinned) {
+                                    Supplier<Optional<VC>> database,
+                                    boolean pinned) {
 
         Supplier<SortedSet<VC>> channelsSupplier = () -> pinned ? pinnedChannels : normalChannels;
         Optional<VC> cache;
