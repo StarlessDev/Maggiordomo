@@ -136,6 +136,8 @@ public class LocalVCMapper implements IMapper<VC> {
         return gateway.lazyLoad(query);
     }
 
+    // This code below handles the creation of a new vc
+
     public void createVC(VC vc, Role publicRole, Category category) {
         int hashcode = vc.hashCode();
         synchronized (scheduledForCreation) {
@@ -146,7 +148,7 @@ public class LocalVCMapper implements IMapper<VC> {
             VoiceChannel newChannel = category.createVoiceChannel(vc.getTitle()).complete();
             Member owner = newChannel.getGuild().getMemberById(vc.getUser());
             if (owner == null) { // Non dovrebbe mai accadere
-                removeFromCreationCache(hashcode);
+                removeFromCreationSchedule(hashcode);
                 return;
             }
 
@@ -184,7 +186,7 @@ public class LocalVCMapper implements IMapper<VC> {
                 vc.setChannel(newChannel.getId());
 
                 if (vc.isPinned()) {
-                    removeFromCreationCache(hashcode);
+                    removeFromCreationSchedule(hashcode);
 
                     newChannel.getGuild()
                             .moveVoiceMember(owner, newChannel)
@@ -197,7 +199,7 @@ public class LocalVCMapper implements IMapper<VC> {
                             .selectPosition(newChannel)
                             .moveUp(movement)
                             .queue(nothing2 -> {
-                                removeFromCreationCache(hashcode);
+                                removeFromCreationSchedule(hashcode);
 
                                 // Movva l'utente nella stanza
                                 newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(
@@ -211,17 +213,19 @@ public class LocalVCMapper implements IMapper<VC> {
                         category.getGuild().getName());
 
                 update(vc); // Aggiorna i dati
-            }, throwable -> removeFromCreationCache(hashcode));
+            }, throwable -> removeFromCreationSchedule(hashcode));
         });
     }
 
-    private synchronized void removeFromCreationCache(int hashcode) {
+    private synchronized void removeFromCreationSchedule(int hashcode) {
         scheduledForCreation.remove(hashcode);
     }
 
     public synchronized boolean isBeingCreated(VC vc) {
         return scheduledForCreation.contains(vc.hashCode());
     }
+
+    // This code below handles the process of pinning/unpinning of vcs
 
     public void togglePinStatus(Guild guild, Settings settings, VC vc) {
         if (scheduledForDeletion.contains(vc.getChannel())) return;
@@ -311,12 +315,14 @@ public class LocalVCMapper implements IMapper<VC> {
         }
     }
 
-    public boolean isBeingDeleted(AudioChannel channel) {
-        return scheduledForDeletion.contains(channel.getId());
-    }
+    // This code below handles the deletion of vcs
 
     public void scheduleForDeletion(VC vc, AudioChannel channel) {
         scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
+    }
+
+    public boolean isBeingDeleted(AudioChannel channel) {
+        return scheduledForDeletion.contains(channel.getId());
     }
 
     public void scheduleForDeletion(VC vc, AudioChannel channel, Consumer<Void> success) {
