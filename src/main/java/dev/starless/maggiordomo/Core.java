@@ -30,10 +30,12 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
@@ -72,10 +74,8 @@ public class Core implements Module {
     private final MongoStorage storage;
     private final ScheduledExecutorService activityService;
 
-    @Getter
-    private VCManager channelMapper;
-    @Getter
-    private SettingsMapper settingsMapper;
+    @Getter private VCManager channelMapper;
+    @Getter private SettingsMapper settingsMapper;
 
     private CommandManager commands;
 
@@ -255,6 +255,25 @@ public class Core implements Module {
                         localMapper.scheduleForDeletion(vc, channel);
                     }
                 });
+    }
+
+    @SubscribeEvent
+    public void onVoiceChannelDelete(@NotNull ChannelDeleteEvent event) {
+        if (event.getChannelType().equals(ChannelType.VOICE)) {
+            LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
+            localMapper.searchByID(QueryBuilder.init()
+                            .add("guild", event.getGuild().getId())
+                            .add("channel", event.getChannel().getId())
+                            .create())
+                    .ifPresent(vc -> {
+                        if (vc.isPinned()) {
+                            vc.setPinned(false);
+                        }
+
+                        localMapper.update(vc);
+                        localMapper.removeFromCache(vc);
+                    });
+        }
     }
 
     @SubscribeEvent
