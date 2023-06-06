@@ -339,7 +339,7 @@ public class Core implements Module {
 
         // Crea il messaggio di aiuto
         String content = """
-                :question: **Comandi disponibili**
+                # Comandi disponibili :books:
                 
                 Puoi usare questo pannello per **personalizzare** la tua stanza privata.
                 Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
