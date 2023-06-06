@@ -13,10 +13,12 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Accessors(fluent = true)
-@EqualsAndHashCode(of = "user")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Cooldown {
 
-    @Getter private final String user;
+    @Getter
+    @EqualsAndHashCode.Include
+    private final String user;
     private final Map<String, Instant> restrictions = new HashMap<>();
 
     public void apply(Interaction interaction) {

@@ -4,6 +4,7 @@ import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.enums.VCStatus;
 import it.ayyjava.storage.annotations.MongoKey;
 import it.ayyjava.storage.annotations.MongoObject;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Member;
@@ -17,11 +18,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @MongoObject(database = "Maggiordomo", collection = "VCs")
 public class VC implements Comparable<VC> {
 
-    @MongoKey private final String guild;
-    @MongoKey private final String user;
+    @MongoKey
+    @EqualsAndHashCode.Include
+    private final String guild;
+    @MongoKey
+    @EqualsAndHashCode.Include
+    private final String user;
+
     @Setter private String channel;
     @Setter private Instant lastJoin;
     private Instant lastModification;
@@ -101,24 +108,6 @@ public class VC implements Comparable<VC> {
 
     public void updateLastModification(@Nullable Instant instant) {
         lastModification = instant == null ? Instant.EPOCH : instant;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        VC vc = (VC) o;
-
-        if (!guild.equals(vc.guild)) return false;
-        return user.equals(vc.user);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = guild.hashCode();
-        result = 31 * result + user.hashCode();
-        return result;
     }
 
     @Override

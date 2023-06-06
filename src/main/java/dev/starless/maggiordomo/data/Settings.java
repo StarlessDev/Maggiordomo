@@ -3,16 +3,21 @@ package dev.starless.maggiordomo.data;
 import it.ayyjava.storage.annotations.MongoKey;
 import it.ayyjava.storage.annotations.MongoObject;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @MongoObject(database = "Maggiordomo", collection = "Settings")
 public class Settings {
 
-    @MongoKey private final String guild;
+    @MongoKey
+    @EqualsAndHashCode.Include
+    private final String guild;
+
     private final Set<String> premiumRoles;
     private final Set<String> bannedRoles;
     private String categoryID;
@@ -42,20 +47,5 @@ public class Settings {
 
     public boolean hasCategory() {
         return !categoryID.equals("-1");
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Settings settings = (Settings) o;
-
-        return guild.equals(settings.guild);
-    }
-
-    @Override
-    public int hashCode() {
-        return guild.hashCode();
     }
 }
