@@ -13,8 +13,6 @@ Tutte le releases sono compilate con i JDK Eclipse Temurin, scaricabili su [adop
 
 Per avviare il jar basta usare il solito comando `java -jar Maggiordomo-*-all.jar`.
 
----
-
 ## Il primo avvio
 Alla prima esecuzione il bot andrà in crash perchè non è stato inserito alcun token.
 Il prossimo passo è inserire il token del bot e l'uri per la connessione a MongoDB, per maggiori dettagli consulta la sezione [Configurazione](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/config.md) nella documentazione.
