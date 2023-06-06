@@ -27,6 +27,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @Getter
 public class LocalVCMapper implements IMapper<VC> {
@@ -72,9 +74,9 @@ public class LocalVCMapper implements IMapper<VC> {
         };
 
         if (value.isPinned()) {
-            runPinnedCacheOperation(transferProperties);
+            operateOnPinned(transferProperties);
         } else {
-            runNormalCacheOperation(transferProperties);
+            operateOnNormal(transferProperties);
         }
 
         gateway.update(value);
@@ -92,32 +94,38 @@ public class LocalVCMapper implements IMapper<VC> {
 
     @Override
     public Optional<VC> search(Query query) {
-        String guild = query.get("guild");
         String user = query.get("user");
-        if (guild == null || user == null) return Optional.empty();
+        if (user == null) return Optional.empty();
 
-        List<VC> vcs = getFullList(guild);
-        Optional<VC> cache = vcs.stream().filter(vc -> vc.getUser().equals(user)).findFirst();
-        if (cache.isEmpty()) {
-            cache = gateway.load(query);
-
-            cache.ifPresent(this::addToCache);
-        }
-
-        return cache;
+        return searchImpl(vc -> vc.getUser().equals(user), () -> gateway.load(query));
     }
 
     public Optional<VC> searchByID(Query query) {
-        String guild = query.get("guild");
         String channel = query.get("channel");
-        if (guild == null || channel == null) return Optional.empty();
+        if (channel == null) return Optional.empty();
 
-        List<VC> vcs = getFullList(guild);
-        Optional<VC> cache = vcs.stream().filter(vc -> vc.getChannel().equals(channel)).findFirst();
-        if (cache.isEmpty()) {
-            cache = gateway.loadByChannel(query);
+        return searchImpl(vc -> vc.getChannel().equals(channel), () -> gateway.loadByChannel(query));
+    }
 
-            cache.ifPresent(this::addToCache);
+    private Optional<VC> searchImpl(Predicate<VC> searchCondition,
+                                   Supplier<Optional<VC>> vcSupplier) {
+
+        return searchImpl(searchCondition, vcSupplier, false).or(() -> searchImpl(searchCondition, vcSupplier, true));
+    }
+
+    private Optional<VC> searchImpl(Predicate<VC> searchCondition,
+                                   Supplier<Optional<VC>> database,
+                                   boolean pinned) {
+
+        Supplier<SortedSet<VC>> channelsSupplier = () -> pinned ? pinnedChannels : normalChannels;
+        Optional<VC> cache;
+        synchronized (channelsSupplier.get()) {
+            cache = channelsSupplier.get().stream().filter(searchCondition).findFirst();
+            if (cache.isEmpty()) {
+                cache = database.get();
+
+                cache.ifPresent(this::addToCache);
+            }
         }
 
         return cache;
@@ -182,7 +190,7 @@ public class LocalVCMapper implements IMapper<VC> {
                             .moveVoiceMember(owner, newChannel)
                             .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
                 } else {
-                    int movement = getPartialList(true).size();
+                    int movement = pinnedChannels.size();
 
                     // Movva la stanza sopra alle non pinnate
                     category.modifyVoiceChannelPositions()
@@ -219,7 +227,7 @@ public class LocalVCMapper implements IMapper<VC> {
         if (scheduledForDeletion.contains(vc.getChannel())) return;
 
         // Modifica i dati dell'oggetto stanza
-        boolean isPinned = getPartialList(true).contains(vc);
+        boolean isPinned = pinnedChannels.contains(vc);
         boolean reverse = !isPinned;
         vc.setPinned(reverse);
 
@@ -237,12 +245,12 @@ public class LocalVCMapper implements IMapper<VC> {
             pin(guild, vc.getChannel(), settings);
         }
 
-        runNormalCacheOperation(normal -> {
-            if(isPinned) normal.add(vc);
+        operateOnNormal(normal -> {
+            if (isPinned) normal.add(vc);
             else normal.remove(vc);
         });
 
-        runPinnedCacheOperation(pinned -> {
+        operateOnPinned(pinned -> {
             if (isPinned) pinned.remove(vc);
             else pinned.add(vc);
         });
@@ -289,7 +297,7 @@ public class LocalVCMapper implements IMapper<VC> {
 
                     int channelIndex = channels.indexOf(channel); // Qua non serve il +1, perchè devo mettere la stanza sotto ad un'altra
                     int totalChannels = channels.size() - 1;
-                    int pinnedChannels = getPartialList(true).size();
+                    int pinnedChannels = this.pinnedChannels.size();
 
                     int movement = channelIndex - (totalChannels - pinnedChannels);
                     if (movement == 0) return;
@@ -335,46 +343,30 @@ public class LocalVCMapper implements IMapper<VC> {
     // Utility methods used in all the class
 
     public void addToCache(VC vc) {
-        if(vc.isPinned()) {
-            runPinnedCacheOperation(pinned -> pinned.add(vc));
+        if (vc.isPinned()) {
+            operateOnPinned(pinned -> pinned.add(vc));
         } else {
-            runNormalCacheOperation(normal -> normal.add(vc));
+            operateOnNormal(normal -> normal.add(vc));
         }
     }
 
     public void removeFromCache(VC vc) {
-        if(vc.isPinned()) {
-            runPinnedCacheOperation(pinned -> pinned.remove(vc));
+        if (vc.isPinned()) {
+            operateOnPinned(pinned -> pinned.remove(vc));
         } else {
-            runNormalCacheOperation(normal -> normal.remove(vc));
+            operateOnNormal(normal -> normal.remove(vc));
         }
-    }
-
-    // These getter methods below are for read-only
-
-    public Set<VC> getPartialList(boolean pinned) {
-        synchronized (pinned ? this.pinnedChannels : this.normalChannels) {
-            return new LinkedHashSet<>(pinned ? this.pinnedChannels : this.normalChannels);
-        }
-    }
-
-    private List<VC> getFullList(String guild) {
-        List<VC> vcs = new ArrayList<>();
-        vcs.addAll(getPartialList(false)); // Stanze temporanee
-        vcs.addAll(getPartialList(true)); // Stanze pinnate
-
-        return vcs;
     }
 
     // Utility methods to synchronize read/write operations
 
-    private void runNormalCacheOperation(Consumer<SortedSet<VC>> action) {
+    private void operateOnNormal(Consumer<SortedSet<VC>> action) {
         synchronized (normalChannels) {
             action.accept(normalChannels);
         }
     }
 
-    private void runPinnedCacheOperation(Consumer<SortedSet<VC>> action) {
+    private void operateOnPinned(Consumer<SortedSet<VC>> action) {
         synchronized (pinnedChannels) {
             action.accept(pinnedChannels);
         }

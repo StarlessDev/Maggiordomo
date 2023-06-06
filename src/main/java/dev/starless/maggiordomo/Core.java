@@ -53,7 +53,6 @@ import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.jetbrains.annotations.NotNull;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -112,12 +111,9 @@ public class Core implements Module {
                     category.getVoiceChannels().forEach(voiceChannel -> {
                         if (voiceChannel.getId().equals(settings.getVoiceID())) return;
 
-                        Query query = QueryBuilder.init()
-                                .add("guild", id)
+                        Optional<VC> optionalVC = localMapper.searchByID(QueryBuilder.init()
                                 .add("channel", voiceChannel.getId())
-                                .create();
-
-                        Optional<VC> optionalVC = localMapper.searchByID(query);
+                                .create());
                         if (optionalVC.isPresent()) {
                             VC vc = optionalVC.get();
                             vc.setTitle(voiceChannel.getName());
@@ -247,13 +243,11 @@ public class Core implements Module {
     @SubscribeEvent
     public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
         // Se l'utente lascia la gilda, cancelliamo la vc
-        Query query = QueryBuilder.init()
-                .add("guild", event.getGuild().getId())
-                .add("user", event.getUser().getId())
-                .create();
-
         LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
-        localMapper.search(query).ifPresent(vc -> {
+        localMapper.search(QueryBuilder.init()
+                .add("user", event.getUser().getId())
+                .create()
+        ).ifPresent(vc -> {
             VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) {
                 localMapper.scheduleForDeletion(vc, channel);
@@ -340,7 +334,7 @@ public class Core implements Module {
         // Crea il messaggio di aiuto
         String content = """
                 # Comandi disponibili :books:
-                
+                                
                 Puoi usare questo pannello per **personalizzare** la tua stanza privata.
                 Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
                 """;
@@ -428,24 +422,26 @@ public class Core implements Module {
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
         if (channel == null || localMapper.isBeingDeleted(channel)) return;
 
-        QueryBuilder builder = QueryBuilder.init().add("guild", guild.getId());
-        localMapper.searchByID(builder.add("channel", channel.getId()).create()).ifPresent(vc -> {
+        localMapper.searchByID(QueryBuilder.init().add("channel", channel.getId()).create()).ifPresent(vc -> {
             // Se il canale lasciato non è una vc oppure se il canale non è vuoto, ritorna
             if (channel.getMembers().size() != 0) return;
 
             if (vc.isPinned()) {
-                settingsMapper.search(builder.create()).ifPresent(settings -> {
-                    VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
-                    if (voiceChannel == null) return;
+                settingsMapper.search(QueryBuilder.init()
+                                .add("guild", guild.getId())
+                                .create())
+                        .ifPresent(settings -> {
+                            VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
+                            if (voiceChannel == null) return;
 
-                    // Setta i permessi nuovi
-                    VoiceChannelManager manager = voiceChannel.getManager();
-                    manager = Perms.setPublicPerms(manager,
-                            vc.getStatus(),
-                            guild.getRoleById(settings.getPublicRole()),
-                            false);
-                    manager.queue();
-                });
+                            // Setta i permessi nuovi
+                            VoiceChannelManager manager = voiceChannel.getManager();
+                            manager = Perms.setPublicPerms(manager,
+                                    vc.getStatus(),
+                                    guild.getRoleById(settings.getPublicRole()),
+                                    false);
+                            manager.queue();
+                        });
             } else {
                 localMapper.scheduleForDeletion(vc, channel);
             }
