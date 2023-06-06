@@ -72,8 +72,10 @@ public class Core implements Module {
     private final MongoStorage storage;
     private final ScheduledExecutorService activityService;
 
-    @Getter private VCManager channelMapper;
-    @Getter private SettingsMapper settingsMapper;
+    @Getter
+    private VCManager channelMapper;
+    @Getter
+    private SettingsMapper settingsMapper;
 
     private CommandManager commands;
 
@@ -91,9 +93,8 @@ public class Core implements Module {
 
         jda.getGuilds().forEach(guild -> {
             final String id = guild.getId();
-            Optional<Settings> cachedSettings = settingsMapper.search(QueryBuilder.init()
-                    .add("guild", id)
-                    .create());
+            QueryBuilder query = QueryBuilder.init().add("guild", id);
+            Optional<Settings> cachedSettings = settingsMapper.search(query.create());
 
             LocalVCMapper localMapper = channelMapper.getMapper(guild);
             Settings settings;
@@ -111,7 +112,7 @@ public class Core implements Module {
                     category.getVoiceChannels().forEach(voiceChannel -> {
                         if (voiceChannel.getId().equals(settings.getVoiceID())) return;
 
-                        Optional<VC> optionalVC = localMapper.searchByID(QueryBuilder.init()
+                        Optional<VC> optionalVC = localMapper.searchByID(query
                                 .add("channel", voiceChannel.getId())
                                 .create());
                         if (optionalVC.isPresent()) {
@@ -245,14 +246,15 @@ public class Core implements Module {
         // Se l'utente lascia la gilda, cancelliamo la vc
         LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
         localMapper.search(QueryBuilder.init()
-                .add("user", event.getUser().getId())
-                .create()
-        ).ifPresent(vc -> {
-            VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
-            if (channel != null) {
-                localMapper.scheduleForDeletion(vc, channel);
-            }
-        });
+                        .add("guild", event.getGuild().getId())
+                        .add("user", event.getUser().getId())
+                        .create())
+                .ifPresent(vc -> {
+                    VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
+                    if (channel != null) {
+                        localMapper.scheduleForDeletion(vc, channel);
+                    }
+                });
     }
 
     @SubscribeEvent
@@ -422,30 +424,30 @@ public class Core implements Module {
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
         if (channel == null || localMapper.isBeingDeleted(channel)) return;
 
-        localMapper.searchByID(QueryBuilder.init().add("channel", channel.getId()).create()).ifPresent(vc -> {
-            // Se il canale lasciato non è una vc oppure se il canale non è vuoto, ritorna
-            if (channel.getMembers().size() != 0) return;
+        QueryBuilder query = QueryBuilder.init().add("guild", guild.getId());
+        localMapper.searchByID(query.add("channel", channel.getId()).create())
+                .ifPresent(vc -> {
+                    // Se il canale lasciato non è una vc oppure se il canale non è vuoto, ritorna
+                    if (channel.getMembers().size() != 0) return;
 
-            if (vc.isPinned()) {
-                settingsMapper.search(QueryBuilder.init()
-                                .add("guild", guild.getId())
-                                .create())
-                        .ifPresent(settings -> {
-                            VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
-                            if (voiceChannel == null) return;
+                    if (vc.isPinned()) {
+                        settingsMapper.search(query.create())
+                                .ifPresent(settings -> {
+                                    VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
+                                    if (voiceChannel == null) return;
 
-                            // Setta i permessi nuovi
-                            VoiceChannelManager manager = voiceChannel.getManager();
-                            manager = Perms.setPublicPerms(manager,
-                                    vc.getStatus(),
-                                    guild.getRoleById(settings.getPublicRole()),
-                                    false);
-                            manager.queue();
-                        });
-            } else {
-                localMapper.scheduleForDeletion(vc, channel);
-            }
-        });
+                                    // Setta i permessi nuovi
+                                    VoiceChannelManager manager = voiceChannel.getManager();
+                                    manager = Perms.setPublicPerms(manager,
+                                            vc.getStatus(),
+                                            guild.getRoleById(settings.getPublicRole()),
+                                            false);
+                                    manager.queue();
+                                });
+                    } else {
+                        localMapper.scheduleForDeletion(vc, channel);
+                    }
+                });
     }
 
 

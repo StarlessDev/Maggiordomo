@@ -136,7 +136,7 @@ public class LocalVCMapper implements IMapper<VC> {
         return gateway.lazyLoad(query);
     }
 
-    // This code below handles the creation of a new vc
+    // Il codice qua sotto gestisce il processo di creazione delle vc
 
     public void createVC(VC vc, Role publicRole, Category category) {
         int hashcode = vc.hashCode();
@@ -225,7 +225,7 @@ public class LocalVCMapper implements IMapper<VC> {
         return scheduledForCreation.contains(vc.hashCode());
     }
 
-    // This code below handles the process of pinning/unpinning of vcs
+    // Questo codice gestisce il processo di pin/unpin delle vc
 
     public void togglePinStatus(Guild guild, Settings settings, VC vc) {
         if (scheduledForDeletion.contains(vc.getChannel())) return;
@@ -315,7 +315,7 @@ public class LocalVCMapper implements IMapper<VC> {
         }
     }
 
-    // This code below handles the deletion of vcs
+    // Qua sotto viene gestita la cancellazione delle vc
 
     public void scheduleForDeletion(VC vc, AudioChannel channel) {
         scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
@@ -363,8 +363,6 @@ public class LocalVCMapper implements IMapper<VC> {
             operateOnNormal(normal -> normal.remove(vc));
         }
     }
-
-    // Utility methods to synchronize read/write operations
 
     private void operateOnNormal(Consumer<SortedSet<VC>> action) {
         synchronized (normalChannels) {

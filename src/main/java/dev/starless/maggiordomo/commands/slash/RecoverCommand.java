@@ -109,6 +109,7 @@ public class RecoverCommand implements Slash {
                 banned.forEach(string -> vc.addRecordPlayer(RecordType.BAN, string));
 
                 localMapper.search(QueryBuilder.init()
+                                .add("guild", guild)
                                 .add("user", user)
                                 .create())
                         .ifPresent(localMapper::delete);
