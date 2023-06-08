@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
-import dev.starless.maggiordomo.data.user.PlayerRecord;
+import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.PageUtils;
@@ -39,7 +39,7 @@ public class UnbanInteraction implements Interaction {
             return null;
         }
 
-        Set<PlayerRecord> records = vc.getTotalRecords();
+        Set<UserRecord> records = vc.getTotalRecords();
         int recordsNumber = records.size();
 
         MessageCreateBuilder builder = new MessageCreateBuilder();

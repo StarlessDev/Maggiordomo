@@ -9,7 +9,7 @@ import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.data.Cooldown;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
-import dev.starless.maggiordomo.data.user.PlayerRecord;
+import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.interfaces.Module;
 import dev.starless.maggiordomo.logging.BotLogger;
@@ -54,7 +54,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.jetbrains.annotations.NotNull;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.awt.*;
 import java.time.Instant;
@@ -298,7 +297,7 @@ public class Core implements Module {
                 List<String> trusted = vc.getTotalRecords()
                         .stream()
                         .filter(record -> record.type().equals(RecordType.TRUST))
-                        .map(PlayerRecord::user)
+                        .map(UserRecord::user)
                         .toList();
 
                 String memberID = event.getMember().getId();

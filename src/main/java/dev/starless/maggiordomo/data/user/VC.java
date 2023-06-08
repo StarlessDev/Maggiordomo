@@ -8,8 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.entities.Member;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -33,8 +31,8 @@ public class VC {
     @Setter private Instant lastJoin;
 
     // Questi sono i permessi
-    private final Set<PlayerRecord> trusted;
-    private final Set<PlayerRecord> banned;
+    private final Set<UserRecord> trusted;
+    private final Set<UserRecord> banned;
 
     private String title;
     private int size;
@@ -50,7 +48,7 @@ public class VC {
         this.trusted = new HashSet<>();
         this.banned = new HashSet<>();
 
-        this.title = name;
+        this.title = name.length() > 99 ? name.substring(0, 100) : name;
         this.size = limit;
         this.status = status;
         this.pinned = pinned;
@@ -65,7 +63,7 @@ public class VC {
     }
 
     public void addRecordPlayer(RecordType type, String id) {
-        PlayerRecord record = new PlayerRecord(type, guild, channel, id);
+        UserRecord record = new UserRecord(type, guild, channel, id);
         consumeSet(type, set -> set.add(record));
     }
 
@@ -79,12 +77,12 @@ public class VC {
         return check.get();
     }
 
-    public void consumeSet(RecordType type, Consumer<Set<PlayerRecord>> consumer) {
+    public void consumeSet(RecordType type, Consumer<Set<UserRecord>> consumer) {
         consumer.accept(type.equals(RecordType.BAN) ? banned : trusted);
     }
 
-    public Set<PlayerRecord> getTotalRecords() {
-        Set<PlayerRecord> total = new HashSet<>(banned);
+    public Set<UserRecord> getTotalRecords() {
+        Set<UserRecord> total = new HashSet<>(banned);
         total.addAll(trusted);
         return total;
     }

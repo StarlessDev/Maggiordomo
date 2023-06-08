@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
-import dev.starless.maggiordomo.data.user.PlayerRecord;
+import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Perms;
@@ -55,7 +55,7 @@ public class ReloadPermsCommand implements Slash {
                             }
 
                             // Trusted & untrusted
-                            for (PlayerRecord record : vc.getTotalRecords()) {
+                            for (UserRecord record : vc.getTotalRecords()) {
                                 Member targetRecord = e.getGuild().getMemberById(record.user());
                                 if (targetRecord != null) {
                                     if (record.type().equals(RecordType.TRUST)) {

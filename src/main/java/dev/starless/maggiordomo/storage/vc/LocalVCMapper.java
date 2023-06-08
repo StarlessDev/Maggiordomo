@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.storage.vc;
 
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.user.PlayerRecord;
+import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.logging.References;
@@ -9,9 +9,7 @@ import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import it.ayyjava.storage.MongoStorage;
 import it.ayyjava.storage.structures.Query;
-import it.ayyjava.storage.structures.QueryBuilder;
 import it.ayyjava.storage.structures.mapper.IMapper;
-import lombok.AccessLevel;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -168,13 +166,13 @@ public class LocalVCMapper implements IMapper<VC> {
             manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
 
             // Trusta gli utenti
-            for (PlayerRecord record : vc.getTrusted()) {
+            for (UserRecord record : vc.getTrusted()) {
                 Member member = category.getGuild().getMemberById(record.user());
                 if (member != null) manager = Perms.trust(member, manager);
             }
 
             // Banna gli utenti
-            for (PlayerRecord record : vc.getBanned()) {
+            for (UserRecord record : vc.getBanned()) {
                 Member member = category.getGuild().getMemberById(record.user());
                 if (member != null) manager = Perms.ban(member, manager);
             }

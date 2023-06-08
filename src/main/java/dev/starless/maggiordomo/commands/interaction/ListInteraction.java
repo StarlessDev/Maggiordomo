@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
-import dev.starless.maggiordomo.data.user.PlayerRecord;
+import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.Member;
@@ -59,7 +59,7 @@ public class ListInteraction implements Interaction {
                 AtomicInteger integer = new AtomicInteger(0); // Numero iniziale di record
 
                 // Filtra i record e forma il messaggio
-                Set<PlayerRecord> records = vc.getTotalRecords();
+                Set<UserRecord> records = vc.getTotalRecords();
                 int elementsNumber = records.size();
                 long skippedElements = 25L * page;
                 records.stream()
