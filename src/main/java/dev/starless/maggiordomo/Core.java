@@ -54,6 +54,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.jetbrains.annotations.NotNull;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.awt.*;
 import java.time.Instant;
@@ -72,8 +73,10 @@ public class Core implements Module {
     private final MongoStorage storage;
     private final ScheduledExecutorService activityService;
 
-    @Getter private VCManager channelMapper;
-    @Getter private SettingsMapper settingsMapper;
+    @Getter
+    private VCManager channelMapper;
+    @Getter
+    private SettingsMapper settingsMapper;
 
     private CommandManager commands;
 
@@ -232,7 +235,7 @@ public class Core implements Module {
     public void onVoiceChannelDelete(@NotNull ChannelDeleteEvent event) {
         if (event.getChannelType().equals(ChannelType.VOICE)) {
             LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
-            if(localMapper.isBeingDeleted(event.getChannel().getId())) return;
+            if (localMapper.isBeingDeleted(event.getChannel().getId())) return;
 
             localMapper.searchByID(QueryBuilder.init()
                             .add("guild", event.getGuild().getId())
@@ -311,6 +314,15 @@ public class Core implements Module {
     }
 
     public void sendMenu(TextChannel channel) {
+        Optional<String> createChannel = settingsMapper.search(QueryBuilder.init()
+                        .add("guild", channel.getGuild().getId())
+                        .create())
+                .map(Settings::getVoiceID);
+
+        String createChannelMention = createChannel.isPresent()
+                ? String.format("<#%s>", createChannel.get())
+                : "`???`";
+
         // Crea la lista di bottoni
         List<ActionRow> buttonRows = new ArrayList<>();
         Stack<Button> row = new Stack<>();
@@ -329,9 +341,9 @@ public class Core implements Module {
         String content = """
                 # Comandi disponibili :books:
 
-                Puoi usare questo pannello per **personalizzare** la tua stanza privata.
+                Entra in %s per creare la tua stanza e usa questo pannello per **personalizzarla**.
                 Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
-                """;
+                """.formatted(createChannelMention);
 
         // Crea il messaggio d'aito
         MessageCreateBuilder builder = new MessageCreateBuilder()
