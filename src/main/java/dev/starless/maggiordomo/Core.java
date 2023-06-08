@@ -50,7 +50,6 @@ import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
-import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -261,17 +260,19 @@ public class Core implements Module {
     public void onVoiceChannelDelete(@NotNull ChannelDeleteEvent event) {
         if (event.getChannelType().equals(ChannelType.VOICE)) {
             LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
+            if(localMapper.isBeingDeleted(event.getChannel().getId())) return;
+
             localMapper.searchByID(QueryBuilder.init()
                             .add("guild", event.getGuild().getId())
                             .add("channel", event.getChannel().getId())
                             .create())
                     .ifPresent(vc -> {
+                        localMapper.removeFromCache(vc);
+
                         if (vc.isPinned()) {
                             vc.setPinned(false);
+                            localMapper.getGateway().update(vc);
                         }
-
-                        localMapper.update(vc);
-                        localMapper.removeFromCache(vc);
                     });
         }
     }
@@ -355,7 +356,7 @@ public class Core implements Module {
         // Crea il messaggio di aiuto
         String content = """
                 # Comandi disponibili :books:
-                                
+
                 Puoi usare questo pannello per **personalizzare** la tua stanza privata.
                 Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
                 """;
@@ -373,10 +374,10 @@ public class Core implements Module {
 
     private void handleJoin(Guild guild, AudioChannel channel, Member member) {
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
-        if (channel == null || localMapper.isBeingDeleted(channel)) return;
+        if (channel == null || localMapper.isBeingDeleted(channel.getId())) return;
 
-        String id = guild.getId();
-        QueryBuilder builder = QueryBuilder.init().add("guild", id);
+        String guildID = guild.getId();
+        QueryBuilder builder = QueryBuilder.init().add("guild", guildID);
         // Controlla se la gilda ha una categoria setuppata
         settingsMapper.search(builder.create()).ifPresent(settings -> {
             // Prendi gli oggetti utili
@@ -441,7 +442,7 @@ public class Core implements Module {
 
     private void handleQuit(Guild guild, AudioChannel channel) {
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
-        if (channel == null || localMapper.isBeingDeleted(channel)) return;
+        if (channel == null || localMapper.isBeingDeleted(channel.getId())) return;
 
         QueryBuilder query = QueryBuilder.init().add("guild", guild.getId());
         localMapper.searchByID(query.add("channel", channel.getId()).create())
@@ -456,12 +457,11 @@ public class Core implements Module {
                                     if (voiceChannel == null) return;
 
                                     // Setta i permessi nuovi
-                                    VoiceChannelManager manager = voiceChannel.getManager();
-                                    manager = Perms.setPublicPerms(manager,
-                                            vc.getStatus(),
-                                            guild.getRoleById(settings.getPublicRole()),
-                                            false);
-                                    manager.queue();
+                                    Perms.setPublicPerms(voiceChannel.getManager(),
+                                                    vc.getStatus(),
+                                                    guild.getRoleById(settings.getPublicRole()),
+                                                    false)
+                                            .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
                                 });
                     } else {
                         localMapper.scheduleForDeletion(vc, channel);

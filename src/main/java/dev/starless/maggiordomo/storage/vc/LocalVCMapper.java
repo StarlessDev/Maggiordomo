@@ -34,7 +34,7 @@ import java.util.function.Supplier;
 @Getter
 public class LocalVCMapper implements IMapper<VC> {
 
-    @Getter(AccessLevel.NONE) private final VCGateway gateway;
+    private final VCGateway gateway;
 
     private final SortedSet<VC> normalChannels;
     private final SortedSet<VC> pinnedChannels;
@@ -72,6 +72,7 @@ public class LocalVCMapper implements IMapper<VC> {
         value.updateLastModification();
 
         // Ricerca l'oggetto nella cache
+        // Il supplier passato è Optional.empty() per evitare di cercare anche nel database
         Optional<VC> cachedVC = searchImpl(vc -> vc.equals(value), Optional::empty);
         if(cachedVC.isEmpty()) return; // dovrebbe essere usato insert in questo caso
 
@@ -111,7 +112,7 @@ public class LocalVCMapper implements IMapper<VC> {
     private Optional<VC> searchImpl(Predicate<VC> searchCondition,
                                     Supplier<Optional<VC>> vcSupplier) {
 
-        return searchImpl(searchCondition, vcSupplier, false).or(() -> searchImpl(searchCondition, vcSupplier, true));
+        return searchImpl(searchCondition, Optional::empty, false).or(() -> searchImpl(searchCondition, vcSupplier, true));
     }
 
     private Optional<VC> searchImpl(Predicate<VC> searchCondition,
@@ -233,8 +234,6 @@ public class LocalVCMapper implements IMapper<VC> {
 
         // Modifica i dati dell'oggetto stanza
         boolean isPinned = pinnedChannels.contains(vc);
-        boolean reverse = !isPinned;
-        vc.setPinned(reverse);
 
         if (isPinned) {
             unpin(guild, vc, settings);
@@ -243,6 +242,7 @@ public class LocalVCMapper implements IMapper<VC> {
             if (voiceChannel != null && voiceChannel.getMembers().size() == 0) {
                 scheduleForDeletion(vc, voiceChannel);
 
+                vc.setPinned(false);
                 gateway.update(vc);
                 return;
             }
@@ -260,6 +260,7 @@ public class LocalVCMapper implements IMapper<VC> {
             else pinned.add(vc);
         });
 
+        vc.setPinned(!isPinned);
         gateway.update(vc);
     }
 
@@ -322,8 +323,8 @@ public class LocalVCMapper implements IMapper<VC> {
         scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
     }
 
-    public boolean isBeingDeleted(AudioChannel channel) {
-        return scheduledForDeletion.contains(channel.getId());
+    public boolean isBeingDeleted(String channelID) {
+        return scheduledForDeletion.contains(channelID);
     }
 
     public void scheduleForDeletion(VC vc, AudioChannel channel, Consumer<Void> success) {
