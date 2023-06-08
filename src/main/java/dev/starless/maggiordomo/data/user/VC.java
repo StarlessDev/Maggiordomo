@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 @Getter
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @MongoObject(database = "Maggiordomo", collection = "VCs")
-public class VC implements Comparable<VC> {
+public class VC {
 
     @MongoKey
     @EqualsAndHashCode.Include
@@ -31,7 +31,6 @@ public class VC implements Comparable<VC> {
 
     @Setter private String channel;
     @Setter private Instant lastJoin;
-    private Instant lastModification;
 
     // Questi sono i permessi
     private final Set<PlayerRecord> trusted;
@@ -100,18 +99,5 @@ public class VC implements Comparable<VC> {
         if (size < -1 || size > 99) return;
 
         this.size = size;
-    }
-
-    public void updateLastModification() {
-        updateLastModification(Instant.now());
-    }
-
-    public void updateLastModification(@Nullable Instant instant) {
-        lastModification = instant == null ? Instant.EPOCH : instant;
-    }
-
-    @Override
-    public int compareTo(@NotNull VC o) {
-        return lastModification.compareTo(o.getLastModification());
     }
 }

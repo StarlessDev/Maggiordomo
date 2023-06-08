@@ -17,6 +17,7 @@ import dev.starless.maggiordomo.logging.References;
 import dev.starless.maggiordomo.storage.VCManager;
 import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
+import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
@@ -56,7 +57,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -66,7 +66,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Core implements Module {
 
@@ -91,15 +90,15 @@ public class Core implements Module {
         settingsMapper = new SettingsMapper(storage);
 
         jda.getGuilds().forEach(guild -> {
-            final String id = guild.getId();
-            QueryBuilder query = QueryBuilder.init().add("guild", id);
-            Optional<Settings> cachedSettings = settingsMapper.search(query.create());
+            String guildID = guild.getId();
+            Optional<Settings> cachedSettings = settingsMapper.search(QueryBuilder.init()
+                    .add("guild", guildID)
+                    .create());
 
-            LocalVCMapper localMapper = channelMapper.getMapper(guild);
             Settings settings;
             if (cachedSettings.isPresent()) {
                 settings = cachedSettings.get();
-                settingsMapper.getSettings().put(id, settings);
+                settingsMapper.getSettings().put(guildID, settings);
             } else {
                 settings = new Settings(guild);
                 settingsMapper.insert(settings);
@@ -108,12 +107,15 @@ public class Core implements Module {
             if (settings.hasCategory()) {
                 Category category = guild.getCategoryById(settings.getCategoryID());
                 if (category != null) {
+                    LocalVCMapper localMapper = channelMapper.getMapper(guild);
                     category.getVoiceChannels().forEach(voiceChannel -> {
                         if (voiceChannel.getId().equals(settings.getVoiceID())) return;
 
-                        Optional<VC> optionalVC = localMapper.searchByID(query
+                        Optional<VC> optionalVC = localMapper.searchByID(QueryBuilder.init()
+                                .add("guild", guildID)
                                 .add("channel", voiceChannel.getId())
                                 .create());
+
                         if (optionalVC.isPresent()) {
                             VC vc = optionalVC.get();
                             vc.setTitle(voiceChannel.getName());
@@ -140,37 +142,7 @@ public class Core implements Module {
             }
 
             // Attiva il servizio di controllo di attività
-            activityService.scheduleWithFixedDelay(() -> {
-                Guild gld = jda.getGuildById(id);
-                if (gld == null) {
-                    BotLogger.info("Cannot find guild " + id);
-                    return;
-                }
-
-                Instant now = Instant.now();
-                AtomicInteger cleaned = new AtomicInteger(0);
-                localMapper.bulkSearch(QueryBuilder.init()
-                                .add("guild", id)
-                                .create())
-                        .stream()
-                        .filter(VC::isPinned)
-                        .filter(vc -> now.isAfter(vc.getLastJoin().plus(5, ChronoUnit.DAYS)))
-                        .forEach(vc -> Optional.ofNullable(guild.getVoiceChannelById(vc.getChannel()))
-                                .ifPresent(voiceChannel ->
-                                        localMapper.scheduleForDeletion(
-                                                vc,
-                                                voiceChannel,
-                                                success -> {
-                                                    vc.setPinned(false);
-                                                    localMapper.update(vc);
-
-                                                    cleaned.incrementAndGet();
-                                                })));
-
-                if (cleaned.get() > 0) {
-                    BotLogger.info(String.format("Cleaned %d inactive locked rooms!", cleaned.get()));
-                }
-            }, 0, 1, TimeUnit.HOURS);
+            activityService.scheduleWithFixedDelay(new ActivityChecker(guildID), 0, 1, TimeUnit.HOURS);
         });
 
         commands = new CommandManager()

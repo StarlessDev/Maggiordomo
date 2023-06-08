@@ -36,8 +36,8 @@ public class LocalVCMapper implements IMapper<VC> {
 
     private final VCGateway gateway;
 
-    private final SortedSet<VC> normalChannels;
-    private final SortedSet<VC> pinnedChannels;
+    private final Set<VC> normalChannels;
+    private final Set<VC> pinnedChannels;
 
     private final Set<String> scheduledForDeletion;
     private final Set<Integer> scheduledForCreation;
@@ -47,8 +47,9 @@ public class LocalVCMapper implements IMapper<VC> {
     public LocalVCMapper(MongoStorage storage) {
         gateway = new VCGateway(storage);
 
-        normalChannels = Collections.synchronizedSortedSet(new TreeSet<>());
-        pinnedChannels = Collections.synchronizedSortedSet(new TreeSet<>());
+        normalChannels = Collections.synchronizedSet(new HashSet<>());
+        pinnedChannels = Collections.synchronizedSet(new HashSet<>());
+
         scheduledForDeletion = new LinkedHashSet<>();
         scheduledForCreation = new LinkedHashSet<>();
 
@@ -57,8 +58,6 @@ public class LocalVCMapper implements IMapper<VC> {
 
     @Override
     public boolean insert(VC value) {
-        value.updateLastModification();
-
         boolean result = gateway.insert(value);
         if (result) {
             addToCache(value);
@@ -69,14 +68,12 @@ public class LocalVCMapper implements IMapper<VC> {
 
     @Override
     public void update(VC value) {
-        value.updateLastModification();
-
         // Ricerca l'oggetto nella cache
         // Il supplier passato è Optional.empty() per evitare di cercare anche nel database
         Optional<VC> cachedVC = searchImpl(vc -> vc.equals(value), Optional::empty);
         if(cachedVC.isEmpty()) return; // dovrebbe essere usato insert in questo caso
 
-        // Aggiorna i TreeSet
+        // Aggiorna i set
         removeFromCache(cachedVC.get());
         addToCache(value);
 
@@ -119,7 +116,7 @@ public class LocalVCMapper implements IMapper<VC> {
                                     Supplier<Optional<VC>> database,
                                     boolean pinned) {
 
-        Supplier<SortedSet<VC>> channelsSupplier = () -> pinned ? pinnedChannels : normalChannels;
+        Supplier<Set<VC>> channelsSupplier = () -> pinned ? pinnedChannels : normalChannels;
         Optional<VC> cache;
         synchronized (channelsSupplier.get()) {
             cache = channelsSupplier.get().stream().filter(searchCondition).findFirst();
@@ -366,13 +363,13 @@ public class LocalVCMapper implements IMapper<VC> {
         }
     }
 
-    private void operateOnNormal(Consumer<SortedSet<VC>> action) {
+    private void operateOnNormal(Consumer<Set<VC>> action) {
         synchronized (normalChannels) {
             action.accept(normalChannels);
         }
     }
 
-    private void operateOnPinned(Consumer<SortedSet<VC>> action) {
+    private void operateOnPinned(Consumer<Set<VC>> action) {
         synchronized (pinnedChannels) {
             action.accept(pinnedChannels);
         }
