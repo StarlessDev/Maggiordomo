@@ -104,6 +104,23 @@ public class Core implements Module {
                 settingsMapper.insert(settings);
             }
 
+            if (settings.getCategories() == null) {
+                settings.setCategories(new ArrayList<>());
+
+                // Se non ci sono categorie, significa che probabilmente è stato fatto
+                // un aggiornamento al nuovo schema, quindi proviamo ad ottenere la categoria
+                // tramite il canale di creazione
+                VoiceChannel createChannel = guild.getVoiceChannelById(settings.getVoiceID());
+                if (createChannel != null) {
+                    Category createCategory = createChannel.getParentCategory();
+                    if (createCategory != null) {
+                        settings.getCategories().add(createCategory.getId());
+
+                        settingsMapper.update(settings);
+                    }
+                }
+            }
+
             if (settings.hasCategory()) {
                 settings.forEachCategory(guild, category -> {
                     LocalVCMapper localMapper = channelMapper.getMapper(guild);
@@ -119,6 +136,7 @@ public class Core implements Module {
                             VC vc = optionalVC.get();
                             vc.setTitle(voiceChannel.getName());
                             vc.setSize(voiceChannel.getUserLimit());
+                            vc.setCategory(category.getId()); // Fix per le vc salvate con lo schema vecchio
 
                             // Se non è lockata è non ci sono persone dentro,
                             // elimina la stanza
@@ -147,8 +165,6 @@ public class Core implements Module {
                 .command(new RecoverCommand())
                 .command(new ReloadPermsCommand())
                 .command(new SetupCommand())
-                .command(new NewCategoryCommand())
-                .command(new FillCategory())
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
