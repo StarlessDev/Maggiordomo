@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.time.Duration;
 import java.util.*;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Getter
 public class LocalVCMapper implements IMapper<VC> {
@@ -141,8 +143,7 @@ public class LocalVCMapper implements IMapper<VC> {
             scheduledForCreation.add(hashcode);
         }
 
-        createService.submit(() -> {
-            VoiceChannel newChannel = category.createVoiceChannel(vc.getTitle()).complete();
+        category.createVoiceChannel(vc.getTitle()).queue(newChannel -> {
             Member owner = newChannel.getGuild().getMemberById(vc.getUser());
             if (owner == null) { // Non dovrebbe mai accadere
                 removeFromCreationSchedule(hashcode);
@@ -231,7 +232,7 @@ public class LocalVCMapper implements IMapper<VC> {
         boolean isPinned = pinnedChannels.contains(vc);
 
         if (isPinned) {
-            unpin(guild, vc, settings);
+            unpin(guild, settings, vc);
 
             VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
             if (voiceChannel != null && voiceChannel.getMembers().size() == 0) {
@@ -242,7 +243,7 @@ public class LocalVCMapper implements IMapper<VC> {
                 return;
             }
         } else {
-            pin(guild, vc.getChannel(), settings);
+            pin(guild, settings, vc.getChannel());
         }
 
         operateOnNormal(normal -> {
@@ -259,15 +260,12 @@ public class LocalVCMapper implements IMapper<VC> {
         gateway.update(vc);
     }
 
-    private void pin(Guild guild, String id, Settings settings) {
+    private void pin(Guild guild, Settings settings, String id) {
         VoiceChannel channel = guild.getVoiceChannelById(id);
         if (channel != null) {
-            Category category = guild.getCategoryById(settings.getCategoryID());
+            Category category = channel.getParentCategory();
             if (category != null) {
-                List<VoiceChannel> channels = category.getVoiceChannels()
-                        .stream()
-                        .skip(1)
-                        .toList();
+                List<VoiceChannel> channels = getVoiceChannelsInCategory(category, settings.isMainCategory(category.getId()));
 
                 int channelIndex = channels.indexOf(channel);
                 int totalChannels = channels.size() - 1;
@@ -283,24 +281,20 @@ public class LocalVCMapper implements IMapper<VC> {
         }
     }
 
-    private void unpin(Guild guild, VC vc, Settings settings) {
+    private void unpin(Guild guild, Settings settings, VC vc) {
         VoiceChannel channel = guild.getVoiceChannelById(vc.getChannel());
         if (channel != null) {
             if (channel.getMembers().size() == 0) {
                 scheduleForDeletion(vc, channel); // Cancella la stanza se è vuota
             } else {
-                Category category = guild.getCategoryById(settings.getCategoryID());
+                Category category = channel.getParentCategory();
                 if (category != null) {
-                    List<VoiceChannel> channels = category.getVoiceChannels()
-                            .stream()
-                            .skip(1)
-                            .toList();
+                    List<VoiceChannel> channels = getVoiceChannelsInCategory(category, settings.isMainCategory(category.getId()));
 
-                    int channelIndex = channels.indexOf(channel); // Qua non serve il +1, perchè devo mettere la stanza sotto ad un'altra
-                    int totalChannels = channels.size() - 1;
-                    int pinnedChannels = this.pinnedChannels.size();
+                    int channelIndex = channels.indexOf(channel);
+                    int normalSize = normalChannels.size();
 
-                    int movement = channelIndex - (totalChannels - pinnedChannels);
+                    int movement = channelIndex - normalSize;
                     if (movement == 0) return;
 
                     category.modifyVoiceChannelPositions()
@@ -310,6 +304,14 @@ public class LocalVCMapper implements IMapper<VC> {
                 }
             }
         }
+    }
+
+    private List<VoiceChannel> getVoiceChannelsInCategory(Category category, boolean skip) {
+        Stream<VoiceChannel> channelStream = category.getVoiceChannels().stream();
+        if(skip) {
+            channelStream = channelStream.skip(1);
+        }
+        return channelStream.toList();
     }
 
     // Qua sotto viene gestita la cancellazione delle vc

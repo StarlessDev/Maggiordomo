@@ -72,10 +72,8 @@ public class Core implements Module {
     private final MongoStorage storage;
     private final ScheduledExecutorService activityService;
 
-    @Getter
-    private VCManager channelMapper;
-    @Getter
-    private SettingsMapper settingsMapper;
+    @Getter private VCManager channelMapper;
+    @Getter private SettingsMapper settingsMapper;
 
     private CommandManager commands;
 
@@ -107,8 +105,7 @@ public class Core implements Module {
             }
 
             if (settings.hasCategory()) {
-                Category category = guild.getCategoryById(settings.getCategoryID());
-                if (category != null) {
+                settings.forEachCategory(guild, category -> {
                     LocalVCMapper localMapper = channelMapper.getMapper(guild);
                     category.getVoiceChannels().forEach(voiceChannel -> {
                         if (voiceChannel.getId().equals(settings.getVoiceID())) return;
@@ -135,12 +132,7 @@ public class Core implements Module {
                             BotLogger.info("Found an invalid vc %s in '%s'", voiceChannel.getName(), guild.getName());
                         }
                     });
-                } else {
-                    BotLogger.info("Found an invalid category in " + guild.getName());
-
-                    settings.reset();
-                    settingsMapper.update(settings);
-                }
+                });
             }
 
             // Attiva il servizio di controllo di attività
@@ -155,6 +147,8 @@ public class Core implements Module {
                 .command(new RecoverCommand())
                 .command(new ReloadPermsCommand())
                 .command(new SetupCommand())
+                .command(new NewCategoryCommand())
+                .command(new FillCategory())
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
@@ -364,7 +358,7 @@ public class Core implements Module {
         // Controlla se la gilda ha una categoria setuppata
         settingsMapper.search(builder.create()).ifPresent(settings -> {
             // Prendi gli oggetti utili
-            Category category = guild.getCategoryById(settings.getCategoryID());
+            Category category = settings.getAvailableCategory(guild);
             Role publicRole = guild.getRoleById(settings.getPublicRole());
             if (publicRole == null || category == null) return;
 

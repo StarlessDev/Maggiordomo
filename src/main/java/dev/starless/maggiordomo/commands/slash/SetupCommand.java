@@ -42,7 +42,8 @@ public class SetupCommand implements Slash {
 
         e.getGuild().createCategory("private").queue(category -> {
             if (category != null) {
-                settings.setCategoryID(category.getId());
+                settings.getCategories().clear();
+                settings.getCategories().add(category.getId());
                 settings.setPublicRole(usersRole.getId());
 
                 // Vieta la visione a @everyone se necessario

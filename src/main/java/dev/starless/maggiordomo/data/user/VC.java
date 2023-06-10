@@ -28,6 +28,7 @@ public class VC {
     private final String user;
 
     @Setter private String channel;
+    @Setter private String category;
     @Setter private Instant lastJoin;
 
     // Questi sono i permessi
@@ -39,10 +40,11 @@ public class VC {
     @Setter private VCStatus status;
     @Setter private boolean pinned;
 
-    public VC(String guild, String user, String channel, String name, int limit, VCStatus status, boolean pinned) {
+    public VC(String guild, String user, String channel, String category, String name, int limit, VCStatus status, boolean pinned) {
         this.guild = guild;
         this.user = user;
         this.channel = channel;
+        this.category = category;
         this.lastJoin = Instant.now();
 
         this.trusted = new HashSet<>();
@@ -55,7 +57,7 @@ public class VC {
     }
 
     public VC(String guild, String user, String channel, String name) {
-        this(guild, user, channel, name, 2, VCStatus.LOCKED, false);
+        this(guild, user, channel, "-1", name, 2, VCStatus.LOCKED, false);
     }
 
     public VC(Member member) {

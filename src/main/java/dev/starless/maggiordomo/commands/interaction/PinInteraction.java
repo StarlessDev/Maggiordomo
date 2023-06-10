@@ -17,11 +17,11 @@ import java.awt.*;
 public class PinInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
+    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         Bot.getInstance().getCore()
                 .getChannelMapper()
                 .getMapper(e.getGuild())
-                .togglePinStatus(e.getGuild(), guild, vc);
+                .togglePinStatus(e.getGuild(), settings, vc);
 
         String content = String.format("Ora la tua stanza%s è bloccata :thumbsup:", vc.isPinned() ? "" : " non");
         e.replyEmbeds(new EmbedBuilder()

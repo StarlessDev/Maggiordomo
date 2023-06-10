@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -44,6 +45,8 @@ public class RecoverCommand implements Slash {
             }
 
             VoiceChannel voiceChannel = voiceMapping.getAsChannel().asVoiceChannel();
+            Category category = Objects.requireNonNullElse(voiceChannel.getParentCategory(), settings.getAvailableCategory(e.getGuild()));
+
             String guild = e.getGuild().getId();
             LocalVCMapper localMapper = Bot.getInstance().getCore()
                     .getChannelMapper()
@@ -100,6 +103,7 @@ public class RecoverCommand implements Slash {
                 VC vc = new VC(guild,
                         user,
                         voiceChannel.getId(),
+                        category.getId(),
                         voiceChannel.getName(),
                         limit,
                         isLocked ? VCStatus.LOCKED : VCStatus.OPEN,
