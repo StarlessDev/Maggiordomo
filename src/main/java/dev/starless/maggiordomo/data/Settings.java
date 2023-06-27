@@ -112,7 +112,12 @@ public class Settings {
 
         Category newCategory;
         try { // Try to create the category
-            newCategory = guild.createCategory(String.format("rooms (%s)", categories.size() + 1))
+            String categoryName = "rooms";
+            if(categories.size() > 0) {
+                categoryName += " (" + (categories.size() + 1) + ")";
+            }
+
+            newCategory = guild.createCategory(categoryName)
                     // Bot permissions (not actually needed if bot has admin, which needs to be removed in the future)
                     .addMemberPermissionOverride(Bot.getInstance().getJda().getSelfUser().getIdLong(),
                             List.of(Permission.MANAGE_CHANNEL,

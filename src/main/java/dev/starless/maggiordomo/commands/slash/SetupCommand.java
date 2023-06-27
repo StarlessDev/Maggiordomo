@@ -6,6 +6,7 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
@@ -21,6 +22,7 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
@@ -35,7 +37,7 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 
 @CommandInfo(name = "setup", description = "Crea la categoria dedicata alle stanze")
 public class SetupCommand implements Slash, Interaction {
@@ -183,6 +185,10 @@ public class SetupCommand implements Slash, Interaction {
                 }
 
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
+
+                e.reply(">>> Messaggio aggiornato! :white_check_mark:")
+                        .setEphemeral(true)
+                        .queue();
             }
         }
 
@@ -209,13 +215,7 @@ public class SetupCommand implements Slash, Interaction {
                 e.getMessage().delete().queue();
                 e.deferReply(true).queue();
 
-                String result = setupChannels(e.getGuild(), settings)
-                        ? "Setup completato! :white_check_mark:"
-                        : "Qualcosa è andato storto! Riprova. :x:";
-
-                e.getHook().sendMessage(result)
-                        .setEphemeral(true)
-                        .queue();
+                setupChannels(e.getGuild(), e.getHook(), settings);
             }
         }
 
@@ -236,7 +236,7 @@ public class SetupCommand implements Slash, Interaction {
                 settings.setPublicRole(role.getId());
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-                e.reply("Ruolo aggiornato :white_check_mark:")
+                e.reply(">>> Ruolo aggiornato :white_check_mark:")
                         .setEphemeral(true)
                         .queue(success -> {
                             if (message.getButtons().stream().noneMatch(button -> button.getId() != null && button.getId().endsWith("embed"))) {
@@ -260,8 +260,17 @@ public class SetupCommand implements Slash, Interaction {
         return false;
     }
 
-    private boolean setupChannels(Guild guild, Settings settings) {
-        AtomicBoolean bool = new AtomicBoolean(false);
+    private void setupChannels(Guild guild, InteractionHook hook, Settings settings) {
+        Consumer<Throwable> errorHandler = throwable -> {
+            BotLogger.error("Something went wrong (%s) while setting up the guild '%s'",
+                    throwable.getMessage(),
+                    guild.getName());
+
+            hook.sendMessage(">>> Qualcosa è andato storto. Riprova! :x:")
+                    .setEphemeral(true)
+                    .queue();
+        };
+
         if (settings.getCategories().isEmpty()) {
             Role usersRole = guild.getRoleById(settings.getPublicRole());
             if (usersRole != null) {
@@ -312,31 +321,38 @@ public class SetupCommand implements Slash, Interaction {
                                 0,
                                 Permission.ALL_PERMISSIONS);
 
-                       createGenerator.addRolePermissionOverride(everyone.getIdLong(),
+                        createGenerator.addRolePermissionOverride(everyone.getIdLong(),
                                 List.of(Permission.VOICE_SPEAK, Permission.VOICE_USE_VAD),
                                 Collections.singletonList(Permission.VIEW_CHANNEL));
                     }
 
-                    createDashboard.submit()
-                            .thenCompose(textChannel -> {
-                                Bot.getInstance().getCore().sendMenu(textChannel);
-                                settings.setChannelID(textChannel.getId());
+                    // Crea tutti i canali
+                    createDashboard.queue(textChannel -> {
+                        settings.setChannelID(textChannel.getId());
 
-                                return createGenerator.submit();
-                            })
-                            .whenComplete((voiceChannel, throwable) -> {
-                                if(throwable == null) {
-                                    settings.setVoiceID(voiceChannel.getId());
-                                    bool.set(true);
+                        createGenerator.queue(voiceChannel -> {
+                            settings.setVoiceID(voiceChannel.getId());
 
-                                    // Update the document in the db if everything goes smoothly
-                                    Bot.getInstance().getCore().getSettingsMapper().update(settings);
-                                }
-                            });
+                            // Aggiorna la cache e il documento nel db
+                            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                            // Manda il menu nel canale testuale
+                            Bot.getInstance().getCore().sendMenu(textChannel);
+
+                            // Manda il feedback all'utente
+                            hook.sendMessage(">>> Setup completato! :white_check_mark:")
+                                    .setEphemeral(true)
+                                    .queue();
+                        }, errorHandler);
+                    }, errorHandler);
+
+                } else {
+                    errorHandler.accept(new Exception("Category creation failed"));
                 }
+            } else {
+                errorHandler.accept(new Exception("Public role does not exist!"));
             }
+        } else {
+            errorHandler.accept(new Exception("Category already exists!"));
         }
-
-        return bool.get();
     }
 }
