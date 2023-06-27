@@ -10,14 +10,18 @@ import net.dv8tion.jda.api.entities.User;
 public class References {
 
     public String user(String id) {
-        if(!Bot.getInstance().isReady()) return null;
+        if (!Bot.getInstance().isReady()) return null;
 
         User user = Bot.getInstance().getJda().getUserById(id);
-        return user != null ? user.getAsTag() : null;
+        if (user != null) {
+            return user.getDiscriminator().equals("0000") ? "@" + user.getName() : user.getAsTag();
+        }
+
+        return null;
     }
 
     public String guild(String id) {
-        if(!Bot.getInstance().isReady()) return null;
+        if (!Bot.getInstance().isReady()) return null;
 
         Guild guild = Bot.getInstance().getJda().getGuildById(id);
         return guild != null ? guild.getName() : null;
