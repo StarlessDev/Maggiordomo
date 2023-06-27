@@ -24,6 +24,7 @@ import dev.starless.maggiordomo.utils.discord.RestUtils;
 import dev.starless.mongo.MongoStorage;
 import dev.starless.mongo.objects.Query;
 import dev.starless.mongo.objects.QueryBuilder;
+import dev.starless.mongo.objects.Schema;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -80,7 +81,16 @@ public class Core implements Module {
     private CommandManager commands;
 
     public Core(Config config) {
-        storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO));
+        storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
+                .registerSchema(new Schema(Settings.class)
+                        .entry("categories", new ArrayList<>())
+                        .entry("channelID", "-1")
+                        .entry("voiceID", "-1")
+                        .entry("publicRole", "-1")
+                        .entry("maxInactivity", -1L)
+                        .entry("title", "Comandi disponibili :books:")
+                        .entry("descriptionRaw", "Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**."));
+
         activityService = Executors.newScheduledThreadPool(3);
     }
 
