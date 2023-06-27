@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.storage;
 
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
-import it.ayyjava.storage.MongoStorage;
+import dev.starless.mongo.MongoStorage;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.Map;

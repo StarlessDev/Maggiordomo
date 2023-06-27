@@ -8,6 +8,7 @@ import dev.starless.maggiordomo.data.Cooldown;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 import java.util.ArrayList;
@@ -20,14 +21,14 @@ public class CommandManager {
 
     private String commandName;
 
-    private final List<Slash> slashCommands;
-    private final List<Interaction> menuCommands;
+    private final List<Slash> commands;
+    private final List<Interaction> interactions;
 
     private final Map<String, Cooldown> cooldowns;
 
     public CommandManager() {
-        slashCommands = new ArrayList<>();
-        menuCommands = new ArrayList<>();
+        commands = new ArrayList<>();
+        interactions = new ArrayList<>();
 
         cooldowns = new ConcurrentHashMap<>();
     }
@@ -43,9 +44,15 @@ public class CommandManager {
             throw new RuntimeException("Non hai inserito il nome del comando!");
         }
 
-        List<SubcommandData> mappedData = slashCommands.stream()
+        List<SubcommandData> mappedData = commands.stream()
                 .map(command -> {
                     SubcommandData data = new SubcommandData(command.getName(), command.getDescription());
+                    List<OptionData> optionData = data.getOptions();
+                    // Fix per i cambi di parametri possibili
+                    if(!optionData.isEmpty()) {
+                        optionData.forEach(option -> data.removeOptionByName(option.getName()));
+                    }
+
                     for (Parameter param : command.getParameters()) {
                         data.addOption(param.type(), param.name(), param.description(), param.required());
                     }
@@ -66,17 +73,29 @@ public class CommandManager {
         return this;
     }
 
-    public CommandManager command(Slash action) {
-        if (isNotRegistered(action)) {
-            slashCommands.add(action);
+    public CommandManager command(Slash slash) {
+        if (isCommandNotRegistered(slash)) {
+            commands.add(slash);
         }
 
         return this;
     }
 
-    public CommandManager interaction(Interaction action) {
-        if (isNotRegistered(action)) {
-            menuCommands.add(action);
+    public CommandManager interaction(Interaction interaction) {
+        if (isInteractionNotRegistered(interaction)) {
+            interactions.add(interaction);
+        }
+
+        return this;
+    }
+
+    public CommandManager both(Command command) {
+        if (command instanceof Slash slash && isCommandNotRegistered(slash)) {
+            commands.add(slash);
+        }
+
+        if (command instanceof Interaction interaction && isInteractionNotRegistered(interaction)) {
+            interactions.add(interaction);
         }
 
         return this;
@@ -104,10 +123,12 @@ public class CommandManager {
         return new Cooldown.Result(false);
     }
 
-    private boolean isNotRegistered(Command command) {
-        return (command instanceof Slash ? slashCommands : menuCommands)
-                .stream()
-                .noneMatch(otherCommand -> isTheSame(command, otherCommand));
+    private boolean isCommandNotRegistered(Slash slash) {
+        return commands.stream().noneMatch(otherCommand -> isTheSame(slash, otherCommand));
+    }
+
+    private boolean isInteractionNotRegistered(Interaction interaction) {
+        return interactions.stream().noneMatch(otherCommand -> isTheSame(interaction, otherCommand));
     }
 
     private boolean isTheSame(Command command, Command otherCommand) {

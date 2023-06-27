@@ -1,19 +1,22 @@
 package dev.starless.maggiordomo.data;
 
 import dev.starless.maggiordomo.Bot;
-import it.ayyjava.storage.annotations.MongoKey;
-import it.ayyjava.storage.annotations.MongoObject;
+import dev.starless.mongo.annotations.MongoKey;
+import dev.starless.mongo.annotations.MongoObject;
+import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.internal.entities.channel.concrete.CategoryImpl;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 @Data
@@ -28,35 +31,39 @@ public class Settings {
     private final Set<String> premiumRoles;
     private final Set<String> bannedRoles;
     private List<String> categories;
+
     private String channelID;
     private String voiceID;
     private String publicRole;
+    private long maxInactivity;
 
-    public Settings(String guild, String category, String channel, String voice, String role, Set<String> premiumRoles, Set<String> staffRoles, Set<String> bannedRoles) {
+    private String title;
+    private String descriptionRaw;
+
+    public Settings(String guild) {
         this.guild = guild;
 
+        this.premiumRoles = new HashSet<>();
+        this.bannedRoles = new HashSet<>();
         // In genere CopyOnWriteArrayList è molto pesante quando si tratta di
         // operazioni di scrittura, ma dato che abbiamo pochi elementi e
         // la maggior parte delle volte leggiamo da questa lista
         // dovrebbe essere accettabile come soluzione.
         this.categories = new CopyOnWriteArrayList<>();
-        this.categories.add(category);
 
-        this.channelID = channel;
-        this.voiceID = voice;
-        this.publicRole = role;
-        this.premiumRoles = premiumRoles;
-        this.bannedRoles = bannedRoles;
+        this.channelID = "-1";
+        this.voiceID = "-1";
+        this.publicRole = "-1";
+        this.maxInactivity = -1L;
+
+        this.title = "Comandi disponibili :books:";
+        this.descriptionRaw = """
+                Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**.
+                Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.""";
     }
 
     public Settings(Guild guild) {
-        this(guild.getId(), "-1", "-1", "-1", "-1", new HashSet<>(), new HashSet<>(), new HashSet<>());
-    }
-
-    public void reset() {
-        categories.clear();
-        voiceID = "-1";
-        publicRole = "-1";
+        this(guild.getId());
     }
 
     public void forEachCategory(Guild guild, Consumer<Category> action) {
@@ -85,14 +92,14 @@ public class Settings {
             }
         }
 
-        if(!toBeDeleted.isEmpty()) {
+        if (!toBeDeleted.isEmpty()) {
             toBeDeleted.forEach(id -> categories.remove(id));
         }
 
         return output != null ? output : createCategory(guild);
     }
 
-    public Category createCategory(Guild guild) {
+    public @Nullable Category createCategory(Guild guild) {
         int movement = 0;
 
         if (hasCategory()) {
@@ -103,17 +110,42 @@ public class Settings {
             }
         }
 
-        Category newCategory = guild.createCategory("private #" + categories.size()).complete();
-        categories.add(newCategory.getId());
-        if(movement != 0) {
-            guild.modifyCategoryPositions()
-                    .selectPosition(newCategory)
-                    .moveUp(movement)
+        Category newCategory;
+        try { // Try to create the category
+            newCategory = guild.createCategory(String.format("rooms (%s)", categories.size() + 1))
+                    // Bot permissions (not actually needed if bot has admin, which needs to be removed in the future)
+                    .addMemberPermissionOverride(Bot.getInstance().getJda().getSelfUser().getIdLong(),
+                            List.of(Permission.MANAGE_CHANNEL,
+                                    Permission.MESSAGE_MANAGE,
+                                    Permission.MANAGE_ROLES,
+                                    Permission.MANAGE_PERMISSIONS,
+                                    Permission.MESSAGE_SEND,
+                                    Permission.MESSAGE_ATTACH_FILES),
+                            Collections.emptyList())
+                    .addRolePermissionOverride(Long.parseLong(publicRole),
+                            Collections.singletonList(Permission.VIEW_CHANNEL),
+                            List.of(Permission.CREATE_PUBLIC_THREADS,
+                                    Permission.CREATE_PRIVATE_THREADS,
+                                    Permission.MESSAGE_SEND_IN_THREADS))
                     .complete();
+        } catch (RuntimeException ex) { // Catch a possible exception
+            newCategory = null;
         }
 
-        // Update database async
-        CompletableFuture.runAsync(() -> Bot.getInstance().getCore().getSettingsMapper().update(this));
+        if (newCategory != null) {
+            // Add category to the list
+            categories.add(newCategory.getId());
+
+            if (movement != 0) {
+                guild.modifyCategoryPositions()
+                        .selectPosition(newCategory)
+                        .moveUp(movement)
+                        .complete();
+            }
+
+            // Update database async
+            CompletableFuture.runAsync(() -> Bot.getInstance().getCore().getSettingsMapper().update(this));
+        }
 
         return newCategory;
     }
@@ -124,5 +156,9 @@ public class Settings {
 
     public boolean isMainCategory(String categoryID) {
         return categories.size() > 0 && categories.get(0).equals(categoryID);
+    }
+
+    public String getDescription() {
+        return descriptionRaw.replace("{CHANNEL}", voiceID.equals("-1") ? "`???`" : "<#" + voiceID + ">");
     }
 }

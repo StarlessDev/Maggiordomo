@@ -2,9 +2,9 @@ package dev.starless.maggiordomo.storage.vc;
 
 import com.mongodb.client.model.Filters;
 import dev.starless.maggiordomo.data.user.VC;
-import it.ayyjava.storage.MongoStorage;
-import it.ayyjava.storage.structures.Query;
-import it.ayyjava.storage.structures.gateway.GatewayImpl;
+import dev.starless.mongo.MongoStorage;
+import dev.starless.mongo.objects.Query;
+import dev.starless.mongo.objects.gateway.GatewayImpl;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,10 +1,10 @@
 package dev.starless.maggiordomo.storage.settings;
 
 import dev.starless.maggiordomo.data.Settings;
-import it.ayyjava.storage.MongoStorage;
-import it.ayyjava.storage.structures.Query;
-import it.ayyjava.storage.structures.QueryBuilder;
-import it.ayyjava.storage.structures.mapper.IMapper;
+import dev.starless.mongo.MongoStorage;
+import dev.starless.mongo.objects.Query;
+import dev.starless.mongo.objects.QueryBuilder;
+import dev.starless.mongo.objects.mapper.IMapper;
 import lombok.Getter;
 
 import java.util.List;

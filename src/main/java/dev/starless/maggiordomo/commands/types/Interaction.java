@@ -6,6 +6,7 @@ import dev.starless.maggiordomo.data.user.VC;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 
 public interface Interaction extends Command {
@@ -22,6 +23,10 @@ public interface Interaction extends Command {
         return vc;
     }
 
+    default VC execute(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
+        return vc;
+    }
+
     default Emoji emoji() {
         return Emoji.fromUnicode("U+2753");
     }
@@ -29,5 +34,9 @@ public interface Interaction extends Command {
     // Timeout in secondi
     default long timeout() {
         return -1L;
+    }
+
+    default boolean needsVC() {
+        return true;
     }
 }

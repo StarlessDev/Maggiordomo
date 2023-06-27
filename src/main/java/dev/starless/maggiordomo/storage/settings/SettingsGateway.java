@@ -1,9 +1,9 @@
 package dev.starless.maggiordomo.storage.settings;
 
 import dev.starless.maggiordomo.data.Settings;
-import it.ayyjava.storage.MongoStorage;
-import it.ayyjava.storage.structures.Query;
-import it.ayyjava.storage.structures.gateway.GatewayImpl;
+import dev.starless.mongo.MongoStorage;
+import dev.starless.mongo.objects.Query;
+import dev.starless.mongo.objects.gateway.GatewayImpl;
 
 import java.util.List;
 import java.util.Optional;

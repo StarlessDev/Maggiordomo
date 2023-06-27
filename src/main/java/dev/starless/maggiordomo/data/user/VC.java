@@ -2,8 +2,8 @@ package dev.starless.maggiordomo.data.user;
 
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.enums.VCStatus;
-import it.ayyjava.storage.annotations.MongoKey;
-import it.ayyjava.storage.annotations.MongoObject;
+import dev.starless.mongo.annotations.MongoKey;
+import dev.starless.mongo.annotations.MongoObject;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

@@ -13,7 +13,7 @@ import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.interfaces.Module;
 import dev.starless.maggiordomo.logging.BotLogger;
-import dev.starless.maggiordomo.logging.References;
+import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.storage.VCManager;
 import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
@@ -21,9 +21,9 @@ import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
-import it.ayyjava.storage.MongoStorage;
-import it.ayyjava.storage.structures.Query;
-import it.ayyjava.storage.structures.QueryBuilder;
+import dev.starless.mongo.MongoStorage;
+import dev.starless.mongo.objects.Query;
+import dev.starless.mongo.objects.QueryBuilder;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -44,6 +44,7 @@ import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
@@ -53,6 +54,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -159,12 +161,12 @@ public class Core implements Module {
 
         commands = new CommandManager()
                 .name("maggiordomo")
+                .both(new SetupCommand())
                 .command(new BannedCommand())
                 .command(new MenuCommand())
                 .command(new PremiumCommand())
                 .command(new RecoverCommand())
                 .command(new ReloadPermsCommand())
-                .command(new SetupCommand())
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
@@ -322,22 +324,20 @@ public class Core implements Module {
         }
     }
 
-    public void sendMenu(TextChannel channel) {
-        Optional<String> createChannel = settingsMapper.search(QueryBuilder.init()
-                        .add("guild", channel.getGuild().getId())
-                        .create())
-                .map(Settings::getVoiceID);
+    public MessageCreateData createMenu(String guild) {
+        Optional<Settings> op = settingsMapper.search(QueryBuilder.init()
+                        .add("guild", guild)
+                        .create());
 
-        String createChannelMention = createChannel.isPresent()
-                ? String.format("<#%s>", createChannel.get())
-                : "`???`";
+        if(op.isEmpty()) return null;
+        Settings settings = op.get();
 
         // Crea la lista di bottoni
         List<ActionRow> buttonRows = new ArrayList<>();
         Stack<Button> row = new Stack<>();
-        int commandNumber = commands.getMenuCommands().size();
+        int commandNumber = commands.getInteractions().size();
         for (int i = 0; i < commandNumber; i++) {
-            Interaction cmd = commands.getMenuCommands().get(i);
+            Interaction cmd = commands.getInteractions().get(i);
             row.add(Button.of(ButtonStyle.SECONDARY, cmd.getName(), cmd.emoji()));
 
             if (row.size() == 4 || i == commandNumber - 1) {
@@ -348,21 +348,25 @@ public class Core implements Module {
 
         // Crea il messaggio di aiuto
         String content = """
-                # Comandi disponibili :books:
+                # %s
 
-                Entra in %s per creare la tua stanza e usa questo pannello per **personalizzarla**.
-                Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
-                """.formatted(createChannelMention);
+                %s
+                """.formatted(settings.getTitle(), settings.getDescription());
 
         // Crea il messaggio d'aito
         MessageCreateBuilder builder = new MessageCreateBuilder()
+                .addFiles(FileUpload.fromData(getClass().getResourceAsStream("/guide.png"), "guide.png"))
                 .setContent(content)
-                .addFiles(FileUpload.fromData(getClass().getResourceAsStream("/guide.png"), "guide.png"));
+                .addComponents(buttonRows);
 
-        // Setta i bottoni
-        channel.sendMessage(builder.build())
-                .addComponents(buttonRows)
-                .queue();
+        return builder.build();
+    }
+
+    public void sendMenu(TextChannel channel) {
+        MessageCreateData data = createMenu(channel.getGuild().getId());
+        if(data == null) return;
+
+        channel.sendMessage(data).queue();
     }
 
     private void handleJoin(Guild guild, AudioChannel channel, Member member) {
@@ -485,7 +489,7 @@ public class Core implements Module {
         } else {
             // Altrimenti cerchiamo di eseguire il comando,
             // scegliendo tra quelli disponibili
-            commands.getSlashCommands().stream()
+            commands.getCommands().stream()
                     .filter(command -> command.getName().equalsIgnoreCase(sub))
                     .findFirst()
                     .ifPresentOrElse(
@@ -515,17 +519,7 @@ public class Core implements Module {
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         if (!event.isFromGuild()) return;
 
-        Optional<Settings> cachedSettings = settingsMapper.search(QueryBuilder.init()
-                .add("guild", event.getGuild().getId())
-                .create());
-        // Condizioni:
-        // 1. La gilda deve avere una categoria creata
-        // 2. L'ID del canale dell'interazione deve essere uguale a quello presente nell'oggetto VCCategory
-        cachedSettings.ifPresent(category -> {
-            if (category.getChannelID().equals(event.getInteraction().getMessageChannel().getId())) {
-                handleInteraction(event, event.getButton().getId());
-            }
-        });
+        handleInteraction(event, event.getButton().getId());
     }
 
     @SubscribeEvent
@@ -535,6 +529,11 @@ public class Core implements Module {
 
     @SubscribeEvent
     public void onSelectMenuInteraction(@NotNull StringSelectInteractionEvent event) {
+        handleInteraction(event, event.getComponentId());
+    }
+
+    @SubscribeEvent
+    public void onEntityMenuInteraction(@NotNull EntitySelectInteractionEvent event) {
         handleInteraction(event, event.getComponentId());
     }
 
@@ -554,78 +553,86 @@ public class Core implements Module {
 
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
         settingsMapper.search(builder.create())
-                .ifPresent(settings ->
-                        commands.getMenuCommands().stream() // Cerca il comando corrispondente
-                                .filter(buttonCommand -> id.startsWith(buttonCommand.getName()))
-                                .findFirst()
-                                .ifPresent(command -> localMapper.search(builder.add("user", user).create())
-                                        .ifPresent(vc -> {
-                                            // Se ha il permesso
-                                            if (command.hasPermission(event.getMember(), settings)) {
-                                                // Se non è in fase di creazione
-                                                if (localMapper.isBeingCreated(vc)) {
-                                                    event.reply("""
-                                                                    La tua stanza è in fase di creazione.
-                                                                    Attendi un secondo! ⏳""")
-                                                            .setEphemeral(true)
-                                                            .queue();
-                                                    return;
-                                                }
+                .ifPresent(settings -> {
+                    Optional<Interaction> op = commands.getInteractions().stream() // Cerca il comando corrispondente
+                            .filter(interaction -> id.startsWith(interaction.getName()))
+                            .findFirst();
 
-                                                boolean isOnCooldown = false;
-                                                // Esegui il comando
-                                                if (event instanceof ButtonInteractionEvent e) {
-                                                    Cooldown.Result result = commands.isOnCooldown(command, user);
-                                                    // Se è in cooldown, manda un messaggio di avviso
-                                                    if (result.active()) {
-                                                        isOnCooldown = true;
-                                                        String content = """
-                                                                Questo comando ha un **cooldown**!
-                                                                Per favore, attendi ancora __%.1fs__"""
-                                                                .formatted(result.nextExecutionInstant().toMillis() / 1000D);
+                    if (op.isPresent()) {
+                        Interaction interaction = op.get();
+                        VC vc = localMapper.search(builder.add("user", user).create()).orElse(null);
 
-                                                        event.replyEmbeds(new EmbedBuilder()
-                                                                        .setColor(new Color(213, 178, 70))
-                                                                        .setAuthor("Avviso")
-                                                                        .setDescription(content)
-                                                                        .build())
-                                                                .setEphemeral(true)
-                                                                .queue();
-                                                    } else {
-                                                        vc = command.execute(vc, settings, id, e);
-                                                    }
-                                                } else if (event instanceof ModalInteractionEvent e) {
-                                                    vc = command.execute(vc, settings, id, e);
-                                                } else if (event instanceof StringSelectInteractionEvent e) {
-                                                    vc = command.execute(vc, settings, id, e);
-                                                } else {
-                                                    return;
-                                                }
+                        if(interaction.needsVC() && vc == null) return;
 
-                                                if (!isOnCooldown) {
-                                                    commands.handleCooldown(command, user);
+                        // Se ha il permesso
+                        if (interaction.hasPermission(event.getMember(), settings)) {
+                            // Se non è in fase di creazione
+                            if (vc != null && localMapper.isBeingCreated(vc)) {
+                                event.reply("""
+                                                La tua stanza è in fase di creazione.
+                                                Attendi un secondo! ⏳""")
+                                        .setEphemeral(true)
+                                        .queue();
+                                return;
+                            }
 
-                                                    BotLogger.info("%s just used the command '%s' (type: %s) in guild '%s'",
-                                                            References.user(user),
-                                                            command.getName(),
-                                                            event.getClass().getSimpleName().replace("InteractionEvent", ""),
-                                                            References.guild(guild));
-                                                }
+                            boolean isOnCooldown = false;
+                            // Esegui il comando
+                            if (event instanceof ButtonInteractionEvent e) {
+                                Cooldown.Result result = commands.isOnCooldown(interaction, user);
+                                // Se è in cooldown, manda un messaggio di avviso
+                                if (result.active()) {
+                                    isOnCooldown = true;
+                                    String content = """
+                                            Questo comando ha un **cooldown**!
+                                            Per favore, attendi ancora __%.1fs__"""
+                                            .formatted(result.nextExecutionInstant().toMillis() / 1000D);
 
-                                                // Se ritorna null, significa che non c'è
-                                                // bisogno di alcun update al database
-                                                if (vc != null) {
-                                                    localMapper.update(vc); // Aggiorna il database
-                                                }
-                                            } else {
-                                                // Mostra un messaggio di errore
-                                                event.replyEmbeds(Embeds.errorEmbed("Non hai il permesso di usare questa funzione! :books:"))
-                                                        .setEphemeral(true)
-                                                        .queue();
-                                            }
+                                    event.replyEmbeds(new EmbedBuilder()
+                                                    .setColor(new Color(213, 178, 70))
+                                                    .setAuthor("Avviso")
+                                                    .setDescription(content)
+                                                    .build())
+                                            .setEphemeral(true)
+                                            .queue();
+                                } else {
+                                    vc = interaction.execute(vc, settings, id, e);
+                                }
+                            } else if (event instanceof ModalInteractionEvent e) {
+                                vc = interaction.execute(vc, settings, id, e);
+                            } else if (event instanceof StringSelectInteractionEvent e) {
+                                vc = interaction.execute(vc, settings, id, e);
+                            } else if (event instanceof EntitySelectInteractionEvent e) {
+                                vc = interaction.execute(vc, settings, id, e);
+                            } else {
+                                return;
+                            }
 
-                                            success.set(true); // Ritorna true
-                                        })));
+                            if (!isOnCooldown) {
+                                commands.handleCooldown(interaction, user);
+
+                                BotLogger.info("%s just used the command '%s' (type: %s) in guild '%s'",
+                                        References.user(user),
+                                        interaction.getName(),
+                                        event.getClass().getSimpleName().replace("InteractionEvent", ""),
+                                        References.guild(guild));
+                            }
+
+                            // Se ritorna null, significa che non c'è
+                            // bisogno di alcun update al database
+                            if (vc != null) {
+                                localMapper.update(vc); // Aggiorna il database
+                            }
+                        } else {
+                            // Mostra un messaggio di errore
+                            event.replyEmbeds(Embeds.errorEmbed("Non hai il permesso di usare questa funzione! :books:"))
+                                    .setEphemeral(true)
+                                    .queue();
+                        }
+
+                        success.set(true); // Ritorna true
+                    }
+                });
 
         return success.get();
     }

@@ -20,6 +20,7 @@ import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 
 import static net.dv8tion.jda.api.requests.GatewayIntent.*;
+import static net.dv8tion.jda.api.utils.cache.CacheFlag.*;
 
 @Getter
 public class Bot implements Service {
@@ -49,9 +50,9 @@ public class Bot implements Service {
         jda = JDABuilder.createDefault(config.getString(ConfigEntry.TOKEN))
                 .enableIntents(GUILD_MESSAGES,
                         GUILD_VOICE_STATES,
-                        GUILD_MEMBERS,
-                        DIRECT_MESSAGES)
-                .disableIntents(GUILD_MODERATION,
+                        GUILD_MEMBERS)
+                .disableIntents(DIRECT_MESSAGES,
+                        GUILD_MODERATION,
                         GUILD_PRESENCES,
                         GUILD_EMOJIS_AND_STICKERS,
                         GUILD_WEBHOOKS,
@@ -60,13 +61,14 @@ public class Bot implements Service {
                         GUILD_MESSAGE_TYPING,
                         DIRECT_MESSAGE_REACTIONS,
                         DIRECT_MESSAGE_TYPING)
-                .enableCache(CacheFlag.VOICE_STATE, CacheFlag.MEMBER_OVERRIDES)
-                .disableCache(CacheFlag.EMOJI,
-                        CacheFlag.STICKER,
-                        CacheFlag.ONLINE_STATUS,
-                        CacheFlag.ACTIVITY,
-                        CacheFlag.CLIENT_STATUS,
-                        CacheFlag.ROLE_TAGS)
+                .enableCache(VOICE_STATE, MEMBER_OVERRIDES)
+                .disableCache(EMOJI,
+                        STICKER,
+                        ONLINE_STATUS,
+                        ACTIVITY,
+                        CLIENT_STATUS,
+                        ROLE_TAGS,
+                        FORUM_TAGS)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setActivity(Activity.watching("VCs"))
