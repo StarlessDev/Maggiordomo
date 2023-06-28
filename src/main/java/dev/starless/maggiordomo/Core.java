@@ -73,17 +73,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Core implements Module {
 
     private final MongoStorage storage;
-    private final ScheduledExecutorService activityService;
 
     @Getter private VCManager channelMapper;
     @Getter private SettingsMapper settingsMapper;
 
+    private ScheduledExecutorService activityService;
     private CommandManager commands;
 
     public Core(Config config) {
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
                 .registerSchema(new Schema(Settings.class)
-                        .entry("categories", document -> {
+                        .entry("categories", "categoryID", document -> {
                             // Trasferisce il vecchio id della categoria sul nuovo formato
                             List<String> categories = new ArrayList<>();
                             String legacyID = document.getString("categoryID");
@@ -101,14 +101,13 @@ public class Core implements Module {
                         .entry("descriptionRaw", """
                                 Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**.
                                 Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo."""));
-
-        activityService = Executors.newScheduledThreadPool(3);
     }
 
     @Override
     public void onEnable(JDA jda) {
         storage.init();
 
+        activityService = Executors.newScheduledThreadPool(jda.getGuilds().size());
         channelMapper = new VCManager(storage);
         settingsMapper = new SettingsMapper(storage);
 

@@ -202,6 +202,11 @@ public class LocalVCMapper implements IMapper<VC> {
                                 newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(
                                         RestUtils.emptyConsumer(),
                                         throwable -> BotLogger.warn(owner.getUser().getAsTag() + " left before being moved to his room!"));
+                            }, throwable -> {
+                                // Se la stanza non riesce ad essere spostata
+                                // allora cancellala e fai riprovare all'utente
+                                removeFromCreationSchedule(hashcode);
+                                scheduleForDeletion(vc, newChannel);
                             });
                 }
 
