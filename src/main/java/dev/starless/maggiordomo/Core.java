@@ -83,13 +83,24 @@ public class Core implements Module {
     public Core(Config config) {
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
                 .registerSchema(new Schema(Settings.class)
-                        .entry("categories", new ArrayList<>())
+                        .entry("categories", document -> {
+                            // Trasferisce il vecchio id della categoria sul nuovo formato
+                            List<String> categories = new ArrayList<>();
+                            String legacyID = document.getString("categoryID");
+                            if (legacyID != null) {
+                                categories.add(legacyID);
+                            }
+
+                            return categories;
+                        })
                         .entry("channelID", "-1")
                         .entry("voiceID", "-1")
                         .entry("publicRole", "-1")
                         .entry("maxInactivity", -1L)
                         .entry("title", "Comandi disponibili :books:")
-                        .entry("descriptionRaw", "Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**."));
+                        .entry("descriptionRaw", """
+                                Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**.
+                                Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo."""));
 
         activityService = Executors.newScheduledThreadPool(3);
     }
@@ -114,23 +125,6 @@ public class Core implements Module {
             } else {
                 settings = new Settings(guild);
                 settingsMapper.insert(settings);
-            }
-
-            if (settings.getCategories() == null) {
-                settings.setCategories(new ArrayList<>());
-
-                // Se non ci sono categorie, significa che probabilmente è stato fatto
-                // un aggiornamento al nuovo schema, quindi proviamo ad ottenere la categoria
-                // tramite il canale di creazione
-                VoiceChannel createChannel = guild.getVoiceChannelById(settings.getVoiceID());
-                if (createChannel != null) {
-                    Category createCategory = createChannel.getParentCategory();
-                    if (createCategory != null) {
-                        settings.getCategories().add(createCategory.getId());
-
-                        settingsMapper.update(settings);
-                    }
-                }
             }
 
             if (settings.hasCategory()) {
@@ -336,10 +330,10 @@ public class Core implements Module {
 
     public MessageCreateData createMenu(String guild) {
         Optional<Settings> op = settingsMapper.search(QueryBuilder.init()
-                        .add("guild", guild)
-                        .create());
+                .add("guild", guild)
+                .create());
 
-        if(op.isEmpty()) return null;
+        if (op.isEmpty()) return null;
         Settings settings = op.get();
 
         // Crea la lista di bottoni
@@ -374,7 +368,7 @@ public class Core implements Module {
 
     public void sendMenu(TextChannel channel) {
         MessageCreateData data = createMenu(channel.getGuild().getId());
-        if(data == null) return;
+        if (data == null) return;
 
         channel.sendMessage(data).queue();
     }
@@ -572,7 +566,7 @@ public class Core implements Module {
                         Interaction interaction = op.get();
                         VC vc = localMapper.search(builder.add("user", user).create()).orElse(null);
 
-                        if(interaction.needsVC() && vc == null) return;
+                        if (interaction.needsVC() && vc == null) return;
 
                         // Se ha il permesso
                         if (interaction.hasPermission(event.getMember(), settings)) {
