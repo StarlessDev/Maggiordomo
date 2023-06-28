@@ -13,8 +13,6 @@ Il primo comando da eseguire è `/maggiordomo setup`.
 
 Il bot ti guiderà attraverso il processo di setup e, una volta terminato, verrà creata in automatico la categoria, il canale testuale per l'interfaccia e il canale vocale per creare la stanza.
 
-![](https://i.imgur.com/uAjzG0L.png)
-
 Teoricamente, il bot **è già pronto all'uso**. Ora è possibile aggiungere ruoli alla lista **premium** o alla lista dei **bannati** con i seguenti comandi:
 
 - `/maggiordomo premium <role>`
