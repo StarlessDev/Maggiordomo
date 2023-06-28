@@ -99,6 +99,11 @@ public class CommandManager {
         return this;
     }
 
+    // This returns an immutable list
+    public List<Interaction> getMenuInteractions() {
+        return interactions.stream().filter(Interaction::inMenu).toList();
+    }
+
     public void handleCooldown(Interaction interaction, String user) {
         if (interaction.timeout() == -1L) return;
 

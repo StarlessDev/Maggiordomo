@@ -433,4 +433,9 @@ public class SetupCommand implements Slash, Interaction {
                     .queue();
         }
     }
+
+    @Override
+    public boolean inMenu() {
+        return false;
+    }
 }

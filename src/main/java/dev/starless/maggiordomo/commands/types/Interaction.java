@@ -39,4 +39,8 @@ public interface Interaction extends Command {
     default boolean needsVC() {
         return true;
     }
+
+    default boolean inMenu() {
+        return true;
+    }
 }

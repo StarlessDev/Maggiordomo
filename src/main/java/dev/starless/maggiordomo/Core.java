@@ -332,9 +332,11 @@ public class Core implements Module {
         // Crea la lista di bottoni
         List<ActionRow> buttonRows = new ArrayList<>();
         Stack<Button> row = new Stack<>();
-        int commandNumber = commands.getInteractions().size();
+
+        List<Interaction> actualInteractions = commands.getMenuInteractions();
+        int commandNumber = actualInteractions.size();
         for (int i = 0; i < commandNumber; i++) {
-            Interaction cmd = commands.getInteractions().get(i);
+            Interaction cmd = actualInteractions.get(i);
             row.add(Button.of(ButtonStyle.SECONDARY, cmd.getName(), cmd.emoji()));
 
             if (row.size() == 4 || i == commandNumber - 1) {
