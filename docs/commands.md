@@ -1,0 +1,8 @@
+# Altri comandi
+
+---
+Tutti i comandi slash (cioè quelli che usano lo `/`) sono eseguibili solamente dagli utenti con i privilegi di amministratore. Lascio una lista completa qua sotto:
+
++ `/maggiordomo setupmenu` manda nel canale testuale in cui è stato inviato l'interfaccia per personalizzare le stanze
++ `/maggiordomo recover <vocale> <boolean>` nel caso che ci sia una stanza corrotta ~~(che erano all'ordine nel giorno prima del recode)~~ questo comando recupera i dati della stanza basandosi sui permessi del canale vocale e sovrascrive i dati nel database. Il primo parametro deve essere la stanza da recuperare e il secondo parametro è booleano (cioè deve essere true o false) e indica se la stanza verrà impostata come fissata.
++ `/maggiordomo refreshperms` questo comando aggiorna i permessi in tutte le stanze vocali create al momento dell'esecuzione. Utile quando vengono aggiornate le liste premium o dei bannati. Infatti **se le liste vengono cambiate i permessi non vengono aggiornati in automatico!!**

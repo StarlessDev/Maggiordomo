@@ -1,30 +1,42 @@
 # Maggiordomo
-Questo bot è nato come un piccolo progetto personale per imparare a creare bot discord usando la libreria [JDA](https://jda.wiki).
-Se volete provare prima il bot, potete trovare una versione del bot sempre online sul server discord [.gg/dorado](https://discord.gg/dorado).
+Un bot creato per gestire e personalizzare le stanze degli utenti in modo completamente gratuito.
 
+### Requisiti
 In questo progetto i dati delle stanze vocali vengono salvati su un database MongoDB e la mia "libreria" [MongoStorage](https://github.com/StarlessDev/MongoStorage) gestisce la comunicazione con il database.
 Quindi gli unici requisiti del bot sono:
 - Java 17
 - MongoDB
 
-## Come avviare il bot
+### Setup
+É disponibile sul server [.gg/dorado](https://discord.gg/dorado) una versione del bot che potete provare, ma non potrete aggiungerlo al vostro server.
+Gli hosting non crescono sugli alberi e questo bot è stato concepito per essere completamente gratis, quindi non è possibile (per me almeno) hostare il bot.
 
-Tutte le releases sono compilate con i JDK Eclipse Temurin, scaricabili su [adoptium.net](https://adoptium.net), la versione consigliata per questo bot è OpenJDK 17.
+L'unica opzione disponibile è hostarlo voi stessi, usando [la guida](https://github.com/StarlessDev/Maggiordomo/blob/docs/creation.md) che vi aiuterà a mettere online il vostro bot: partendo dalla creazione del bot su discord, fino al setup vero e proprio sul server discord.
 
-Per avviare il jar basta usare il solito comando `java -jar Maggiordomo-*-all.jar`.
+### Funzioni
+In termini di personalizzazione della stanza il bot rende possibile cambiare:
+- Nome
+- Capienza
+- Gli utenti che possono accedere liberamente ad essa, detti: *fidati*
+- Gli utenti banditi dalla stanza, detti *bannati*
+- Impostazioni della privacy: puoi scegliere se rendere la stanza accessible a tutti oppure solamente agli utenti fidati.
 
-## Il primo avvio
-Alla prima esecuzione il bot andrà in crash perchè non è stato inserito alcun token.
-Il prossimo passo è inserire il token del bot e l'uri per la connessione a MongoDB, per maggiori dettagli consulta la sezione [Configurazione](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/config.md) nella documentazione.
+> Tutte queste caratteristiche possono essere modificate e salvate anche quando la stanza non è fisicamente presente nella categoria.
 
----
-## Documentazione
-Volete sapere di più sulle funzioni del bot, il modo in cui è stato pensato e istruzioni più dettagliate sul setup?
+Lo sviluppo del bot continua! Al momento stiamo lavorando per aggiungere:
+- [ ] Supporto per più di una categoria dedicata alle stanze
+- [ ] Personalizzazione del pannello di controllo (titolo e descrizione dell'embed)
 
-Consultate la documentazione qui sotto:
+### La particolarità di questo bot
+Oltre alle stanze temporanee, che si cancellano quando non ha utenti che la usano, Maggiordomo offre anche le *stanze fissate*: cioè stanze che non si cancellano e rimangono disponibili 24 ore su 24.
 
-  * [Setup](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/setup.md)
-  * [Configurazione](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/config.md)
-  * [Design](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/design.md), cioè come funziona il bot e le sue particolarità
-  * [Interfaccia](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/interface.md)
-  * [Other](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/other.md), una sezione che verrà riempita con informazioni che non appartengono alle categorie precedenti. Al momento ospita solamente una lista di comandi poco usati.
+Le stanze sono sempre ordinate in base alla loro tipologia: le stanze temporanee sono **sempre in cima**, mentre le stanze fissate sono sempre **in fondo** alla categoria.
+
+![Separazione stanze](https://i.imgur.com/Zrz1eYQ.jpg)
+
+> *Ma se ci sono troppe stanze fissate senza utenti dentro, il discord non sembrerà vuoto e inattivo?*
+
+Questo è quello che ho pensato mentre facevo il bot e ho trovato una soluzione: solamente le stanze con utenti al suo interno sono visibili al pubblico, cioè a tutti quelli che hanno il *Public role* (controlla la documentazione se non sai cosa sia).
+
+![Confronto della vista admin e utente](https://i.imgur.com/4z9hIFV.jpeg)
+
