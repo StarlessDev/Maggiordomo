@@ -15,7 +15,6 @@ import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.utils.ChunkingFilter;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import okhttp3.OkHttpClient;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,7 +70,7 @@ public class Bot implements Service {
                         FORUM_TAGS)
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .setChunkingFilter(ChunkingFilter.ALL)
-                .setActivity(Activity.watching("VCs"))
+                .setActivity(Activity.watching("Your rooms 👀"))
                 .setEventManager(new AnnotatedEventManager())
                 .addEventListeners(this)
                 .build();

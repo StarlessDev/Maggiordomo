@@ -139,17 +139,11 @@ public class Core implements Module {
 
                         if (optionalVC.isPresent()) {
                             VC vc = optionalVC.get();
-                            vc.setTitle(voiceChannel.getName());
-                            vc.setSize(voiceChannel.getUserLimit());
-                            vc.setCategory(category.getId()); // Fix per le vc salvate con lo schema vecchio
-
                             // Se non è lockata è non ci sono persone dentro,
                             // elimina la stanza
                             if (!vc.isPinned() && voiceChannel.getMembers().size() == 0) {
                                 localMapper.scheduleForDeletion(vc, voiceChannel);
                             }
-
-                            localMapper.update(vc);
                         } else {
                             localMapper.scheduleForDeletion(null, voiceChannel);
                             BotLogger.info("Found an invalid vc %s in '%s'", voiceChannel.getName(), guild.getName());
@@ -192,7 +186,7 @@ public class Core implements Module {
     public void onDisable(JDA jda) {
         jda.removeEventListener(this);
 
-        int interruputed = 0;
+        int interrupted = 0;
         for (Guild guild : jda.getGuilds()) {
             LocalVCMapper localMapper = channelMapper.getMapper(guild);
             ExecutorService createService = localMapper.getCreateService();
@@ -201,7 +195,7 @@ public class Core implements Module {
             try {
                 boolean success = createService.awaitTermination(15, TimeUnit.SECONDS);
                 if (!success) {
-                    interruputed++;
+                    interrupted++;
                     createService.shutdownNow();
                 }
 
@@ -210,9 +204,9 @@ public class Core implements Module {
             }
         }
 
-        String debug = interruputed == 0
+        String debug = interrupted == 0
                 ? "CreateService terminated successfully."
-                : interruputed + " CreateService(s) got interrupted forcefully!";
+                : interrupted + " CreateService(s) got interrupted forcefully!";
         BotLogger.info(debug);
 
         storage.close();
