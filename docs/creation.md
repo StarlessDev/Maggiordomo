@@ -18,8 +18,9 @@ Se sai già come creare un bot e ottenere un token sul sito di discord, puoi sal
 5. L'ultima cosa che ci rimane è **invitare il bot** nel proprio server: clicca su "OAuth2" sulla barra laterale e poi "URL Generator". Adesso puoi copiare esattamente le spunte da mettere nella pagina per dare al bot tutti i permessi necessari.
 
    Una volta impostati tutti i permessi, clicca sul pulsante "Copy" in fondo alla pagina.
-   ![gif](https://i.imgur.com/ScZ4Zpy.gif)
-6. Incolla l'url appena copiato nel tuo browser e seleziona il server che preferisci per invitare il bot.
+   Al momento il bot richiede il permesso di **Amministratore**, ma in futuro verranno richiesti solamente i permessi necessari al funzionamento del bot.
+   ![gif](https://i.imgur.com/1GwRYO8.gif)
+7. Incolla l'url appena copiato nel tuo browser e seleziona il server che preferisci per invitare il bot.
 
 ---
 Step successivo: [Configurazione](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/config.md)
