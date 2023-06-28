@@ -14,7 +14,9 @@ Gli hosting non crescono sugli alberi e questo bot è stato concepito per essere
 L'unica opzione disponibile è hostarlo voi stessi, usando [la guida](https://github.com/StarlessDev/Maggiordomo/blob/docs/creation.md) che vi aiuterà a mettere online il vostro bot: partendo dalla creazione del bot su discord, fino al setup vero e proprio sul server discord.
 
 ### Funzioni
-In termini di personalizzazione della stanza il bot rende possibile cambiare:
+Ogni stanza è **personale**: significa che a differenza degli altri bot, le stanze non possono essere "trasferite" o "claimate" da altri utenti quando il proprietario esce.
+
+In termini di personalizzazione della stanza invece il bot rende possibile cambiare:
 - Nome
 - Capienza
 - Gli utenti che possono accedere liberamente ad essa, detti: *fidati*
@@ -24,8 +26,10 @@ In termini di personalizzazione della stanza il bot rende possibile cambiare:
 > Tutte queste caratteristiche possono essere modificate e salvate anche quando la stanza non è fisicamente presente nella categoria.
 
 Lo sviluppo del bot continua! Al momento stiamo lavorando per aggiungere:
-- [ ] Supporto per più di una categoria dedicata alle stanze
-- [ ] Personalizzazione del pannello di controllo (titolo e descrizione dell'embed)
+- [x] Supporto per più di una categoria dedicata alle stanze
+- [x] Personalizzazione del pannello di controllo (titolo e descrizione dell'embed)
+
+*(Disponibile se compilate il progetto voi stessi, disponibile prossimamente nelle releases)*
 
 ### La particolarità di questo bot
 Oltre alle stanze temporanee, che si cancellano quando non ha utenti che la usano, Maggiordomo offre anche le *stanze fissate*: cioè stanze che non si cancellano e rimangono disponibili 24 ore su 24.
