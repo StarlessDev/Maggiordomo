@@ -1,7 +1,5 @@
-package dev.starless.maggiordomo.commands.manager;
+package dev.starless.maggiordomo.commands;
 
-import dev.starless.maggiordomo.commands.Command;
-import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Cooldown;

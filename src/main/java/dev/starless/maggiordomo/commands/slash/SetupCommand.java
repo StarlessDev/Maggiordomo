@@ -7,11 +7,13 @@ import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -35,6 +37,7 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -149,7 +152,8 @@ public class SetupCommand implements Slash, Interaction {
                         menu.addOption(i + " giorni", String.valueOf(i), daysEmojis.getOrDefault(i, Emoji.fromUnicode("❓")));
                     }
 
-                    rows.add(ActionRow.of(menu.build()));
+                    String defaultOption = String.valueOf(settings.getMaxInactivity());
+                    rows.add(ActionRow.of(menu.setDefaultValues(defaultOption).build()));
                 }
                 default -> {
                     return null;
@@ -184,6 +188,11 @@ public class SetupCommand implements Slash, Interaction {
                     settings.setDescriptionRaw(descMapping.getAsString());
                 }
 
+                // Se il menu è già stato mandato, aggiornalo
+                if (!settings.getMenuID().equals("-1")) {
+                    updateMenu(e.getGuild(), settings);
+                }
+
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
                 e.reply(">>> Messaggio aggiornato! :white_check_mark:")
@@ -215,7 +224,7 @@ public class SetupCommand implements Slash, Interaction {
                 e.getMessage().delete().queue();
                 e.deferReply(true).queue();
 
-                setupChannels(e.getGuild(), e.getHook(), settings);
+                completeSetup(e.getGuild(), e.getHook(), settings);
             }
         }
 
@@ -232,8 +241,12 @@ public class SetupCommand implements Slash, Interaction {
                 if (roles.isEmpty()) return null;
 
                 Message message = e.getMessage();
-                Role role = roles.get(0);
-                settings.setPublicRole(role.getId());
+                Role oldRole = e.getGuild().getRoleById(settings.getPublicRole());
+                Role newRole = roles.get(0);
+
+                updateRole(e.getGuild(), settings, oldRole, newRole);
+
+                settings.setPublicRole(newRole.getId());
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
                 e.reply(">>> Ruolo aggiornato :white_check_mark:")
@@ -260,7 +273,52 @@ public class SetupCommand implements Slash, Interaction {
         return false;
     }
 
-    private void setupChannels(Guild guild, InteractionHook hook, Settings settings) {
+    private void updateRole(Guild guild, Settings settings, Role oldRole, Role newRole) {
+        if (oldRole == null || newRole == null) return;
+
+        // In pratica imposta tutti i permessi del vecchio ruolo
+        // sul nuovo ruolo
+        settings.getCategories().forEach(categoryID -> {
+            Category category = guild.getCategoryById(categoryID);
+            if (category != null) {
+                category.getVoiceChannels().forEach(voiceChannel -> {
+                    if(voiceChannel.getId().equals(settings.getVoiceID())) return;
+
+                    PermissionOverride oldPerms = voiceChannel.getPermissionOverride(oldRole);
+                    if (oldPerms != null) {
+                        long allowed = oldPerms.getAllowedRaw();
+                        long denied = oldPerms.getDeniedRaw();
+
+                        voiceChannel.upsertPermissionOverride(oldRole).reset().queue();
+                        voiceChannel.upsertPermissionOverride(newRole).reset().grant(allowed).deny(denied).queue();
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateMenu(Guild guild, Settings settings) {
+        TextChannel channel = guild.getTextChannelById(settings.getChannelID());
+        if (channel != null) {
+            channel.retrieveMessageById(settings.getMenuID()).queue(message -> {
+                message.delete().queue();
+
+                MessageCreateData data = Bot.getInstance().getCore().createMenu(guild.getId());
+                if (data != null) {
+                    channel.sendMessage(data).queue(updatedMessage -> {
+                        settings.setMenuID(updatedMessage.getId());
+                        Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                    });
+                } else {
+                    BotLogger.warn("Could not update the menu of the guild (build failed): " + guild.getName());
+                }
+            }, throwable -> BotLogger.warn("Could not update the menu of the guild (no message): " + guild.getName()));
+        } else {
+            BotLogger.warn("Could not update the menu of the guild (no channel): " + guild.getName());
+        }
+    }
+
+    private void completeSetup(Guild guild, InteractionHook hook, Settings settings) {
         Consumer<Throwable> errorHandler = throwable -> {
             BotLogger.error("Something went wrong (%s) while setting up the guild '%s'",
                     throwable.getMessage(),
@@ -271,14 +329,14 @@ public class SetupCommand implements Slash, Interaction {
                     .queue();
         };
 
-        if (settings.getCategories().isEmpty()) {
+        if (!settings.hasCategory()) { // Se non c'è una categoria significa che dobbiamo fare il setup completo
             Role usersRole = guild.getRoleById(settings.getPublicRole());
             if (usersRole != null) {
                 // Vieta la visione a @everyone se non è il ruolo pubblico scelto
                 Role everyone = guild.getPublicRole();
                 boolean excludeEveryone = !everyone.getId().equals(usersRole.getId());
-
                 long selfID = Bot.getInstance().getJda().getSelfUser().getIdLong();
+
                 Category category = settings.createCategory(guild);
                 if (category != null) {
                     // Dashboard textchannel
@@ -335,8 +393,22 @@ public class SetupCommand implements Slash, Interaction {
 
                             // Aggiorna la cache e il documento nel db
                             Bot.getInstance().getCore().getSettingsMapper().update(settings);
+
                             // Manda il menu nel canale testuale
-                            Bot.getInstance().getCore().sendMenu(textChannel);
+                            MessageCreateData data = Bot.getInstance().getCore().createMenu(guild.getId());
+                            if (data != null) {
+                                textChannel.sendMessage(data).queue(message -> {
+                                    settings.setMenuID(message.getId());
+                                    Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                                });
+                            } else {
+                                textChannel.sendMessage(new MessageCreateBuilder()
+                                                .setContent("""
+                                                        Impossibile creare il menu! :x:
+                                                        Usa il comando `/maggiordomo setupMenu` in questo canale per riprovare.""")
+                                                .build())
+                                        .queue();
+                            }
 
                             // Manda il feedback all'utente
                             hook.sendMessage(">>> Setup completato! :white_check_mark:")
@@ -352,7 +424,13 @@ public class SetupCommand implements Slash, Interaction {
                 errorHandler.accept(new Exception("Public role does not exist!"));
             }
         } else {
-            errorHandler.accept(new Exception("Category already exists!"));
+            // Se arriviamo qua significa che deve essere aggiornata solo la maxInactivity
+            // quindi facciamo partire un check forzato per rendere effettivi i cambiamenti da subito
+            new Thread(new ActivityChecker(guild.getId())).start();
+
+            hook.sendMessage(">>> Setup completato! :white_check_mark:")
+                    .setEphemeral(true)
+                    .queue();
         }
     }
 }

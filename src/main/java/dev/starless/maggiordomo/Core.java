@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo;
 
+import dev.starless.maggiordomo.commands.CommandManager;
 import dev.starless.maggiordomo.commands.interaction.*;
-import dev.starless.maggiordomo.commands.manager.CommandManager;
 import dev.starless.maggiordomo.commands.slash.*;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.config.Config;
@@ -357,13 +357,6 @@ public class Core implements Module {
                 .addComponents(buttonRows);
 
         return builder.build();
-    }
-
-    public void sendMenu(TextChannel channel) {
-        MessageCreateData data = createMenu(channel.getGuild().getId());
-        if (data == null) return;
-
-        channel.sendMessage(data).queue();
     }
 
     private void handleJoin(Guild guild, AudioChannel channel, Member member) {

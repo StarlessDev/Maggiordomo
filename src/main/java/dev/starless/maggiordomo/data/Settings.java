@@ -34,6 +34,7 @@ public class Settings {
 
     private String channelID;
     private String voiceID;
+    private String menuID;
     private String publicRole;
     private long maxInactivity;
 
@@ -53,6 +54,7 @@ public class Settings {
 
         this.channelID = "-1";
         this.voiceID = "-1";
+        this.menuID = "-1";
         this.publicRole = "-1";
         this.maxInactivity = -1L;
 
