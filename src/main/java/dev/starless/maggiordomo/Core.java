@@ -139,7 +139,7 @@ public class Core implements Module {
 
                         if (optionalVC.isPresent()) {
                             VC vc = optionalVC.get();
-                            // Se non è lockata è non ci sono persone dentro,
+                            // Se non è lockata e non ci sono persone dentro,
                             // elimina la stanza
                             if (!vc.isPinned() && voiceChannel.getMembers().size() == 0) {
                                 localMapper.scheduleForDeletion(vc, voiceChannel);
