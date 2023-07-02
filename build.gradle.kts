@@ -17,13 +17,18 @@ tasks.withType<JavaCompile> {
 
 repositories {
     mavenCentral()
-    mavenLocal()
+    maven {
+        url = uri("https://jitpack.io")
+    }
+    maven {
+        url = uri("https://repo.spongepowered.org/maven/")
+    }
 }
 
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion") // JDA
     implementation("org.mongodb:mongodb-driver-sync:4.9.1") // MongoDB driver
-    implementation("dev.starless:MongoStorage:1.0.4")
+    implementation("com.github.StarlessDev:MongoStorage:1.0.4")
 
     implementation("org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT") // Configurate
     implementation("com.google.code.gson:gson:2.10.1") // Gson
