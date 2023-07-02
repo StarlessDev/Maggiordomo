@@ -60,13 +60,19 @@ public class UntrustInteraction implements Interaction {
                         menuBuilder.addOption(member.getEffectiveName(), member.getId());
                     });
 
-            int maxPages = (int) Math.ceil(recordsNumber / 10D);
-            Button backButton = PageUtils.getBackButton(getName(), page);
-            Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
+            // Credo che a volte, se gli utenti sono bannati ed escono dal server,
+            // i membri non vengono trovati e JDA lancia una exception
+            if (menuBuilder.getOptions().size() == 0) {
+                builder.setContent("*Non ci sono utenti bannati* :rainbow:");
+            } else {
+                int maxPages = (int) Math.ceil(recordsNumber / 10D);
+                Button backButton = PageUtils.getBackButton(getName(), page);
+                Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
 
-            builder.setContent("Scegli un utente :point_down:")
-                    .addComponents(ActionRow.of(menuBuilder.build()))
-                    .addComponents(ActionRow.of(backButton, nextButton));
+                builder.setContent("Scegli un utente :point_down:")
+                        .addComponents(ActionRow.of(menuBuilder.build()))
+                        .addComponents(ActionRow.of(backButton, nextButton));
+            }
         }
 
         e.reply(builder.build())
