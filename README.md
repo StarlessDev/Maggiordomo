@@ -1,5 +1,5 @@
 # Maggiordomo
-Un bot creato per gestire e personalizzare le stanze degli utenti in modo completamente gratuito.
+Un bot creato per gestire e personalizzare le stanze degli utenti in modo completamente gratuito, senza troppe funzioni inutili.
 
 ### Requisiti
 In questo progetto i dati delle stanze vocali vengono salvati su un database MongoDB e la mia "libreria" [MongoStorage](https://github.com/StarlessDev/MongoStorage) gestisce la comunicazione con il database.
@@ -7,11 +7,17 @@ Quindi gli unici requisiti del bot sono:
 - Java 17
 - MongoDB
 
+### Download
+Ogni volta che ci saranno abbastanza novità importanti verrà rilasciata una nuova versione del bot nella sezione [releases](github.com/StarlessDev/Maggiordomo/releases/latest).
+Tuttavia se non volete aspettare una release stabile, potete scaricare le **build di sviluppo** da [qui](https://ci.starless.dev/job/Maggiordomo) che vengono aggiornate automaticamente ogni volta che verrà aggiornato il codice della repo. 
+
+> **ATTENZIONE**: le build di sviluppo potrebbero essere **instabili** e contenere dei bug, usatele **con cautela**. *(e per favore reportate ogni bug che trovare nelle issues)*
+
 ### Setup
 É disponibile sul server [.gg/dorado](https://discord.gg/dorado) una versione del bot che potete provare, ma non potrete aggiungerlo al vostro server.
 Gli hosting non crescono sugli alberi e questo bot è stato concepito per essere completamente gratis, quindi non è possibile (per me almeno) hostare il bot.
 
-L'unica opzione disponibile è hostarlo voi stessi, usando [la guida](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/creation.md) che vi aiuterà a mettere online il vostro bot: partendo dalla creazione del bot su discord, fino al setup vero e proprio sul server discord.
+L'unica opzione disponibile al momento è scaricarlo dalle  e hostarlo voi stessi usando [la guida](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/creation.md) che vi aiuterà a mettere online il vostro bot: partendo dalla creazione del bot su discord, fino al setup vero e proprio sul server discord.
 
 ### Funzioni
 Ogni stanza è **personale**: significa che a differenza degli altri bot, le stanze non possono essere "trasferite" o "claimate" da altri utenti quando il proprietario esce.
@@ -26,10 +32,8 @@ In termini di personalizzazione della stanza invece il bot rende possibile cambi
 > Tutte queste caratteristiche possono essere modificate e salvate anche quando la stanza non è fisicamente presente nella categoria.
 
 Lo sviluppo del bot continua! Al momento stiamo lavorando per aggiungere:
-- [x] Supporto per più di una categoria dedicata alle stanze
-- [x] Personalizzazione del pannello di controllo (titolo e descrizione dell'embed)
-
-*(Disponibile se compilate il progetto voi stessi, disponibile prossimamente nelle releases)*
+- [ ] Ancora più personalizzazione riguardo ai permessi delle vc
+- [ ] Un filtro per le parole non consentite nei nomi delle stanze
 
 ### La particolarità di questo bot
 Oltre alle stanze temporanee, che si cancellano quando non ha utenti che la usano, Maggiordomo offre anche le *stanze fissate*: cioè stanze che non si cancellano e rimangono disponibili 24 ore su 24.
