@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 
@@ -70,7 +71,7 @@ public class LocalVCMapper implements IMapper<VC> {
         // Ricerca l'oggetto nella cache
         // Il supplier passato è Optional.empty() per evitare di cercare anche nel database
         Optional<VC> cachedVC = searchImpl(vc -> vc.equals(value), Optional::empty);
-        if(cachedVC.isEmpty()) return; // dovrebbe essere usato insert in questo caso
+        if (cachedVC.isEmpty()) return; // dovrebbe essere usato insert in questo caso
 
         // Aggiorna i set
         removeFromCache(cachedVC.get());
@@ -177,6 +178,13 @@ public class LocalVCMapper implements IMapper<VC> {
                 if (member != null) manager = Perms.ban(member, manager);
             }
 
+            Consumer<? super Throwable> errorHandler = throwable -> {
+                // Se la stanza non riesce ad essere spostata
+                // allora cancellala e fai riprovare all'utente
+                removeFromCreationSchedule(hashcode);
+                scheduleForDeletion(vc, newChannel);
+            };
+
             // Manda l'aggiornamento a discord
             manager.queue(nothing -> {
                 // Aggiorna id della stanza e il database
@@ -199,22 +207,12 @@ public class LocalVCMapper implements IMapper<VC> {
                                 removeFromCreationSchedule(hashcode);
 
                                 // Movva l'utente nella stanza
-                                newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(
-                                        RestUtils.emptyConsumer(),
-                                        throwable -> {
-                                            BotLogger.warn(owner.getUser().getAsTag() + " left before being moved to his room!");
-
-                                            // Se l'utente non riesce ad essere spostato
-                                            // allora cancella la stanza, per evitare bug
-                                            removeFromCreationSchedule(hashcode);
-                                            scheduleForDeletion(vc, newChannel);
-                                        });
-                            }, throwable -> {
-                                // Se la stanza non riesce ad essere spostata
-                                // allora cancellala e fai riprovare all'utente
-                                removeFromCreationSchedule(hashcode);
-                                scheduleForDeletion(vc, newChannel);
-                            });
+                                try {
+                                    newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(RestUtils.emptyConsumer(), errorHandler);
+                                } catch (IllegalArgumentException | InsufficientPermissionException ex) {
+                                    errorHandler.accept(ex);
+                                }
+                            }, errorHandler);
                 }
 
                 BotLogger.info("%s just created his voice channel in guild '%s'!",
@@ -319,7 +317,7 @@ public class LocalVCMapper implements IMapper<VC> {
 
     private List<VoiceChannel> getVoiceChannelsInCategory(Category category, boolean skip) {
         Stream<VoiceChannel> channelStream = category.getVoiceChannels().stream();
-        if(skip) {
+        if (skip) {
             channelStream = channelStream.skip(1);
         }
         return channelStream.toList();

@@ -13,11 +13,15 @@ public class References {
         if (!Bot.getInstance().isReady()) return null;
 
         User user = Bot.getInstance().getJda().getUserById(id);
+        return user(user);
+    }
+
+    public String user(User user) {
         if (user != null) {
             return user.getDiscriminator().equals("0000") ? "@" + user.getName() : user.getAsTag();
+        } else {
+            return null;
         }
-
-        return null;
     }
 
     public String guild(String id) {
