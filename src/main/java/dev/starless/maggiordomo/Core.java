@@ -144,9 +144,6 @@ public class Core implements Module {
                             if (!vc.isPinned() && voiceChannel.getMembers().size() == 0) {
                                 localMapper.scheduleForDeletion(vc, voiceChannel);
                             }
-                        } else {
-                            localMapper.scheduleForDeletion(null, voiceChannel);
-                            BotLogger.info("Found an invalid vc %s in '%s'", voiceChannel.getName(), guild.getName());
                         }
                     });
                 });
