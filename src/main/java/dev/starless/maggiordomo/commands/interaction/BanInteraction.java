@@ -37,7 +37,7 @@ public class BanInteraction implements Interaction {
         } else {
             Optional<Member> optionalMember = Matcher.getMemberFromInput(e.getGuild(), mapping.getAsString());
             if (optionalMember.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed("Errore! Devi inserire un username#tag o ID valido!"))
+                e.replyEmbeds(Embeds.errorEmbed("Errore! Devi inserire un username#tag, @username o ID valido!"))
                         .setEphemeral(true)
                         .queue();
 
@@ -45,7 +45,11 @@ public class BanInteraction implements Interaction {
             }
 
             Member member = optionalMember.get();
-            if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
+            if (vc.getUser().equals(member.getId())) {
+                e.replyEmbeds(Embeds.errorEmbed("Non puoi bannarti dalla tua stessa stanza!"))
+                        .setEphemeral(true)
+                        .queue();
+            } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed("Questo giocatore è già bannato"))
                         .setEphemeral(true)
                         .queue();
@@ -113,7 +117,7 @@ public class BanInteraction implements Interaction {
     public VC execute(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
         e.replyModal(Modal.create( getName(), "Inserisci")
                         .addActionRow(TextInput.create("ban:id", "utente", TextInputStyle.SHORT)
-                                .setPlaceholder("username#tag oppure ID")
+                                .setValue("username#0001, @username o un id")
                                 .build())
                         .build())
                 .queue();

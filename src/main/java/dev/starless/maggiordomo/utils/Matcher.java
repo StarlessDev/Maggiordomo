@@ -29,6 +29,9 @@ public class Matcher {
 
     public Optional<Member> getMemberFromInput(Guild guild, String input) {
         Member member = null;
+        if(input.startsWith("@")) {
+            input = input.concat("#0000").substring(1);
+        }
 
         if (Matcher.isFullUsername(input)) {
             member = guild.getMemberByTag(input);
