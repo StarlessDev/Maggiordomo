@@ -209,7 +209,7 @@ public class LocalVCMapper implements IMapper<VC> {
                                 // Movva l'utente nella stanza
                                 try {
                                     newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(RestUtils.emptyConsumer(), errorHandler);
-                                } catch (IllegalArgumentException | InsufficientPermissionException ex) {
+                                } catch (IllegalStateException | InsufficientPermissionException ex) {
                                     errorHandler.accept(ex);
                                 }
                             }, errorHandler);
