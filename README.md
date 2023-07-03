@@ -1,4 +1,7 @@
 # Maggiordomo
+![Jenkins](https://img.shields.io/jenkins/build?jobUrl=https%3A%2F%2Fci.starless.dev%2Fjob%2FMaggiordomo%2F&style=for-the-badge)
+![License](https://img.shields.io/github/license/StarlessDev/Maggiordomo?style=for-the-badge&color=white)
+
 Un bot creato per gestire e personalizzare le stanze degli utenti in modo completamente gratuito, senza troppe funzioni inutili.
 
 ### Requisiti
