@@ -159,14 +159,18 @@ public class SetupCommand implements Slash, Interaction {
                     e.deferReply(true).queue();
 
                     completeSetup(e.getGuild(), e.getHook(), settings);
-                    break;
                 }
                 default -> {
                     return null;
                 }
             }
 
-            e.deferReply().queue(success -> e.getInteraction().getHook().deleteOriginal().queue());
+            if (e.getInteraction().isAcknowledged()) {
+                e.getMessage().delete().queue();
+            } else {
+                e.deferReply().queue(success -> e.getInteraction().getHook().deleteOriginal().queue());
+            }
+
             if(content != null) {
                 e.getMessage().editMessage(builder.setContent(content)
                                 .setComponents(rows)
