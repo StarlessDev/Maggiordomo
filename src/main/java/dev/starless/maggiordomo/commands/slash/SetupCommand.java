@@ -77,7 +77,7 @@ public class SetupCommand implements Slash, Interaction {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
-            String content;
+            String content = null;
 
             MessageEditBuilder builder = new MessageEditBuilder();
             List<ActionRow> rows = new ArrayList<>();
@@ -92,12 +92,11 @@ public class SetupCommand implements Slash, Interaction {
                             .setPlaceholder("Seleziona un ruolo")
                             .build();
 
+                    rows.add(ActionRow.of(roleSelector));
                     if (!settings.getPublicRole().equals("-1")) {
                         content += "\nIl ruolo pubblico attuale è " + References.role(e.getGuild(), settings.getPublicRole());
                         rows.add(ActionRow.of(Button.secondary("setup:embed", "Continua ➡")));
                     }
-
-                    rows.add(ActionRow.of(roleSelector));
                 }
                 case "embed" -> {
                     content = """
@@ -154,6 +153,13 @@ public class SetupCommand implements Slash, Interaction {
 
                     String defaultOption = String.valueOf(settings.getMaxInactivity());
                     rows.add(ActionRow.of(menu.setDefaultValues(defaultOption).build()));
+                    rows.add(ActionRow.of(Button.secondary("setup:inactivity_impl", "Continua ➡")));
+                }
+                case "inactivity_impl" -> {
+                    e.deferReply(true).queue();
+
+                    completeSetup(e.getGuild(), e.getHook(), settings);
+                    break;
                 }
                 default -> {
                     return null;
@@ -161,11 +167,13 @@ public class SetupCommand implements Slash, Interaction {
             }
 
             e.deferReply().queue(success -> e.getInteraction().getHook().deleteOriginal().queue());
-            e.getMessage().editMessage(builder.setContent(content)
-                            .setComponents(rows)
-                            .build())
-                    .setReplace(true)
-                    .queue();
+            if(content != null) {
+                e.getMessage().editMessage(builder.setContent(content)
+                                .setComponents(rows)
+                                .build())
+                        .setReplace(true)
+                        .queue();
+            }
         }
 
         return null;
@@ -329,7 +337,12 @@ public class SetupCommand implements Slash, Interaction {
                     .queue();
         };
 
-        if (!settings.hasCategory()) { // Se non c'è una categoria significa che dobbiamo fare il setup completo
+        Category mainCategory = settings.getMainCategory(guild);
+        if (mainCategory == null) { // Se non c'è una categoria significa che dobbiamo fare il setup completo
+            if (settings.getCategories().size() > 0) {
+                settings.getCategories().clear();
+            }
+
             Role usersRole = guild.getRoleById(settings.getPublicRole());
             if (usersRole != null) {
                 // Vieta la visione a @everyone se non è il ruolo pubblico scelto

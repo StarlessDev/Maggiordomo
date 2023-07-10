@@ -161,6 +161,10 @@ public class Settings {
         return !categories.isEmpty();
     }
 
+    public Category getMainCategory(Guild guild) {
+        return categories.size() > 0 ? guild.getCategoryById(categories.get(0)) : null;
+    }
+
     public boolean isMainCategory(String categoryID) {
         return categories.size() > 0 && categories.get(0).equals(categoryID);
     }
