@@ -218,7 +218,7 @@ public class Core implements Module {
             settingsMapper.insert(new Settings(e.getGuild()));
         }
 
-        BotLogger.info("The guild '%s' has just added the bot!");
+        BotLogger.info("The guild '%s' has just added the bot!", e.getGuild().getName());
     }
 
     @SubscribeEvent
