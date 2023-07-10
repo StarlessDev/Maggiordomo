@@ -16,12 +16,14 @@ Tuttavia se non volete aspettare una release stabile, potete scaricare le **buil
 
 > **ATTENZIONE**: le build di sviluppo potrebbero essere **instabili** e contenere dei bug, usatele **con cautela**. *(e per favore reportate ogni bug che trovare nelle issues)*
 
-### Setup
+### Setup/Invite
 É disponibile sul server [.gg/dorado](https://discord.gg/dorado) una versione del bot che potete provare, ma non potrete aggiungerlo al vostro server.
-Gli hosting non crescono sugli alberi e questo bot è stato concepito per essere completamente gratis, quindi non è possibile (per me almeno) hostare il bot.
 
-L'unica opzione disponibile al momento è scaricarlo dalle  e hostarlo voi stessi usando [la guida](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/creation.md) che vi aiuterà a mettere online il vostro bot: partendo dalla creazione del bot su discord, fino al setup vero e proprio sul server discord.
+~~Gli hosting non crescono sugli alberi e questo bot è stato concepito per essere completamente gratis, quindi non è possibile (per me almeno) hostare il bot.~~
 
+Ho trovato un amico disposto ad hostare il bot, ora è possibile aggiungere il bot ai vostri server: https://maggiordomo.starless.dev
+
+Comunque è ancora (e sarà sempre) possibile scaricare e hostare voi stessi usando [la guida](https://github.com/StarlessDev/Maggiordomo/blob/main/docs/creation.md) che vi aiuterà a mettere online il vostro bot: partendo dalla creazione del bot su discord, fino al setup vero e proprio sul server discord.
 ### Funzioni
 Ogni stanza è **personale**: significa che a differenza degli altri bot, le stanze non possono essere "trasferite" o "claimate" da altri utenti quando il proprietario esce.
 
