@@ -27,7 +27,7 @@ public class Console extends Thread {
                 return;
             } else if (cmd.equals("stats")) {
                 int numberOfGuilds = Bot.getInstance().getJda().getGuilds().size();
-                BotLogger.info("The bot has joined %d guilds", numberOfGuilds);
+                BotLogger.info("The bot has joined %d guild(s).", numberOfGuilds);
             } else if (cmd.startsWith("guilds")) {
                 int page = 0;
                 String[] args = cmd.split(" ");
@@ -35,7 +35,7 @@ public class Console extends Thread {
                     try {
                         page = Integer.parseInt(args[1]);
                     } catch (NumberFormatException ex) {
-                        BotLogger.info("");
+                        BotLogger.info("Please provide a valid page number.");
                         return;
                     }
                 }
@@ -53,7 +53,7 @@ public class Console extends Thread {
                 }
 
                 if(start < guilds.size()) {
-                    StringBuilder sb = new StringBuilder();
+                    StringBuilder sb = new StringBuilder(String.format("Joined guilds (page %d)\n", page + 1));
                     guilds.subList(start, end).forEach(str -> sb.append("- \"").append(str).append("\"\n"));
                     BotLogger.info(sb.substring(0, sb.length() - 1));
                 } else {

@@ -486,9 +486,9 @@ public class Core implements Module {
                             command -> {
                                 if (command.hasPermission(e.getMember(), settings.get())) {
                                     BotLogger.info("%s just used the command '%s' (type: Slash) in guild '%s'",
-                                            e.getUser().getAsTag(),
+                                            References.user(e.getUser()),
                                             command.getName(),
-                                            e.getGuild().getName());
+                                            References.guild(e.getGuild().getId()));
 
                                     command.execute(settings.get(), e);
                                 } else {
