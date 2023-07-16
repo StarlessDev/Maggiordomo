@@ -530,8 +530,9 @@ public class Core implements Module {
     private void handleInteraction(IReplyCallback event, String id) {
         if (!event.isFromGuild() || id == null) return;
 
-        if (!handleMenuInteraction(event, event.getGuild().getId(), event.getUser().getId(), id)) {
-            event.replyEmbeds(Embeds.errorEmbed("Errore. Stanza non trovata! :confused:"))
+        boolean handledCorrectly = handleMenuInteraction(event, event.getGuild().getId(), event.getUser().getId(), id);
+        if (!handledCorrectly && !event.isAcknowledged()) {
+            event.replyEmbeds(Embeds.errorEmbed("Si è verificato un errore durante l'interazione."))
                     .setEphemeral(true)
                     .queue();
         }

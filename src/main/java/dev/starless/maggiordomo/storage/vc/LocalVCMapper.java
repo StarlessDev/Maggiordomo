@@ -234,7 +234,7 @@ public class LocalVCMapper implements IMapper<VC> {
 
     // Questo codice gestisce il processo di pin/unpin delle vc
 
-    public void togglePinStatus(Guild guild, Settings settings, VC vc) {
+    public synchronized void togglePinStatus(Guild guild, Settings settings, VC vc) {
         if (scheduledForDeletion.contains(vc.getChannel())) return;
 
         // Modifica i dati dell'oggetto stanza
