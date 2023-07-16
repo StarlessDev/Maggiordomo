@@ -28,6 +28,7 @@ public class Bot implements Service {
 
     private Core core;
     private JDA jda;
+    private UptimeServer server;
 
     private boolean ready;
 
@@ -44,6 +45,9 @@ public class Bot implements Service {
         }
 
         core = new Core(config);
+        if (config.getBoolean(ConfigEntry.UPTIME_ENABLED)) {
+            server = new UptimeServer(config.getString(ConfigEntry.UPTIME_ENDPOINT), config.getInt(ConfigEntry.UPTIME_PORT));
+        }
 
         // Effettua il login
         jda = JDABuilder.createDefault(config.getString(ConfigEntry.TOKEN))
@@ -85,6 +89,12 @@ public class Bot implements Service {
         // Avvia il bot vero e proprio
         core.onEnable(jda);
 
+        // Avvia il server che risponde
+        // ad uptimerobot
+        if (server != null) {
+            server.start();
+        }
+
         // Avvia la console
         new Console().start();
     }
@@ -113,5 +123,9 @@ public class Bot implements Service {
         OkHttpClient client = jda.getHttpClient();
         client.connectionPool().evictAll();
         client.dispatcher().executorService().shutdown();
+
+        if (server != null) {
+            server.stop();
+        }
     }
 }
