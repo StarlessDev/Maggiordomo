@@ -20,11 +20,13 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
 import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -325,33 +327,30 @@ public class LocalVCMapper implements IMapper<VC> {
 
     // Qua sotto viene gestita la cancellazione delle vc
 
-    public void scheduleForDeletion(VC vc, AudioChannel channel) {
-        scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
-    }
-
     public boolean isBeingDeleted(String channelID) {
         return scheduledForDeletion.contains(channelID);
     }
 
-    public void scheduleForDeletion(VC vc, AudioChannel channel, Consumer<Void> success) {
+    public void scheduleForDeletion(@NotNull VC vc, AudioChannel channel) {
+        scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
+    }
+
+    public void scheduleForDeletion(@NotNull VC vc, AudioChannel channel, Consumer<Void> success) {
         String id = channel.getId();
         if (scheduledForDeletion.contains(id)) return;
 
         scheduledForDeletion.add(id);
 
-        if (vc != null) removeFromCache(vc);
+        channel.delete()
+                .onSuccess(success.andThen(nothing -> {
+                    scheduledForDeletion.remove(id);
 
-        queueDeletion(channel.delete(), success, Duration.ofSeconds(-1L), id);
-    }
+                    vc.setChannel("-1");
+                    gateway.update(vc);
 
-    private void queueDeletion(AuditableRestAction<Void> action,
-                               Consumer<Void> consumer,
-                               Duration duration,
-                               String id) {
-        action.queueAfter(duration.toSeconds(),
-                TimeUnit.SECONDS,
-                consumer.andThen(nothing -> scheduledForDeletion.remove(id)),
-                throwable -> queueDeletion(action, consumer, duration.abs().plusSeconds(30), id));
+                    removeFromCache(vc);
+                }))
+                .complete();
     }
 
     // Utility methods used in all the class
