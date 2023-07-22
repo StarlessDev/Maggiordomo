@@ -9,6 +9,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.internal.entities.channel.concrete.CategoryImpl;
 import org.jetbrains.annotations.Nullable;
@@ -155,6 +157,12 @@ public class Settings {
         }
 
         return newCategory;
+    }
+
+    public boolean isBanned(Member member) {
+        return member.getRoles().stream()
+                .map(Role::getId)
+                .anyMatch(bannedRoles::contains);
     }
 
     public boolean hasCategory() {

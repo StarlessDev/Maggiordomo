@@ -39,6 +39,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
+import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -273,13 +274,13 @@ public class Core implements Module {
                     .stream()
                     .noneMatch(role -> settings.getPremiumRoles().contains(role.getId()));
 
-            if (isNotPremium) {
-                LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
-                localMapper.search(builder.add("user", event.getMember().getId()).create()).ifPresent(vc -> {
-                    if (vc.isPinned()) localMapper.togglePinStatus(event.getGuild(), settings, vc);
+                    if (isNotPremium) {
+                        LocalVCMapper localMapper = channelMapper.getMapper(event.getGuild());
+                        localMapper.search(builder.add("user", event.getMember().getId()).create()).ifPresent(vc -> {
+                            if (vc.isPinned()) localMapper.togglePinStatus(event.getGuild(), settings, vc);
+                        });
+                    }
                 });
-            }
-        });
     }
 
     @SubscribeEvent
@@ -396,6 +397,11 @@ public class Core implements Module {
             Optional<VC> cachedChannelVC = localMapper.searchByID(builder.add("channel", channel.getId()).create());
             cachedChannelVC.flatMap(vc -> Optional.ofNullable(guild.getVoiceChannelById(vc.getChannel())))
                     .ifPresent(voiceChannel -> { // Se questa vc esiste
+                        if (settings.isBanned(member)) { // Kicka l'utente se ha un ruolo bannato
+                            guild.kickVoiceMember(member).queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
+                            return;
+                        }
+
                         // Se è il primo a entrare (cioè prima non c'era nessuno)
                         if (voiceChannel.getMembers().size() == 1) {
                             channel.upsertPermissionOverride(publicRole)
@@ -527,7 +533,7 @@ public class Core implements Module {
     private void handleInteraction(IReplyCallback event, String id) {
         if (!event.isFromGuild() || id == null) return;
 
-        boolean handledCorrectly = handleMenuInteraction(event, event.getGuild().getId(), event.getUser().getId(), id);
+        boolean handledCorrectly = handleMenuInteraction(event, event.getGuild().getId(), event.getMember(), id);
         if (!handledCorrectly && !event.isAcknowledged()) {
             event.replyEmbeds(Embeds.errorEmbed("Si è verificato un errore durante l'interazione."))
                     .setEphemeral(true)
@@ -535,20 +541,28 @@ public class Core implements Module {
         }
     }
 
-    private boolean handleMenuInteraction(IReplyCallback event, String guild, String user, String id) {
+    private boolean handleMenuInteraction(IReplyCallback event, String guild, Member member, String id) {
         AtomicBoolean success = new AtomicBoolean(false);
         QueryBuilder builder = QueryBuilder.init().add("guild", guild);
+        String memberID = member.getId();
 
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
         settingsMapper.search(builder.create())
                 .ifPresent(settings -> {
+                    if (settings.isBanned(member)) {
+                        event.reply("Sei stato bannato dalle stanze private! :x:")
+                                .setEphemeral(true)
+                                .queue();
+                        return;
+                    }
+
                     Optional<Interaction> op = commands.getInteractions().stream() // Cerca il comando corrispondente
                             .filter(interaction -> id.startsWith(interaction.getName()))
                             .findFirst();
 
                     if (op.isPresent()) {
                         Interaction interaction = op.get();
-                        VC vc = localMapper.search(builder.add("user", user).create()).orElse(null);
+                        VC vc = localMapper.search(builder.add("user", memberID).create()).orElse(null);
 
                         if (interaction.needsVC() && vc == null) return;
 
@@ -567,7 +581,7 @@ public class Core implements Module {
                             boolean isOnCooldown = false;
                             // Esegui il comando
                             if (event instanceof ButtonInteractionEvent e) {
-                                Cooldown.Result result = commands.isOnCooldown(interaction, user);
+                                Cooldown.Result result = commands.isOnCooldown(interaction, memberID);
                                 // Se è in cooldown, manda un messaggio di avviso
                                 if (result.active()) {
                                     isOnCooldown = true;
@@ -597,10 +611,10 @@ public class Core implements Module {
                             }
 
                             if (!isOnCooldown) {
-                                commands.handleCooldown(interaction, user);
+                                commands.handleCooldown(interaction, memberID);
 
                                 BotLogger.info("%s just used the command '%s' (type: %s) in guild '%s'",
-                                        References.user(user),
+                                        References.user(member.getUser()),
                                         interaction.getName(),
                                         event.getClass().getSimpleName().replace("InteractionEvent", ""),
                                         References.guild(guild));
