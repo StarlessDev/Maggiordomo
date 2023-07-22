@@ -24,7 +24,7 @@ import java.awt.*;
 public class StatusInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
+    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String content = String.format("Al momento la stanza è **%s**",
                 vc.getStatus().equals(VCStatus.OPEN) ? "aperta" : "chiusa");
 

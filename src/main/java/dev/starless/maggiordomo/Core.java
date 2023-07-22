@@ -362,9 +362,14 @@ public class Core implements Module {
         if (channel == null || localMapper.isBeingDeleted(channel.getId())) return;
 
         String guildID = guild.getId();
+        AtomicBoolean isMemberBanned = new AtomicBoolean(false);
         QueryBuilder builder = QueryBuilder.init().add("guild", guildID);
         // Controlla se la gilda ha una categoria setuppata
         settingsMapper.search(builder.create()).ifPresent(settings -> {
+            // Controlla se l'utente è bannato e non fare niente se è il caso
+            isMemberBanned.set(settings.isBanned(member));
+            if (isMemberBanned.get()) return;
+
             // Prendi gli oggetti utili
             Category category = settings.getAvailableCategory(guild);
             Role publicRole = guild.getRoleById(settings.getPublicRole());
@@ -397,7 +402,7 @@ public class Core implements Module {
             Optional<VC> cachedChannelVC = localMapper.searchByID(builder.add("channel", channel.getId()).create());
             cachedChannelVC.flatMap(vc -> Optional.ofNullable(guild.getVoiceChannelById(vc.getChannel())))
                     .ifPresent(voiceChannel -> { // Se questa vc esiste
-                        if (settings.isBanned(member)) { // Kicka l'utente se ha un ruolo bannato
+                        if (isMemberBanned.get()) { // Kicka l'utente se ha un ruolo bannato
                             guild.kickVoiceMember(member).queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
                             return;
                         }

@@ -3,6 +3,11 @@ package dev.starless.maggiordomo.commands.interaction;
 import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
+import dev.starless.maggiordomo.data.filter.FilterResult;
+import dev.starless.maggiordomo.data.filter.FilterType;
+import dev.starless.maggiordomo.data.filter.IFilter;
+import dev.starless.maggiordomo.data.filter.impl.ContainsFilter;
+import dev.starless.maggiordomo.data.filter.impl.PatternFilter;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -16,12 +21,19 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 @CommandInfo(name = "rename", description = "Cambia il nome della tua stanza")
 public class TitleInteraction implements Interaction {
 
+    Set<IFilter> filters = new HashSet<>();
+    private final ContainsFilter containsFilter = new ContainsFilter();
+    private final PatternFilter patternFilter = new PatternFilter();
+
     @Override
-    public VC execute(VC vc, Settings guild, String id, ModalInteractionEvent e) {
+    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:title");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -29,10 +41,27 @@ public class TitleInteraction implements Interaction {
                     .queue();
         } else {
             String newTitle = mapping.getAsString();
+            for (FilterType type : FilterType.values()) {
+                IFilter filter = switch (type) {
+                    case CONTAINS -> containsFilter;
+                    case REGEX -> patternFilter;
+                };
+
+                for (String string : settings.getFilterStrings().getOrDefault(type, new ArrayList<>())) {
+                    FilterResult result = filter.apply(newTitle, string);
+                    if (result.flagged()) {
+                        e.reply("Questo nome non è permesso: " + result.message())
+                                .setEphemeral(true)
+                                .queue();
+                        return null;
+                    }
+                }
+            }
+
             vc.setTitle(newTitle);
 
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
-            if(channel != null) {
+            if (channel != null) {
                 channel.getManager().setName(newTitle).queue();
             }
 
@@ -59,7 +88,7 @@ public class TitleInteraction implements Interaction {
                         .build())
                 .queue();
 
-         return null;
+        return null;
     }
 
     @Override

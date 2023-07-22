@@ -1,24 +1,21 @@
 package dev.starless.maggiordomo.data;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.mongo.annotations.MongoKey;
 import dev.starless.mongo.annotations.MongoObject;
-import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
-import net.dv8tion.jda.internal.entities.channel.concrete.CategoryImpl;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 @Data
@@ -32,6 +29,7 @@ public class Settings {
 
     private final Set<String> premiumRoles;
     private final Set<String> bannedRoles;
+    private final Map<FilterType, List<String>> filterStrings;
     private List<String> categories;
 
     private String channelID;
@@ -48,6 +46,7 @@ public class Settings {
 
         this.premiumRoles = new HashSet<>();
         this.bannedRoles = new HashSet<>();
+        this.filterStrings = new HashMap<>();
         // In genere CopyOnWriteArrayList è molto pesante quando si tratta di
         // operazioni di scrittura, ma dato che abbiamo pochi elementi e
         // la maggior parte delle volte leggiamo da questa lista
@@ -117,7 +116,7 @@ public class Settings {
         Category newCategory;
         try { // Try to create the category
             String categoryName = "rooms";
-            if(categories.size() > 0) {
+            if (categories.size() > 0) {
                 categoryName += " (" + (categories.size() + 1) + ")";
             }
 
@@ -157,6 +156,19 @@ public class Settings {
         }
 
         return newCategory;
+    }
+
+    public synchronized void modifyFilters(FilterType type, Consumer<List<String>> action) {
+        List<String> strings = filterStrings.compute(type, (key, list) -> {
+            if (list == null) {
+                list = new ArrayList<>();
+            }
+
+            return list;
+        });
+
+        action.accept(strings);
+        filterStrings.put(type, strings);
     }
 
     public boolean isBanned(Member member) {

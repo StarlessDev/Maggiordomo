@@ -29,7 +29,7 @@ import java.util.Optional;
 public class TrustInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, ModalInteractionEvent e) {
+    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("trust:id");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -63,11 +63,11 @@ public class TrustInteraction implements Interaction {
                         .map(Role::getId)
                         .toList();
 
-                if (!memberRoles.contains(guild.getPublicRole())) {
+                if (!memberRoles.contains(settings.getPublicRole())) {
                     e.replyEmbeds(Embeds.errorEmbed("Quell'utente non ha il ruolo necessario!"))
                             .setEphemeral(true)
                             .queue();
-                } else if (memberRoles.stream().anyMatch(role -> guild.getBannedRoles().contains(role))) {
+                } else if (memberRoles.stream().anyMatch(role -> settings.getBannedRoles().contains(role))) {
                     e.replyEmbeds(Embeds.errorEmbed("Questo utente è bannato dall'utilizzo di questo bot!"))
                             .setEphemeral(true)
                             .queue();
