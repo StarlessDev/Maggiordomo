@@ -68,7 +68,7 @@ public class RecoverCommand implements Slash {
                     Member member = perm.getMember();
                     if (member == null || member.getUser().isBot()) continue;
 
-                    boolean isOwner = matches(Perms.ownerPerms, perm.getAllowed());
+                    boolean isOwner = matches(Perms.voiceOwnerPerms, perm.getAllowed());
                     if (user == null && isOwner) {
                         user = member.getId();
                         continue;

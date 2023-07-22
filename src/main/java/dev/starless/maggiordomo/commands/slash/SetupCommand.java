@@ -13,7 +13,6 @@ import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -37,7 +36,6 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -256,7 +254,7 @@ public class SetupCommand implements Slash, Interaction {
                 Role oldRole = e.getGuild().getRoleById(settings.getPublicRole());
                 Role newRole = roles.get(0);
 
-                updateRole(e.getGuild(), settings, oldRole, newRole);
+                Perms.updatePublicPerms(e.getGuild(), settings, oldRole, newRole);
 
                 settings.setPublicRole(newRole.getId());
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
@@ -283,30 +281,6 @@ public class SetupCommand implements Slash, Interaction {
     @Override
     public boolean needsVC() {
         return false;
-    }
-
-    private void updateRole(Guild guild, Settings settings, Role oldRole, Role newRole) {
-        if (oldRole == null || newRole == null) return;
-
-        // In pratica imposta tutti i permessi del vecchio ruolo
-        // sul nuovo ruolo
-        settings.getCategories().forEach(categoryID -> {
-            Category category = guild.getCategoryById(categoryID);
-            if (category != null) {
-                category.getVoiceChannels().forEach(voiceChannel -> {
-                    if(voiceChannel.getId().equals(settings.getVoiceID())) return;
-
-                    PermissionOverride oldPerms = voiceChannel.getPermissionOverride(oldRole);
-                    if (oldPerms != null) {
-                        long allowed = oldPerms.getAllowedRaw();
-                        long denied = oldPerms.getDeniedRaw();
-
-                        voiceChannel.upsertPermissionOverride(oldRole).reset().queue();
-                        voiceChannel.upsertPermissionOverride(newRole).reset().grant(allowed).deny(denied).queue();
-                    }
-                });
-            }
-        });
     }
 
     private void updateMenu(Guild guild, Settings settings) {
@@ -362,34 +336,14 @@ public class SetupCommand implements Slash, Interaction {
                                     List.of(Permission.MESSAGE_MANAGE, Permission.MESSAGE_SEND),
                                     Collections.emptyList())
                             // Users' permissions
-                            .addRolePermissionOverride(usersRole.getIdLong(),
-                                    Collections.singletonList(Permission.VIEW_CHANNEL),
-                                    List.of(Permission.MESSAGE_SEND,
-                                            Permission.MESSAGE_SEND_IN_THREADS,
-                                            Permission.CREATE_PUBLIC_THREADS,
-                                            Permission.CREATE_PRIVATE_THREADS,
-                                            Permission.MESSAGE_SEND_IN_THREADS,
-                                            Permission.USE_APPLICATION_COMMANDS));
+                            .addRolePermissionOverride(usersRole.getIdLong(), Perms.dashboardAllowedPerms, Perms.dashboardDeniedPerms);
 
                     // Room generator voicechannel
                     ChannelAction<VoiceChannel> createGenerator = category.createVoiceChannel("create")
                             // Bot's permissions
-                            .addMemberPermissionOverride(selfID,
-                                    Arrays.asList(Perms.selfPerms),
-                                    Collections.emptyList())
+                            .addMemberPermissionOverride(selfID, Arrays.asList(Perms.voiceSelfPerms), Collections.emptyList())
                             // Users' permissions
-                            .addRolePermissionOverride(usersRole.getIdLong(),
-                                    List.of(Permission.VIEW_CHANNEL,
-                                            Permission.VOICE_CONNECT,
-                                            Permission.VOICE_MOVE_OTHERS),
-                                    List.of(Permission.MESSAGE_SEND,
-                                            Permission.MESSAGE_SEND_IN_THREADS,
-                                            Permission.CREATE_PUBLIC_THREADS,
-                                            Permission.CREATE_PRIVATE_THREADS,
-                                            Permission.MESSAGE_SEND_IN_THREADS,
-                                            Permission.VOICE_SPEAK,
-                                            Permission.VOICE_STREAM,
-                                            Permission.USE_APPLICATION_COMMANDS));
+                            .addRolePermissionOverride(usersRole.getIdLong(), Perms.createAllowedPerms, Perms.createDeniedPerms);
 
                     if (excludeEveryone) {
                         createDashboard.addRolePermissionOverride(everyone.getIdLong(),

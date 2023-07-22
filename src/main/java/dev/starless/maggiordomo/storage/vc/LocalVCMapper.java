@@ -19,15 +19,11 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
-import net.dv8tion.jda.api.requests.restaction.AuditableRestAction;
 import org.jetbrains.annotations.NotNull;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -158,10 +154,10 @@ public class LocalVCMapper implements IMapper<VC> {
                     .setName(vc.getTitle())
                     .setUserLimit(vc.getSize())
                     .putMemberPermissionOverride(category.getJDA().getSelfUser().getIdLong(),
-                            Arrays.asList(Perms.selfPerms),
+                            Arrays.asList(Perms.voiceSelfPerms),
                             Collections.emptyList())
                     .putMemberPermissionOverride(owner.getIdLong(),
-                            Arrays.asList(Perms.ownerPerms),
+                            Arrays.asList(Perms.voiceOwnerPerms),
                             Collections.emptyList());
 
             // Aggiungi i permessi per @everyone tenendo in conto

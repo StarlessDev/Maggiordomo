@@ -45,7 +45,7 @@ public class ReloadPermsCommand implements Slash {
                             Member owner = e.getGuild().getMemberById(vc.getUser());
                             if (owner != null) {
                                 manager = manager.putMemberPermissionOverride(owner.getIdLong(),
-                                        Arrays.asList(Perms.ownerPerms),
+                                        Arrays.asList(Perms.voiceOwnerPerms),
                                         Collections.emptyList());
                             } else {
                                 BotLogger.warn("Deleting %s since the owner left!");
