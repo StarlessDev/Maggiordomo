@@ -16,8 +16,7 @@ public class FiltersCommand implements Slash {
                         Ci sono due tipi di filtri: **base** e **regex**.
                         I filtri base controllano semplicemente se una parola è presente all'interno del nome della stanza.
                         Il secondo tipo invece usa le espressioni regolari (Regex) e controlla se ci sono una o più corripondenze.""")
-                .setEphemeral(true)
-                .addActionRow(Button.primary("filters:contains", "Filtri base"), Button.secondary("filters:pattern", "Filtri regex"))
+                .addActionRow(Button.primary("contains", "Filtri base"), Button.secondary("pattern", "Filtri regex"))
                 .queue();
     }
 }
