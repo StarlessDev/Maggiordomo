@@ -10,7 +10,7 @@ public class ContainsFilter implements IFilter {
     public FilterResult apply(String input, String value) {
         boolean normalFlag = input.toLowerCase().contains(value.toLowerCase());
         if (normalFlag) {
-            return new FilterResult(true, String.format("Contains the word `%s`", value));
+            return new FilterResult(true, String.format("contiene la parola `%s`", value));
         } else {
             boolean leetFlag = input.toLowerCase()
                     .replaceAll("1", "i")
@@ -21,7 +21,7 @@ public class ContainsFilter implements IFilter {
                     .replaceAll("0", "o")
                     .contains(value.toLowerCase());
 
-            return leetFlag ? new FilterResult(true, String.format("parola non consentita `%s` (leet speak)", value)) : new FilterResult();
+            return leetFlag ? new FilterResult(true, String.format("contiene la parola non consentita `%s` (leet speak)", value)) : new FilterResult();
         }
     }
 

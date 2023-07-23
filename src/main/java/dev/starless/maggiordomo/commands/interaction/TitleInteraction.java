@@ -47,10 +47,10 @@ public class TitleInteraction implements Interaction {
                     case REGEX -> patternFilter;
                 };
 
-                for (String string : settings.getFilterStrings().getOrDefault(type, new ArrayList<>())) {
+                for (String string : settings.getFilterStrings().getOrDefault(type, new HashSet<>())) {
                     FilterResult result = filter.apply(newTitle, string);
                     if (result.flagged()) {
-                        e.reply("Questo nome non è permesso: " + result.message())
+                        e.reply("Questo nome non è permesso perchè " + result.message())
                                 .setEphemeral(true)
                                 .queue();
                         return null;

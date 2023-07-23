@@ -2,6 +2,8 @@ package dev.starless.maggiordomo;
 
 import dev.starless.maggiordomo.commands.CommandManager;
 import dev.starless.maggiordomo.commands.interaction.*;
+import dev.starless.maggiordomo.commands.interaction.filter.ContainsFilterInteraction;
+import dev.starless.maggiordomo.commands.interaction.filter.PatternFilterInteraction;
 import dev.starless.maggiordomo.commands.slash.*;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.config.Config;
@@ -39,7 +41,6 @@ import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
-import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -60,10 +61,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -95,6 +94,7 @@ public class Core implements Module {
                         .entry("publicRole", "-1")
                         .entry("maxInactivity", -1L)
                         .entry("title", "Comandi disponibili :books:")
+                        .entry("filterStrings", new HashMap<>())
                         .entry("descriptionRaw", """
                                 Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**.
                                 Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo."""));
@@ -158,6 +158,7 @@ public class Core implements Module {
                 .command(new PremiumCommand())
                 .command(new RecoverCommand())
                 .command(new ReloadPermsCommand())
+                .command(new FiltersCommand())
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
@@ -169,7 +170,9 @@ public class Core implements Module {
                 .interaction(new KickInteraction())
                 .interaction(new ListInteraction())
                 .interaction(new ResetDataInteraction())
-                .interaction(new DeleteInteraction());
+                .interaction(new DeleteInteraction())
+                .interaction(new ContainsFilterInteraction())
+                .interaction(new PatternFilterInteraction());
 
         commands.createMainCommand(jda);
 

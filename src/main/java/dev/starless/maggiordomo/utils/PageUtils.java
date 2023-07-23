@@ -24,12 +24,12 @@ public class PageUtils {
     public Button getBackButton(String name, int page) {
         Button button = Button.secondary(name + ":" + (page - 1), "⏪ Pagina precedente");
 
-        return page == 0 ? button.asDisabled() : button;
+        return page <= 0 ? button.asDisabled() : button;
     }
 
     public Button getNextButton(String name, int maxPages, int page) {
         Button button = Button.primary(name + ":" + (page + 1), "Prossima pagina ⏩");
 
-        return page + 1 == maxPages ? button.asDisabled() : button;
+        return page + 1 >= maxPages ? button.asDisabled() : button;
     }
 }

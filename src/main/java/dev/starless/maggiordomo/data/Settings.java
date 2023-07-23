@@ -29,7 +29,7 @@ public class Settings {
 
     private final Set<String> premiumRoles;
     private final Set<String> bannedRoles;
-    private final Map<FilterType, List<String>> filterStrings;
+    private final Map<FilterType, Set<String>> filterStrings;
     private List<String> categories;
 
     private String channelID;
@@ -158,10 +158,14 @@ public class Settings {
         return newCategory;
     }
 
-    public synchronized void modifyFilters(FilterType type, Consumer<List<String>> action) {
-        List<String> strings = filterStrings.compute(type, (key, list) -> {
+    public Set<String> getFilterWords(FilterType type) {
+        return filterStrings.getOrDefault(type, new HashSet<>());
+    }
+
+    public synchronized void modifyFilters(FilterType type, Consumer<Set<String>> action) {
+        Set<String> strings = filterStrings.compute(type, (key, list) -> {
             if (list == null) {
-                list = new ArrayList<>();
+                list = new HashSet<>();
             }
 
             return list;
