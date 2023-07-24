@@ -33,7 +33,7 @@ public class Console extends Thread {
                 String[] args = cmd.split(" ");
                 if (args.length >= 2) {
                     try {
-                        page = Integer.parseInt(args[1]);
+                        page = Math.max(0, Integer.parseInt(args[1]) - 1);
                     } catch (NumberFormatException ex) {
                         BotLogger.info("Please provide a valid page number.");
                         return;

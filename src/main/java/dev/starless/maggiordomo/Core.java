@@ -40,6 +40,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
@@ -220,6 +221,11 @@ public class Core implements Module {
         }
 
         BotLogger.info("The guild '%s' has just added the bot!", e.getGuild().getName());
+    }
+
+    @SubscribeEvent
+    public void onGuildLeave(@NotNull GuildLeaveEvent e) {
+        BotLogger.info("The bot departed from the guild '%s'. See you!", e.getGuild().getName());
     }
 
     @SubscribeEvent
