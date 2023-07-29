@@ -1,12 +1,10 @@
 package dev.starless.maggiordomo.commands.slash;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 
-@CommandInfo(name = "filters", description = "Gestisci le parole vietate nei nomi delle stanze")
 public class FiltersCommand implements Slash {
 
     @Override
@@ -18,5 +16,15 @@ public class FiltersCommand implements Slash {
                         Il secondo tipo invece usa le espressioni regolari (Regex) e controlla se ci sono una o più corripondenze.""")
                 .addActionRow(Button.primary("contains", "Filtri base"), Button.secondary("pattern", "Filtri regex"))
                 .queue();
+    }
+
+    @Override
+    public String getName() {
+        return "filters";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Gestisci le parole vietate nei nomi delle stanze";
     }
 }

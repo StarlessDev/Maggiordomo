@@ -1,12 +1,11 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.Matcher;
+import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,11 +23,10 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import java.awt.*;
 import java.util.Optional;
 
-@CommandInfo(name = "ban", description = "Kicka e banna un utente dalla tua stanza")
 public class BanInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("ban:id");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -37,7 +35,7 @@ public class BanInteraction implements Interaction {
         } else {
             Optional<Member> optionalMember = Matcher.getMemberFromInput(e.getGuild(), mapping.getAsString());
             if (optionalMember.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed("Errore! Devi inserire un username#tag, @username o ID valido!"))
+                e.replyEmbeds(Embeds.errorEmbed("Errore! Devi inserire un username#tag, @username o ID valido."))
                         .setEphemeral(true)
                         .queue();
 
@@ -114,7 +112,7 @@ public class BanInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
         e.replyModal(Modal.create( getName(), "Inserisci")
                         .addActionRow(TextInput.create("ban:id", "utente", TextInputStyle.SHORT)
                                 .setValue("username#0001, @username o un id")
@@ -128,5 +126,10 @@ public class BanInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("U+1F6AB");
+    }
+
+    @Override
+    public String getName() {
+        return "ban";
     }
 }

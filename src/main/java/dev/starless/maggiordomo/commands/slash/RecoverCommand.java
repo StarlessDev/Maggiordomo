@@ -1,7 +1,6 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
@@ -27,7 +26,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-@CommandInfo(name = "recover", description = "Recupera una VC da un canale vocale")
 public class RecoverCommand implements Slash {
 
     @Override
@@ -35,6 +33,7 @@ public class RecoverCommand implements Slash {
         OptionMapping voiceMapping = e.getOption("voice");
         OptionMapping boolMapping = e.getOption("pinned");
         if (voiceMapping == null || boolMapping == null) return;
+
         if (voiceMapping.getChannelType().equals(ChannelType.VOICE)) {
             String publicRole = settings.getPublicRole();
             if (publicRole == null) {
@@ -154,6 +153,17 @@ public class RecoverCommand implements Slash {
             }
             return false;
         });
-        return cache.size() == 0;
+
+        return cache.isEmpty();
+    }
+
+    @Override
+    public String getName() {
+        return "recover";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Recupera una VC da un canale vocale";
     }
 }

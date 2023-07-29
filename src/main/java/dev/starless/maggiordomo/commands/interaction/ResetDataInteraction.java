@@ -1,11 +1,10 @@
 package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -15,11 +14,10 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
-@CommandInfo(name = "resetdata", description = "Resetta tutti i trustati e bannati della stanza. La stanza verrà cancellata temporaneamente, ma potrai ricrearla.")
 public class ResetDataInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), "Sei sicuro?")
                         .addActionRow(TextInput.create("vc:confirmation", "Risposta", TextInputStyle.SHORT)
                                 .setMaxLength(31)
@@ -32,7 +30,7 @@ public class ResetDataInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:confirmation");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -69,5 +67,10 @@ public class ResetDataInteraction implements Interaction {
     @Override
     public long timeout() {
         return 600;
+    }
+
+    @Override
+    public String getName() {
+        return "resetdata";
     }
 }

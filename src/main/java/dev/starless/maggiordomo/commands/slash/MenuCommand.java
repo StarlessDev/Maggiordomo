@@ -2,7 +2,6 @@ package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Slash;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -12,7 +11,6 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 
 import java.awt.*;
 
-@CommandInfo(name = "setupmenu", description = "Manda il menu per controllare le proprie stanze")
 public class MenuCommand implements Slash {
 
     @Override
@@ -46,5 +44,15 @@ public class MenuCommand implements Slash {
                     .setEphemeral(true)
                     .queue();
         }
+    }
+
+    @Override
+    public String getName() {
+        return "setupmenu";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Manda il menu per controllare le proprie stanze";
     }
 }

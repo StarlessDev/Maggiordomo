@@ -11,19 +11,19 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 
 public interface Interaction extends Command {
 
-    default VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    default VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         return vc;
     }
 
-    default VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    default VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         return vc;
     }
 
-    default VC execute(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    default VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         return vc;
     }
 
-    default VC execute(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
+    default VC onEntitySelected(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
         return vc;
     }
 

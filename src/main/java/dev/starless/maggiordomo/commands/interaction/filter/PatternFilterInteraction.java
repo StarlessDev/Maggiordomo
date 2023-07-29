@@ -1,7 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction.filter;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -10,11 +9,9 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
-import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-@CommandInfo(name = "pattern")
 public class PatternFilterInteraction extends FilterInteraction {
 
     public PatternFilterInteraction() {
@@ -47,5 +44,10 @@ public class PatternFilterInteraction extends FilterInteraction {
                         .queue();
             }
         }
+    }
+
+    @Override
+    public String getName() {
+        return "pattern";
     }
 }

@@ -2,7 +2,6 @@ package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Slash;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.utils.discord.Embeds;
@@ -13,7 +12,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.awt.*;
 
-@CommandInfo(name = "blacklist", description = "Aggiungi/Togli ruoli dalla blacklist")
 public class BannedCommand implements Slash {
 
     @Override
@@ -44,5 +42,15 @@ public class BannedCommand implements Slash {
     @Override
     public Parameter[] getParameters() {
         return new Parameter[]{new Parameter(OptionType.ROLE, "role", "Ruolo che verrà messo nella lista ban", true)};
+    }
+
+    @Override
+    public String getName() {
+        return "blacklist";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Aggiungi/Togli ruoli dalla blacklist";
     }
 }

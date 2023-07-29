@@ -1,13 +1,12 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.PageUtils;
+import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -24,14 +23,13 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import java.awt.*;
 import java.util.Set;
 
-@CommandInfo(name = "unban", description = "Rimuovi un ban di un utente")
 public class UnbanInteraction implements Interaction {
 
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
-        if(page == -1) {
+        if (page == -1) {
             e.replyEmbeds(Embeds.errorEmbed("An internal error has occurred.\nThis should never happen!"))
                     .setEphemeral(true)
                     .queue();
@@ -83,7 +81,7 @@ public class UnbanInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(VC vc, Settings guild, String id, StringSelectInteractionEvent e) {
         String memberId = e.getValues().get(0);
         if (memberId != null) {
             Member member = e.getGuild().getMemberById(memberId);
@@ -95,16 +93,6 @@ public class UnbanInteraction implements Interaction {
                 return vc;
             }
 
-            VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
-            if (!vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed("Questo utente non è bannato"))
-                        .setEphemeral(true)
-                        .queue();
-
-                return null;
-            }
-
-            boolean isChannelCreated = channel != null;
             vc.removeRecordPlayer(RecordType.BAN, member.getId());
 
             // Rispondi alla richiesta
@@ -115,7 +103,8 @@ public class UnbanInteraction implements Interaction {
                     .setEphemeral(true)
                     .queue();
 
-            if (isChannelCreated) Perms.reset(member, channel.getManager());
+            VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
+            if (channel != null) Perms.reset(member, channel.getManager());
 
             // Manda un messaggio all'utente sbannato
             member.getUser().openPrivateChannel()
@@ -145,5 +134,10 @@ public class UnbanInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("U+2B55");
+    }
+
+    @Override
+    public String getName() {
+        return "unban";
     }
 }

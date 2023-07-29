@@ -2,7 +2,6 @@ package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Slash;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.utils.discord.Embeds;
@@ -13,7 +12,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.awt.*;
 
-@CommandInfo(name = "premium", description = "Aggiungi/Rimuovi un ruolo dalla lista premium")
 public class PremiumCommand implements Slash {
 
     @Override
@@ -44,5 +42,15 @@ public class PremiumCommand implements Slash {
     @Override
     public Parameter[] getParameters() {
         return new Parameter[]{new Parameter(OptionType.ROLE, "role", "Ruolo a cui verranno dati permessi in più", true)};
+    }
+
+    @Override
+    public String getName() {
+        return "premium";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Aggiungi/Rimuovi un ruolo dalla lista premium";
     }
 }

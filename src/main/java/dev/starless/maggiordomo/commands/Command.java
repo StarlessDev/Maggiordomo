@@ -5,16 +5,10 @@ import net.dv8tion.jda.api.entities.Member;
 
 public interface Command {
 
-    default CommandInfo getCommandInfo() {
-        return this.getClass().getAnnotation(CommandInfo.class);
-    }
-
-    default String getName() {
-        return getCommandInfo().name();
-    }
+    String getName();
 
     default String getDescription() {
-        return getCommandInfo().description();
+        return "";
     }
 
     default boolean hasPermission(Member member, Settings settings) {

@@ -3,6 +3,7 @@ package dev.starless.maggiordomo;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vdurmont.semver4j.Semver;
+import dev.starless.maggiordomo.localization.MessageProvider;
 import dev.starless.maggiordomo.logging.BotLogger;
 import lombok.Getter;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;

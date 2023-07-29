@@ -5,8 +5,10 @@ import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Cooldown;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
 import java.util.ArrayList;
@@ -31,38 +33,18 @@ public class CommandManager {
         cooldowns = new ConcurrentHashMap<>();
     }
 
-    /**
-     * Azione terminale: crea il comando principale con tutti
-     * i sottocomandi registrati in precedenza
-     *
-     * @param jda Istanza di JDA
-     */
-    public void createMainCommand(JDA jda) {
+    public void create(JDA jda) {
         if (commandName == null) {
-            throw new RuntimeException("Non hai inserito il nome del comando!");
+            throw new RuntimeException("You did not set the main command's name");
         }
 
-        List<SubcommandData> mappedData = commands.stream()
-                .map(command -> {
-                    SubcommandData data = new SubcommandData(command.getName(), command.getDescription());
-                    List<OptionData> optionData = data.getOptions();
-                    // Fix per i cambi di parametri possibili
-                    if(!optionData.isEmpty()) {
-                        optionData.forEach(option -> data.removeOptionByName(option.getName()));
-                    }
+        SlashCommandData mainCommand = buildCommand();
+        jda.getGuilds().forEach(guild -> guild.updateCommands().addCommands(mainCommand).queue());
+    }
 
-                    for (Parameter param : command.getParameters()) {
-                        data.addOption(param.type(), param.name(), param.description(), param.required());
-                    }
-                    return data;
-                })
-                .toList();
-
-
-        jda.updateCommands()
-                .addCommands(Commands.slash(commandName.toLowerCase(), "Comando principale del bot")
-                        .setGuildOnly(true)
-                        .addSubcommands(mappedData))
+    public void update(Guild guild) {
+        guild.updateCommands()
+                .addCommands(buildCommand())
                 .queue();
     }
 
@@ -102,6 +84,27 @@ public class CommandManager {
     // This returns an immutable list
     public List<Interaction> getMenuInteractions() {
         return interactions.stream().filter(Interaction::inMenu).toList();
+    }
+
+    private SlashCommandData buildCommand() {
+        List<SubcommandData> mappedData = commands.stream()
+                .map(command -> {
+                    SubcommandData data = new SubcommandData(command.getName(), command.getDescription());
+                    List<OptionData> optionData = data.getOptions();
+                    // Fix per i cambi di parametri possibili
+                    if (!optionData.isEmpty()) {
+                        optionData.forEach(option -> data.removeOptionByName(option.getName()));
+                    }
+
+                    for (Parameter param : command.getParameters()) {
+                        data.addOption(param.type(), param.name(), param.description(), param.required());
+                    }
+                    return data;
+                })
+                .toList();
+
+
+        return Commands.slash(commandName.toLowerCase(), "").addSubcommands(mappedData);
     }
 
     public void handleCooldown(Interaction interaction, String user) {

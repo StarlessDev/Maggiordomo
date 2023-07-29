@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.VCStatus;
@@ -20,11 +19,10 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 import java.awt.*;
 
-@CommandInfo(name = "status", description = "Imposta se tutti possono entrare nella tua stanza oppure solo quelli trustati")
 public class StatusInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String content = String.format("Al momento la stanza è **%s**",
                 vc.getStatus().equals(VCStatus.OPEN) ? "aperta" : "chiusa");
 
@@ -44,7 +42,7 @@ public class StatusInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         String label = e.getValues().get(0);
         if (label != null) {
             // Controlla se il ruolo esiste
@@ -115,5 +113,10 @@ public class StatusInteraction implements Interaction {
     @Override
     public long timeout() {
         return 30;
+    }
+
+    @Override
+    public String getName() {
+        return "status";
     }
 }

@@ -25,6 +25,7 @@ packs/
 videos/
 logs/
 configuration/
+languages/
 
 # Compiled class file
 *.class
