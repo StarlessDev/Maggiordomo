@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.entities.Guild;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
 public class ActivityChecker implements Runnable {
@@ -30,12 +29,11 @@ public class ActivityChecker implements Runnable {
 
         Guild guild = Bot.getInstance().getJda().getGuildById(guildID);
         if (guild == null) {
-            BotLogger.info("Cannot find guild " + guildID);
+            BotLogger.info("ActivityChecker could not retrieve the guild with ID: " + guildID);
             return;
         }
 
         Instant now = Instant.now();
-        AtomicInteger cleaned = new AtomicInteger(0);
 
         LocalVCMapper localMapper = Bot.getInstance().getCore()
                 .getChannelMapper()
@@ -55,12 +53,6 @@ public class ActivityChecker implements Runnable {
                                         success -> {
                                             vc.setPinned(false);
                                             localMapper.update(vc);
-
-                                            cleaned.incrementAndGet();
                                         })));
-
-        if (cleaned.get() > 0) {
-            BotLogger.info(String.format("Cleaned %d inactive locked rooms!", cleaned.get()));
-        }
     }
 }

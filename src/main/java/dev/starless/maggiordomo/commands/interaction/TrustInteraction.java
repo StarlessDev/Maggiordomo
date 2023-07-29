@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
@@ -25,11 +24,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.Optional;
 
-@CommandInfo(name = "trust", description = "Permetti ad un utente di entrare nella tua stanza e di movvare gente")
 public class TrustInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("trust:id");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -103,12 +101,7 @@ public class TrustInteraction implements Interaction {
                                                     ))
                                                     .build())
                                             .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer()),
-                                    throwable -> e.replyEmbeds(Embeds.errorEmbed("""
-                                                Impossibile mandare il messaggio all'utente.
-                                                :point_right: Forse ha i messaggi chiusi?
-                                                """))
-                                            .setEphemeral(true)
-                                            .queue());
+                                    throwable -> RestUtils.emptyConsumer());
 
                     return vc;
                 }
@@ -119,7 +112,7 @@ public class TrustInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), "Inserisci")
                         .addActionRow(TextInput.create("trust:id", "utente", TextInputStyle.SHORT)
                                 .setValue("username#0001, @username o un id")
@@ -133,5 +126,10 @@ public class TrustInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("🙏");
+    }
+
+    @Override
+    public String getName() {
+        return "trust";
     }
 }

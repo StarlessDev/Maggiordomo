@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
@@ -21,19 +20,15 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
-@CommandInfo(name = "rename", description = "Cambia il nome della tua stanza")
 public class TitleInteraction implements Interaction {
 
-    Set<IFilter> filters = new HashSet<>();
     private final ContainsFilter containsFilter = new ContainsFilter();
     private final PatternFilter patternFilter = new PatternFilter();
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:title");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -48,7 +43,7 @@ public class TitleInteraction implements Interaction {
                 };
 
                 for (String string : settings.getFilterStrings().getOrDefault(type, new HashSet<>())) {
-                    FilterResult result = filter.apply(newTitle, string);
+                    FilterResult result = filter.apply(settings, newTitle, string);
                     if (result.flagged()) {
                         e.reply("Questo nome non è permesso perchè " + result.message())
                                 .setEphemeral(true)
@@ -77,7 +72,7 @@ public class TitleInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), "Inserisci")
                         .addActionRow(TextInput.create("vc:title", "Titolo", TextInputStyle.SHORT)
                                 .setRequired(true)
@@ -99,5 +94,10 @@ public class TitleInteraction implements Interaction {
     @Override
     public long timeout() {
         return 30;
+    }
+
+    @Override
+    public String getName() {
+        return "rename";
     }
 }

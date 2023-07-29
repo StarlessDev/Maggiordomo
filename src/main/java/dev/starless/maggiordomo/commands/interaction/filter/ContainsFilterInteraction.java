@@ -1,7 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction.filter;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -12,7 +11,6 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.util.Arrays;
 
-@CommandInfo(name = "contains")
 public class ContainsFilterInteraction extends FilterInteraction {
 
     public ContainsFilterInteraction() {
@@ -41,5 +39,10 @@ public class ContainsFilterInteraction extends FilterInteraction {
             settings.modifyFilters(FilterType.CONTAINS, set -> set.addAll(Arrays.asList(words)));
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
         }
+    }
+
+    @Override
+    public String getName() {
+        return "contains";
     }
 }

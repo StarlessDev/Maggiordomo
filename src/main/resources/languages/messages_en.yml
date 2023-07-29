@@ -1,0 +1,386 @@
+# Translations of the strings related to the objects
+# where data is stored
+data:
+  # String related to voice channels
+  vc:
+    # A default name which is assigned the first time a user
+    # creates a temporary voice channel
+    default_name: "%s's room"
+
+    # The "opened" status of a voice channel
+    open_status: "Open"
+
+    # The "closed" status of a voice channel
+    closed_status: "Closed"
+
+    # Banned users
+    banned: "Banned"
+
+    # Trusted users
+    trusted: "Trusted"
+
+  # Strings related to the guild's settings
+  settings:
+    # Default title and description of the interface/menu embed
+    # The placeholder {CHANNEL} is going to be replaced with the mention of the vc generator channel
+    embed_title: "Available commands :books:"
+    embed_description: |-
+      Join {CHANNEL} to create your temporary room and use this panel to **personalize** it.
+      An emoji is assigned to every button: you can read up the explaination of every command and click the respective button to execute the command.
+
+    # Default name of the category which holds every voice channel
+    category_name: "rooms"
+
+  # Strings related to the voice channel name filters
+  filters:
+    flag_prefix: "You are not allowed to use this name because "
+
+    # The '%s' is going to be replaced with the flagged word
+    flag_contains: "it contains the word `%s`"
+
+    # Please note that the '\n' at the end is required, because
+    # a list of the flagged words is going to be appended to this string
+    flag_pattern: "the following the parts of the name violate our rules:\n"
+
+# Translations for slash commands
+commands:
+  # Every command will have an editable description and parameter descriptions
+  # Since the commands are not global, but separate between guilds,
+  # so we can provide a different translation everytime
+  ban_role:
+    description: "Add/Remove roles from the blacklist"
+    parameters:
+      role: "The role in question"
+
+    # Il %s verrà rimpiazzato con una menzione del ruolo aggiunto/rimosso
+    success_added: "The role %s was added to the blacklist"
+    success_removed: "The role %s was removed from the blacklist"
+
+  filters:
+    description: "Manage the words filtered from the channel's names"
+
+    # This is just an explanation of the two types of filters
+    message_content: |-
+      # Filters 🚧
+      There are two types of filters: **basic** e **regex**.
+      The basic filters just check if the channel's title contains a certain word.
+      The second type uses regular expressions (Regex) and checks if the channel's name has one or more matches.
+
+  menu:
+    description: "Sends the interface used to edit the channels in this channel"
+    success: "Interface created!"
+    fail: "Could not create the interface!"
+
+  premium_role:
+    description: "Add/Remove a role from the premium list"
+    parameters:
+      role: "The role in question"
+
+    # Il %s verrà rimpiazzato con una menzione del ruolo aggiunto/rimosso
+    success_added: "The role %s now has the 'premium' status"
+    success_removed: "The 'premium' status was removed from the role %s"
+
+  recover:
+    description: "Recover a corrupted voice channel (use this only if you know what you are doing)"
+    parameters:
+      channel: "Channel to recover"
+      pinned: "Was this channel pinned?"
+
+    # The owner of the voice channel is not found in the server
+    missing_owner: "The channel owner is missing!"
+
+    # The %s will be replaced with the mention of the recovered channel
+    success: "%s was recovered successfully."
+
+    # This message is shown if the channel has no corrupted data
+    not_corrupted: "This voice channel is not corrupted."
+
+    # This message is shown if the selected channel is not a voice channel
+    not_a_voice_channel: "You must select a voice channel!"
+
+  reload_perms:
+    description: "Update the permissions of all voice channels."
+    waiting: "I'm queueing the updates necessary... ⏳"
+
+  setup:
+    description: "Create the category dedicated to the voice channels"
+    parameters:
+      language: "Language of the server (by default it's English)"
+
+    # The first message the user will see
+    explanation: |-
+      ## Setup
+      What will you decide next:
+      ・ Public role
+      ・ Details of the personalization interface: title and description of the embed
+      ・ The maximum inactivity days of pinned channels
+      
+      Once you completed a step, click on "Continue" to advance to the next step.
+
+    # The label of the button that starts the setup process
+    start_button: "Start 📖"
+
+    # The label of the button that allows the user to advance to the
+    # next step of the setup process
+    continue_button: "Continue ➡"
+
+    cannot_create_menu: |-
+      Could not create the interface! :x:
+      Use the `/maggiordomo setupMenu` in the dashboard channel to retry..
+    success: ">>> Setup completed! :white_check_mark:"
+
+    steps:
+      role:
+        # The %s will be replaced with a mention of the current chosen role
+        content: |- 
+          Choose the role that every user must have to use the bot, if you want to choose the role everyone just click on continue.
+          The current public role is `%s`.
+
+        role_selector_placeholder: "Choose a role"
+        updated: ">>> Public role updated :white_check_mark:"
+
+      interface:
+        content: |-
+          Click on 'Edit' to change the title and description of the interface that will be shown to users.
+          Currently is available only the placeholder {CHANNEL}, which will be replaced with the mention of the generator channel in the actual message.
+          When you are done, click 'Continue' to go to the next step.
+
+        preview_prefix: "Here's the preview:"
+        preview_button: "Preview 👀"
+        modify_button: "Edit"
+
+        modal_title_label: "Title"
+        modal_desc_label: "Description"
+
+        updated: ">>> Message updated! :white_check_mark:"
+
+      inactivity:
+        content: |-
+          **ONLY the pinned rooms** have a sort of "expiry date" to avoid the categories from filling up with unused channels.
+          By default this feature is disabled, but you can choose between 3 and 7 days of inactivity after which the room will be unpinned.
+
+        day_selection_placeholer: "Unpin the room after..."
+        day_selection_default: "Disable"
+        days: "days"
+
+interactions:
+  # Used when a user has no permission to use a command/interaction
+  no_permission: "You do not have permission to use this :books:"
+
+  # This message is display when a user with a banned role tries
+  # to use the bot
+  no_permission_banned: "You are banned from the bot! :x:"
+
+  # Used when a nonexistent command is requested to be executed
+  # (This should never happen unless something is very wrong)
+  not_found: "Command not found! 😵"
+
+  # A generic error message used when a command does not execute correctly
+  # and no specific error message is provided
+  generic_error: "An error occurred during this interaction."
+
+  # This message is displayed when a command is on cooldown
+  # and cannot be executed at that moment.
+  # The '%.1f' is going to be replaced with the remaining seconds
+  # that the user has to wait (e.g. 20.8).
+  on_cooldown: |-
+    This command is on **cooldown**!
+    Please wait another __%.1fs__
+
+  # From now on all the strings
+  # refer to the respective menu interactions
+  ban:
+    # Message shown if you try to ban yourself from your own room
+    self_error: "You cannot ban yourself from your room!"
+
+    # Message shown if you try to ban a user who is already banned
+    already_banned: "This user is already banned."
+
+    # Message shown if you try to ban a trusted user
+    # (you need to untrust the user first)
+    trusted_error: "You cannot ban a trusted user!"
+
+    # Message shown when you try to ban ad administrator from your room
+    # (it wouldn't work even if the command was not blocked)
+    admin_error: "You cannot ban an administrator from your room!"
+
+    # Message shown if the target is banned successfully
+    success: "%s was banned from your room."
+
+    # This is the embed that will be sent in the DMs of the
+    # user that got banned
+    notification:
+      title: "You got banned from a room! :no_entry_sign:"
+      # Placeholders:
+      # {ISSUER} will be sostituted with the mention of the owner of the room
+      # {CHANNEL} will be replaced by the room's name
+      description: |-
+        {ISSUER} banned you from the room `{CHANNEL}`.
+        
+        **You cannot join nor see the voice channel anymore.**
+
+  delete:
+    # Message shown if the voice channel is deleted and its data is reset
+    success: "Your room (and all of its data) was deleted successfully :white_check_mark:"
+
+  kick:
+    # Message shown when the user tries to kick someone
+    # from an empty voice channel
+    error_empty: "There isn't anyone in your room!"
+
+    # Message shown if the user never created a voice channel
+    error_not_found: "I could not find your room!"
+
+    # Pretty self explainatory
+    message_content: |-
+      Choose a user.
+      *Page ({CURRENT}/{TOTAL})*
+
+    # Message shown if the target user is kicked successfully
+    success: "The user %s was kicked from your room. :dash:"
+
+  list:
+    # Strings used in the selection menu
+    selection_content: "Choose one option :point_down:"
+    selection_placeholder: "Which list do you want to see?"
+
+    # Strings used in the message which actually contains the list
+    list_content: "Here you go! :point_down:\n\n"
+    # There will be an emoji after this string
+    # (:rainbow: or :cry:) so leave a space at the end of the string
+    list_empty: "*There isn't anyone here* "
+
+  pin:
+    # Message shown when the room is pinned/unpinned
+    pinned: "Your room is now pinned :thumbsup:"
+    unpinned: "Your room is now unpinned :thumbsup:"
+
+  reset:
+    success: "Your trusted and banned users were reset successfully :white_check_mark:"
+
+  size:
+    # Message shown if the user does not input an actual number
+    format_error: "Please input a valid number! :x:"
+    success: "Your room's capacity is now %s! :eyes:"
+
+  status:
+    # Displays the current status of the room
+    # %s will be replaced with open or locked
+    current_status: "Currently your room is **%s**"
+
+    # The title of the selection menu, which will
+    # have only two options OPEN and LOCKED
+    selection_title: "Do you want your room to be..."
+
+    success_open: "Now your room is open to everyone."
+    success_locked: "Now your room is open to you and the users you trust."
+
+  title:
+    # Modal used to input the new voice channel title
+    modal:
+      title: "Change"
+      input_label: "Title"
+      # The %s will be replaced with the user's nickname
+      input_placeholder: "%s's room"
+
+    success: "The title was changed! :pencil:"
+
+  trust:
+    # Message shown when a user tries to trust (him/her)self
+    self_error: "You are already the owner of the room!"
+
+    # Message shown when the selected user is already trusted
+    already_trusted: "This user is already trusted."
+
+    # Message shown when the selected user is banned
+    # (you need to unban the user first)
+    banned_error: "You cannot trust a banned user!"
+
+    # Message shown when the selected user is banned from the bot
+    target_banned: "This user is banned from using the bot!"
+
+    # The %s will be replaced with the selected users' nickname
+    success: "You are now trusting %s :ok_hand:"
+
+    # This embed will be sent to the trusted user in his/her DMs
+    notification:
+      title: "Someone trusts you! :innocent:"
+      description: |-
+        {OWNER}, the owner of the room `{TARGET}`,
+        has chosen to give you access to the room.
+        
+        **Now you can join whenever you please!**
+
+  unban:
+    empty: "*There are no banned users* :rainbow:"
+
+    # The %s will be replaced by the selected users nickname/username
+    success: "%s was unbanned from the room."
+
+    # Embed that will be sent to an unbanned user in the DMs
+    notification:
+      title: "You were unbanned from a room! :tada:"
+      description: |-
+        {OWNER} removed you from the banned list!
+        
+        Now you can see and join `{CHANNEL_NAME}` again.
+
+  untrust:
+    empty: "*You do not trust nobody* :sob:"
+
+    success: "You stopped trusting %s and took away the user's permissions."
+
+    # There is no notification for untrust, because too many friendships
+    # were being broken due to that notification. (Yes, I was requested to remove this)
+    # Sometimes ignorance is a bliss, lmao.
+
+# Strings that are used by multiple interactions
+common:
+  # This is the text that the user will input to confirm
+  # a particular action (e.g. deleting the room and its data
+  # or resetting the trusted users)
+  confirmation_value: "yes"
+
+  # This is the modal that will appear to confirm that
+  # the user actually wants to execute a potentially destructive command
+  confirmation_modal:
+    title: "Are you sure?"
+    # The text above the textinput
+    input_label: "Answer"
+    # The value of the textinput
+    input_value: "Write here \"yes\" to confirm"
+
+  # This is the modal that will be used to
+  # input a specific user
+  member_modal:
+    title: "Input"
+
+    # The default value that will appear in the
+    # textbot in the modal
+    input_value: "username#0001, @username or an id"
+
+    # Message shown when the member to ban it's not found
+    # (probably due to an invalid input)
+    input_error: "Member not found! Please input a valid username#tag, @username or id."
+
+  # This selection menu is used to select a user from a list
+  user_selection_menu:
+    # The message above the selection menu
+    message_content: "Please choose a user :point_down:"
+
+    # The placeholder of the selection menu
+    placeholder: "User"
+
+  # Message shown when the public role is not found
+  # This is a setup error and should not happen often
+  invalid_public_role: "I could not find the public role!"
+
+  # Message shown if a user has not the public role
+  no_public_role: "That user cannot access the private rooms."
+
+  # Message shown if the user does not select anything
+  # in a selectionmenu (should never happen)
+  error_no_selection: "You didn't select anything. :face_with_spiral_eyes:"
+
+  # Message shown when a user is not found by JDA
+  error_member_not_found: "This user is no longer in the server."

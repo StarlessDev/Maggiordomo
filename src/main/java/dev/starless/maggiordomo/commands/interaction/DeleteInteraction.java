@@ -1,12 +1,11 @@
 package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
+import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Embeds;
-import dev.starless.maggiordomo.data.user.VC;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -16,11 +15,10 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
-@CommandInfo(name = "delete", description = "Cancella la tua stanza completamente (perderai i tuoi dati)")
 public class DeleteInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), "Cancellazione")
                         .addActionRow(TextInput.create("vc:confirmation", "Risposta", TextInputStyle.SHORT)
                                 .setMaxLength(31)
@@ -33,7 +31,7 @@ public class DeleteInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:confirmation");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -67,5 +65,10 @@ public class DeleteInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("🧨");
+    }
+
+    @Override
+    public String getName() {
+        return "delete";
     }
 }

@@ -1,11 +1,12 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
+import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.DefaultLanguages;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Perms;
@@ -19,11 +20,14 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
@@ -39,8 +43,8 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-@CommandInfo(name = "setup", description = "Crea la categoria dedicata alle stanze")
 public class SetupCommand implements Slash, Interaction {
 
     private final Map<Integer, Emoji> daysEmojis = new HashMap<>();
@@ -71,7 +75,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -91,10 +95,8 @@ public class SetupCommand implements Slash, Interaction {
                             .build();
 
                     rows.add(ActionRow.of(roleSelector));
-                    if (!settings.getPublicRole().equals("-1")) {
-                        content += "\nIl ruolo pubblico attuale è " + References.role(e.getGuild(), settings.getPublicRole());
-                        rows.add(ActionRow.of(Button.secondary("setup:embed", "Continua ➡")));
-                    }
+                    rows.add(ActionRow.of(Button.secondary("setup:embed", "Continua ➡")));
+                    // to be removed: content += "\nIl ruolo pubblico attuale è " + References.role(e.getGuild(), settings.getPublicRole());
                 }
                 case "embed" -> {
                     content = """
@@ -182,7 +184,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -215,7 +217,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -242,7 +244,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
+    public VC onEntitySelected(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -276,11 +278,6 @@ public class SetupCommand implements Slash, Interaction {
         }
 
         return null;
-    }
-
-    @Override
-    public boolean needsVC() {
-        return false;
     }
 
     private void updateMenu(Guild guild, Settings settings) {
@@ -317,7 +314,7 @@ public class SetupCommand implements Slash, Interaction {
 
         Category mainCategory = settings.getMainCategory(guild);
         if (mainCategory == null) { // Se non c'è una categoria significa che dobbiamo fare il setup completo
-            if (settings.getCategories().size() > 0) {
+            if (!settings.getCategories().isEmpty()) {
                 settings.getCategories().clear();
             }
 
@@ -406,7 +403,39 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
+    public void autocomplete(Settings settings, CommandAutoCompleteInteractionEvent e) {
+        if (e.getFocusedOption().getName().equals("lang")) {
+            List<Command.Choice> options = Stream.of(DefaultLanguages.values())
+                    .filter(lang -> lang.getName().toLowerCase().startsWith(e.getFocusedOption().getValue().toLowerCase()))
+                    .map(lang -> new Command.Choice(lang.getName(), lang.getCode()))
+                    .toList();
+
+            e.replyChoices(options).queue();
+        }
+    }
+
+    @Override
+    public Parameter[] getParameters() {
+        return new Parameter[]{ new Parameter(OptionType.STRING, "lang", "Language of the server (default is English)", false)};
+    }
+
+    @Override
     public boolean inMenu() {
         return false;
+    }
+
+    @Override
+    public boolean needsVC() {
+        return false;
+    }
+
+    @Override
+    public String getName() {
+        return "setup";
+    }
+
+    @Override
+    public String getDescription() {
+        return "Crea la categoria dedicata alle stanze";
     }
 }

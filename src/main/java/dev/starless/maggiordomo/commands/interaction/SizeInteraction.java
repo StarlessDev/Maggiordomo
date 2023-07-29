@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
@@ -17,11 +16,10 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
 
-@CommandInfo(name = "size", description = "Imposta il numero massimo di utenti nella tua stanza")
 public class SizeInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:size");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -61,7 +59,7 @@ public class SizeInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), "Inserisci")
                         .addActionRow(TextInput.create("vc:size", "Numero", TextInputStyle.SHORT)
                                 .setRequiredRange(1, 2)
@@ -76,5 +74,10 @@ public class SizeInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("👥");
+    }
+
+    @Override
+    public String getName() {
+        return "size";
     }
 }

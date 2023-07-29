@@ -12,7 +12,7 @@ public class Embeds {
     public MessageEmbed errorEmbed(String message) {
         return new EmbedBuilder()
                 .setColor(Color.RED)
-                .setDescription(message.isBlank() ? "Qualcosa è andato storto durante questa interazione." : message)
+                .setDescription(message.isBlank() ? "Something went wrong during this interaction." : message)
                 .build();
     }
 

@@ -27,7 +27,7 @@ public abstract class FilterInteraction implements Interaction {
     private final Modal inputModal;
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if (page != -1) {
             e.reply(createMenu(settings, page)).queue();
@@ -39,7 +39,7 @@ public abstract class FilterInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         onInputReceived(settings, e);
 
         e.getMessage().delete().queue();
@@ -49,7 +49,7 @@ public abstract class FilterInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         e.getSelectedOptions().stream()
                 .map(SelectOption::getValue)
                 .forEach(selection -> settings.modifyFilters(type, set -> set.remove(selection)));

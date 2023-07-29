@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
@@ -23,12 +22,11 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import java.awt.*;
 import java.util.Set;
 
-@CommandInfo(name = "untrust", description = "Rimuovi il trust ad un utente")
 public class UntrustInteraction implements Interaction {
 
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if(page == -1) {
             e.replyEmbeds(Embeds.errorEmbed("An internal error has occurred.\nThis should never happen!"))
@@ -63,7 +61,7 @@ public class UntrustInteraction implements Interaction {
             // Credo che a volte, se gli utenti sono bannati ed escono dal server,
             // i membri non vengono trovati e JDA lancia una exception
             if (menuBuilder.getOptions().size() == 0) {
-                builder.setContent("*Non ci sono utenti bannati* :rainbow:");
+                builder.setContent("*Non ci sono utenti trustati* :rainbow:");
             } else {
                 int maxPages = (int) Math.ceil(recordsNumber / 10D);
                 Button backButton = PageUtils.getBackButton(getName(), page);
@@ -83,7 +81,7 @@ public class UntrustInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(VC vc, Settings guild, String id, StringSelectInteractionEvent e) {
         String memberId = e.getValues().get(0);
         if (memberId != null) {
             Member member = e.getGuild().getMemberById(memberId);
@@ -97,16 +95,6 @@ public class UntrustInteraction implements Interaction {
                 return vc;
             }
 
-            VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
-            if (!vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed("Questo utente non è trustato."))
-                        .setEphemeral(true)
-                        .queue();
-
-                return null;
-            }
-
-            boolean isChannelCreated = channel != null;
             vc.removeRecordPlayer(RecordType.TRUST, member.getId());
 
             // Rispondi alla richiesta
@@ -117,9 +105,8 @@ public class UntrustInteraction implements Interaction {
                     .setEphemeral(true)
                     .queue();
 
-            if (isChannelCreated) Perms.reset(member, channel.getManager());
-
-            // Rimosso messaggio perché era brutto
+            VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
+            if (channel != null) Perms.reset(member, channel.getManager());
 
             return vc;
         } else {
@@ -134,5 +121,10 @@ public class UntrustInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("U+1F595");
+    }
+
+    @Override
+    public String getName() {
+        return "untrust";
     }
 }

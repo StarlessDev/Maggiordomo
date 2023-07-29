@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
@@ -20,11 +19,10 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import java.awt.*;
 import java.util.List;
 
-@CommandInfo(name = "kick", description = "Espelli un utente dalla tua stanza vocale")
 public class KickInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(vc.getChannel());
         if (voiceChannel != null) {
             List<Member> joinedMembers = voiceChannel.getMembers();
@@ -34,7 +32,7 @@ public class KickInteraction implements Interaction {
                         .queue();
             } else {
                 int page = PageUtils.getPageFromId(id);
-                if(page == -1) {
+                if (page == -1) {
                     e.replyEmbeds(Embeds.errorEmbed("An internal error has occurred.\nThis should never happen!"))
                             .setEphemeral(true)
                             .queue();
@@ -84,7 +82,7 @@ public class KickInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         String label = e.getValues().get(0);
         if (label != null) {
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
@@ -116,5 +114,10 @@ public class KickInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("👢");
+    }
+
+    @Override
+    public String getName() {
+        return "kick";
     }
 }

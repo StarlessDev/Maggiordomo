@@ -242,7 +242,7 @@ public class LocalVCMapper implements IMapper<VC> {
             unpin(guild, settings, vc);
 
             VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
-            if (voiceChannel != null && voiceChannel.getMembers().size() == 0) {
+            if (voiceChannel != null && voiceChannel.getMembers().isEmpty()) {
                 scheduleForDeletion(vc, voiceChannel);
 
                 vc.setPinned(false);
@@ -291,7 +291,7 @@ public class LocalVCMapper implements IMapper<VC> {
     private void unpin(Guild guild, Settings settings, VC vc) {
         VoiceChannel channel = guild.getVoiceChannelById(vc.getChannel());
         if (channel != null) {
-            if (channel.getMembers().size() == 0) {
+            if (channel.getMembers().isEmpty()) {
                 scheduleForDeletion(vc, channel); // Cancella la stanza se è vuota
             } else {
                 Category category = channel.getParentCategory();
