@@ -1,8 +1,11 @@
 package dev.starless.maggiordomo.commands;
 
+import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Cooldown;
+import dev.starless.maggiordomo.data.Settings;
+import dev.starless.mongo.objects.QueryBuilder;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -10,10 +13,12 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -38,13 +43,24 @@ public class CommandManager {
             throw new RuntimeException("You did not set the main command's name");
         }
 
-        SlashCommandData mainCommand = buildCommand();
-        jda.getGuilds().forEach(guild -> guild.updateCommands().addCommands(mainCommand).queue());
+        jda.getGuilds().forEach(this::update);
     }
 
     public void update(Guild guild) {
+        Optional<Settings> settings = Bot.getInstance().getCore()
+                .getSettingsMapper()
+                .search(QueryBuilder.init()
+                        .add("guild", guild.getId())
+                        .create());
+
+        if(settings.isEmpty()) return;
+
+        update(guild, settings.get());
+    }
+
+    public void update(Guild guild, Settings settings) {
         guild.updateCommands()
-                .addCommands(buildCommand())
+                .addCommands(buildCommand(settings.getLanguage()))
                 .queue();
     }
 
@@ -86,7 +102,7 @@ public class CommandManager {
         return interactions.stream().filter(Interaction::inMenu).toList();
     }
 
-    private SlashCommandData buildCommand() {
+    private SlashCommandData buildCommand(String language) {
         List<SubcommandData> mappedData = commands.stream()
                 .map(command -> {
                     SubcommandData data = new SubcommandData(command.getName(), command.getDescription());
@@ -96,7 +112,7 @@ public class CommandManager {
                         optionData.forEach(option -> data.removeOptionByName(option.getName()));
                     }
 
-                    for (Parameter param : command.getParameters()) {
+                    for (Parameter param : command.getParameters(language)) {
                         data.addOption(param.type(), param.name(), param.description(), param.required());
                     }
                     return data;

@@ -40,7 +40,7 @@ public class PremiumCommand implements Slash {
     }
 
     @Override
-    public Parameter[] getParameters() {
+    public Parameter[] getParameters(String lang) {
         return new Parameter[]{new Parameter(OptionType.ROLE, "role", "Ruolo a cui verranno dati permessi in più", true)};
     }
 
