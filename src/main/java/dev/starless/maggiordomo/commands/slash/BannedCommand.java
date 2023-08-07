@@ -57,7 +57,7 @@ public class BannedCommand implements Slash {
     }
 
     @Override
-    public String getDescription() {
-        return "Aggiungi/Togli ruoli dalla blacklist";
+    public String getDescription(String lang) {
+        return MessageProvider.getMessage(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang);
     }
 }

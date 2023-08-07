@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +104,7 @@ public class CommandManager {
     private SlashCommandData buildCommand(String language) {
         List<SubcommandData> mappedData = commands.stream()
                 .map(command -> {
-                    SubcommandData data = new SubcommandData(command.getName(), command.getDescription());
+                    SubcommandData data = new SubcommandData(command.getName(), command.getDescription(language));
                     List<OptionData> optionData = data.getOptions();
                     // Fix per i cambi di parametri possibili
                     if (!optionData.isEmpty()) {
@@ -120,7 +119,7 @@ public class CommandManager {
                 .toList();
 
 
-        return Commands.slash(commandName.toLowerCase(), "").addSubcommands(mappedData);
+        return Commands.slash(commandName.toLowerCase(), "One command to rule them all").addSubcommands(mappedData);
     }
 
     public void handleCooldown(Interaction interaction, String user) {

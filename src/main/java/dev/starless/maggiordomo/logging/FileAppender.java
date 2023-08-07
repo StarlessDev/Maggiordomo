@@ -15,7 +15,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 public class FileAppender extends AppenderBase<ILoggingEvent> {
 
-    private final Deque<ILoggingEvent> deque;
+    private final LinkedBlockingDeque<ILoggingEvent> deque;
 
     public FileAppender() {
         this.deque = new LinkedBlockingDeque<>();
@@ -53,16 +53,22 @@ public class FileAppender extends AppenderBase<ILoggingEvent> {
             }
 
             while (true) {
-                ILoggingEvent event = deque.poll();
-                if (event == null) continue;
+                ILoggingEvent event;
+                try {
+                    event = deque.take();
+                } catch (InterruptedException ex) {
+                    BotLogger.error("FileAppender thread threw an InterruptedException: " + ex.getMessage());
+                    Thread.currentThread().interrupt();
+                    return;
+                }
 
                 String string = String.format("(%s) %s%n",
                         DateUtils.now(DateUtils.getFullFormatter()),
                         event.getFormattedMessage());
                 try {
                     Files.writeString(log.toPath(), string, StandardCharsets.UTF_8, StandardOpenOption.APPEND);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } catch (IOException ex) {
+                    BotLogger.error("FileAppender could not write to file: " + ex.getMessage());
                     break;
                 }
             }

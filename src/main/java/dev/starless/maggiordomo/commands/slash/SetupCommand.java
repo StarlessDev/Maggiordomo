@@ -434,7 +434,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(String lang) {
         return "Crea la categoria dedicata alle stanze";
     }
 }

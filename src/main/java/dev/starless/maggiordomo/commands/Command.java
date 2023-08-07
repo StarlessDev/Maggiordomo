@@ -7,7 +7,7 @@ public interface Command {
 
     String getName();
 
-    default String getDescription() {
+    default String getDescription(String lang) {
         return "";
     }
 
