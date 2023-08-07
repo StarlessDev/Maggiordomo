@@ -50,7 +50,7 @@ public class PremiumCommand implements Slash {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(String lang) {
         return "Aggiungi/Rimuovi un ruolo dalla lista premium";
     }
 }

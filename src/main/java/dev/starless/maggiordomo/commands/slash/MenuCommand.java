@@ -52,7 +52,7 @@ public class MenuCommand implements Slash {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(String lang) {
         return "Manda il menu per controllare le proprie stanze";
     }
 }

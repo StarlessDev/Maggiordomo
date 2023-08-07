@@ -50,7 +50,6 @@ public class ReloadPermsCommand implements Slash {
                                         Arrays.asList(Perms.voiceOwnerPerms),
                                         Collections.emptyList());
                             } else {
-                                BotLogger.warn("Deleting %s since the owner left!");
                                 localMapper.scheduleForDeletion(vc, channel).complete();
                                 localMapper.delete(vc);
                                 return;
@@ -88,7 +87,7 @@ public class ReloadPermsCommand implements Slash {
     }
 
     @Override
-    public String getDescription(String language) {
+    public String getDescription(String lang) {
         return "Aggiorna i permessi di tutte le vocali";
     }
 }

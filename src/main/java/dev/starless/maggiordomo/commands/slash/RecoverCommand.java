@@ -163,7 +163,7 @@ public class RecoverCommand implements Slash {
     }
 
     @Override
-    public String getDescription() {
+    public String getDescription(String lang) {
         return "Recupera una VC da un canale vocale";
     }
 }
