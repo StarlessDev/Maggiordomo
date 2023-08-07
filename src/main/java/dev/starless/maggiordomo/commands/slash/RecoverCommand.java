@@ -137,7 +137,7 @@ public class RecoverCommand implements Slash {
     }
 
     @Override
-    public Parameter[] getParameters() {
+    public Parameter[] getParameters(String lang) {
         return new Parameter[]{
                 new Parameter(OptionType.CHANNEL, "voice", "Canale vocale da recuperare", true),
                 new Parameter(OptionType.BOOLEAN, "pinned", "Indica se il canale è bloccato o no", true)};

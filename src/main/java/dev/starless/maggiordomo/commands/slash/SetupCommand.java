@@ -10,7 +10,6 @@ import dev.starless.maggiordomo.localization.DefaultLanguages;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Perms;
-import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -415,7 +414,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public Parameter[] getParameters() {
+    public Parameter[] getParameters(String lang) {
         return new Parameter[]{ new Parameter(OptionType.STRING, "lang", "Language of the server (default is English)", false)};
     }
 

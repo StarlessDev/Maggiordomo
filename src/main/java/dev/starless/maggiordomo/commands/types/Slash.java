@@ -7,7 +7,6 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 public interface Slash extends Command {
 
@@ -17,7 +16,7 @@ public interface Slash extends Command {
 
     }
 
-    default Parameter[] getParameters() {
+    default Parameter[] getParameters(String lang) {
         return new Parameter[0];
     }
 

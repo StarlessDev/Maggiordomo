@@ -214,13 +214,21 @@ public class Core implements Module {
 
     @SubscribeEvent
     public void onGuildJoin(@NotNull GuildJoinEvent e) {
-        Optional<Settings> settings = settingsMapper.search(QueryBuilder.init()
+        Optional<Settings> savedSettings = settingsMapper.search(QueryBuilder.init()
                 .add("guild", e.getGuild().getId())
                 .create());
 
-        if (settings.isEmpty()) {
-            settingsMapper.insert(new Settings(e.getGuild()));
+        // Create or get the settings of the guild
+        Settings settings;
+        if (savedSettings.isPresent()) {
+            settings = savedSettings.get();
+        } else {
+            settings = new Settings(e.getGuild());
+            settingsMapper.insert(settings);
         }
+
+        // Update commands of the guild
+        commands.update(e.getGuild());
 
         BotLogger.info("The guild '%s' has just added the bot!", e.getGuild().getName());
     }
