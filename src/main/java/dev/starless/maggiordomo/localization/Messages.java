@@ -20,6 +20,8 @@ public enum Messages {
     SETTINGS_CATEGORY_NAME("data.settings.category_name"),
 
     // Strings related to the filters (classes in the data.filter package)
+    FILTER_BASIC("data.filters.name_contains"),
+    FILTER_PATTERN("data.filters.name_pattern"),
     FILTER_FLAG_PREFIX("data.filters.flag_prefix"),
     FILTER_FLAG_CONTAINS("data.filters.flag_contains"),
     FILTER_FLAG_PATTERN("data.filters.flag_pattern"),

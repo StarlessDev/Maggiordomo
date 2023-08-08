@@ -36,6 +36,11 @@ data:
     name_contains: "Filtri base"
     name_pattern: "Filtri regex"
 
+    explaination: |-
+      # {TYPE}
+      Qua sotto sono elencate le voci che hai inserito già nella lista.
+      Clicca su un'opzione per rimuoverla dalla lista.
+
     flag_prefix: "Questo nome non è permesso perchè "
 
     # The '%s' is going to be replaced with the flagged word

@@ -33,6 +33,14 @@ data:
 
   # Strings related to the voice channel name filters
   filters:
+    name_contains: "Basic filters"
+    name_pattern: "Regex filters"
+
+    explaination: |-
+      # {TYPE}
+      Below are listed the entries you have already added to the list.
+      Click an option to remove it from the list.
+
     flag_prefix: "You are not allowed to use this name because "
 
     # The '%s' is going to be replaced with the flagged word
