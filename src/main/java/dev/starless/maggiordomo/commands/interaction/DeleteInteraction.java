@@ -48,7 +48,7 @@ public class DeleteInteraction implements Interaction {
 
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) { // Risparmiamo query importanti in questo modo...
-                localMapper.scheduleForDeletion(vc, channel);
+                localMapper.scheduleForDeletion(vc, channel).queue();
             }
 
             e.reply("La tua stanza è stata cancellata con successo. :white_check_mark:")

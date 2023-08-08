@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
+import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -180,7 +181,7 @@ public class LocalVCMapper implements IMapper<VC> {
                 // Se la stanza non riesce ad essere spostata
                 // allora cancellala e fai riprovare all'utente
                 removeFromCreationSchedule(hashcode);
-                scheduleForDeletion(vc, newChannel);
+                scheduleForDeletion(vc, newChannel).queue();
             };
 
             // Manda l'aggiornamento a discord
@@ -191,9 +192,10 @@ public class LocalVCMapper implements IMapper<VC> {
                 if (vc.isPinned()) {
                     removeFromCreationSchedule(hashcode);
 
-                    newChannel.getGuild()
-                            .moveVoiceMember(owner, newChannel)
-                            .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
+                    if (owner.getVoiceState() != null && owner.getVoiceState().inAudioChannel()) {
+                        newChannel.getGuild().moveVoiceMember(owner, newChannel)
+                                .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
+                    }
                 } else {
                     int movement = pinnedChannels.size();
 
@@ -242,8 +244,8 @@ public class LocalVCMapper implements IMapper<VC> {
             unpin(guild, settings, vc);
 
             VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
-            if (voiceChannel != null && voiceChannel.getMembers().size() == 0) {
-                scheduleForDeletion(vc, voiceChannel);
+            if (voiceChannel != null && voiceChannel.getMembers().isEmpty()) {
+                scheduleForDeletion(vc, voiceChannel).complete();
 
                 vc.setPinned(false);
                 gateway.update(vc);
@@ -291,8 +293,8 @@ public class LocalVCMapper implements IMapper<VC> {
     private void unpin(Guild guild, Settings settings, VC vc) {
         VoiceChannel channel = guild.getVoiceChannelById(vc.getChannel());
         if (channel != null) {
-            if (channel.getMembers().size() == 0) {
-                scheduleForDeletion(vc, channel); // Cancella la stanza se è vuota
+            if (channel.getMembers().isEmpty()) {
+                scheduleForDeletion(vc, channel).complete(); // Cancella la stanza se è vuota
             } else {
                 Category category = channel.getParentCategory();
                 if (category != null) {
@@ -327,26 +329,24 @@ public class LocalVCMapper implements IMapper<VC> {
         return scheduledForDeletion.contains(channelID);
     }
 
-    public void scheduleForDeletion(@NotNull VC vc, AudioChannel channel) {
-        scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
+    public RestAction<Void> scheduleForDeletion(@NotNull VC vc, AudioChannel channel) {
+        return scheduleForDeletion(vc, channel, RestUtils.emptyConsumer());
     }
 
-    public void scheduleForDeletion(@NotNull VC vc, AudioChannel channel, Consumer<Void> success) {
+    public RestAction<Void> scheduleForDeletion(@NotNull VC vc, AudioChannel channel, Consumer<Void> success) {
         String id = channel.getId();
-        if (scheduledForDeletion.contains(id)) return;
+        if (scheduledForDeletion.contains(id)) return null;
 
         scheduledForDeletion.add(id);
 
-        channel.delete()
-                .onSuccess(success.andThen(nothing -> {
-                    scheduledForDeletion.remove(id);
+        return channel.delete().onSuccess(success.andThen(nothing -> {
+            scheduledForDeletion.remove(id);
 
-                    vc.setChannel("-1");
-                    gateway.update(vc);
+            vc.setChannel("-1");
+            gateway.update(vc);
 
-                    removeFromCache(vc);
-                }))
-                .complete();
+            removeFromCache(vc);
+        }));
     }
 
     // Utility methods used in all the class

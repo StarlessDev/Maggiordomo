@@ -49,7 +49,7 @@ public class ReloadPermsCommand implements Slash {
                                         Collections.emptyList());
                             } else {
                                 BotLogger.warn("Deleting %s since the owner left!");
-                                localMapper.scheduleForDeletion(vc, channel);
+                                localMapper.scheduleForDeletion(vc, channel).complete();
                                 localMapper.delete(vc);
                                 return;
                             }

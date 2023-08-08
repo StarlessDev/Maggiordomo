@@ -44,7 +44,8 @@ public class ResetDataInteraction implements Interaction {
                 Bot.getInstance().getCore()
                         .getChannelMapper()
                         .getMapper(e.getGuild())
-                        .scheduleForDeletion(vc, channel);
+                        .scheduleForDeletion(vc, channel)
+                        .complete();
             }
 
             vc.getTrusted().clear();

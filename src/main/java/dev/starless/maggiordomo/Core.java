@@ -139,8 +139,8 @@ public class Core implements Module {
                             VC vc = optionalVC.get();
                             // Se non è lockata e non ci sono persone dentro,
                             // elimina la stanza
-                            if (!vc.isPinned() && voiceChannel.getMembers().size() == 0) {
-                                localMapper.scheduleForDeletion(vc, voiceChannel);
+                            if (!vc.isPinned() && voiceChannel.getMembers().isEmpty()) {
+                                localMapper.scheduleForDeletion(vc, voiceChannel).complete();
                             }
                         }
                     });
@@ -239,7 +239,7 @@ public class Core implements Module {
                 .ifPresent(vc -> {
                     VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
                     if (channel != null) {
-                        localMapper.scheduleForDeletion(vc, channel);
+                        localMapper.scheduleForDeletion(vc, channel).queue();
                     }
                 });
     }
@@ -468,7 +468,7 @@ public class Core implements Module {
                                             .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
                                 });
                     } else {
-                        localMapper.scheduleForDeletion(vc, channel);
+                        localMapper.scheduleForDeletion(vc, channel).queue();
                     }
                 });
     }

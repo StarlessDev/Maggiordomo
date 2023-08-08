@@ -57,7 +57,8 @@ public class ActivityChecker implements Runnable {
                                             localMapper.update(vc);
 
                                             cleaned.incrementAndGet();
-                                        })));
+                                        }).complete()
+                        ));
 
         if (cleaned.get() > 0) {
             BotLogger.info(String.format("Cleaned %d inactive locked rooms!", cleaned.get()));
