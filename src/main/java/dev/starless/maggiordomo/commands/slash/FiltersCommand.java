@@ -11,12 +11,11 @@ public class FiltersCommand implements Slash {
 
     @Override
     public void execute(Settings settings, SlashCommandInteractionEvent e) {
-        e.reply("""
-                        # Filtri 🚧
-                        Ci sono due tipi di filtri: **base** e **regex**.
-                        I filtri base controllano semplicemente se una parola è presente all'interno del nome della stanza.
-                        Il secondo tipo invece usa le espressioni regolari (Regex) e controlla se ci sono una o più corripondenze.""")
-                .addActionRow(Button.primary("contains", "Filtri base"), Button.secondary("pattern", "Filtri regex"))
+        e.reply(MessageProvider.getMessage(Messages.COMMAND_FILTERS_MESSAGE_CONTENT, settings.getLanguage()))
+                .addActionRow(
+                        Button.primary("contains", MessageProvider.getMessage(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage())),
+                        Button.secondary("pattern", MessageProvider.getMessage(Messages.FILTER_FLAG_PATTERN, settings.getLanguage()))
+                )
                 .queue();
     }
 

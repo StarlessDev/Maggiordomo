@@ -151,7 +151,7 @@ commands:
 
         preview_prefix: "Ecco la tua preview:"
         preview_button: "Anteprima 👀"
-        modify_button: "Modifica"
+        edit_button: "Modifica"
 
         modal_title_label: "Titolo"
         modal_desc_label: "Descrizione"

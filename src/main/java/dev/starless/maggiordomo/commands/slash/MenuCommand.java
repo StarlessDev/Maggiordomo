@@ -3,6 +3,8 @@ package dev.starless.maggiordomo.commands.slash;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -25,7 +27,7 @@ public class MenuCommand implements Slash {
                     Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
                     e.getInteraction().getHook().sendMessageEmbeds(new EmbedBuilder()
-                                    .setDescription("Menu creato!")
+                                    .setDescription(MessageProvider.getMessage(Messages.COMMAND_MENU_SUCCESS, settings.getLanguage()))
                                     .setColor(Color.decode("#65A25F"))
                                     .build())
                             .setEphemeral(true)
@@ -33,7 +35,7 @@ public class MenuCommand implements Slash {
                 });
             } else {
                 e.getInteraction().getHook().sendMessageEmbeds(new EmbedBuilder()
-                                .setDescription("Impossibile creare il menu!")
+                                .setDescription(MessageProvider.getMessage(Messages.COMMAND_MENU_FAIL, settings.getLanguage()))
                                 .setColor(Color.red)
                                 .build())
                         .setEphemeral(true)
@@ -53,6 +55,6 @@ public class MenuCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return "Manda il menu per controllare le proprie stanze";
+        return MessageProvider.getMessage(Messages.COMMAND_MENU_DESCRIPTION, lang);
     }
 }

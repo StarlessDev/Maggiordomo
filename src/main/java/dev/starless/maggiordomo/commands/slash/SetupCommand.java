@@ -7,9 +7,12 @@ import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.DefaultLanguages;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Perms;
+import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
@@ -59,15 +62,8 @@ public class SetupCommand implements Slash, Interaction {
     @Override
     public void execute(Settings settings, SlashCommandInteractionEvent e) {
         MessageCreateData message = new MessageCreateBuilder()
-                .setContent("""
-                        ## Setup
-                        Cosa andrai a personalizzare tra poco:
-                        ・ Public role
-                        ・ Dettagli della guida: titolo e descrizione dell'embed
-                        ・ Giorni di inattività massimi delle stanze fissate
-                                                
-                        Una volta terminato un passaggio clicca "Continua" per passare al prossimo.""")
-                .setActionRow(Button.primary("setup:role", "Inizia 📖"))
+                .setContent(MessageProvider.getMessage(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage()))
+                .setActionRow(Button.primary("setup:role", MessageProvider.getMessage(Messages.COMMAND_SETUP_START_BUTTON_LABEL, settings.getLanguage())))
                 .build();
 
         e.reply(message).queue();
@@ -78,6 +74,7 @@ public class SetupCommand implements Slash, Interaction {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
+            String continueButton = MessageProvider.getMessage(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage());
             String content = null;
 
             MessageEditBuilder builder = new MessageEditBuilder();
@@ -85,37 +82,33 @@ public class SetupCommand implements Slash, Interaction {
 
             switch (element) {
                 case "role" -> {
-                    content = """
-                            Seleziona il ruolo che tutti gli utenti devono avere per usare il bot (anche everyone è supportato).
-                            Se hai già impostato il ruolo, puoi cliccare sul pulsante 'Continua'.""";
+                    content = MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
+                            settings.getLanguage(),
+                            References.role(e.getGuild(), settings.getPublicRole()));
 
                     EntitySelectMenu roleSelector = EntitySelectMenu.create("setup:role", EntitySelectMenu.SelectTarget.ROLE)
-                            .setPlaceholder("Seleziona un ruolo")
+                            .setPlaceholder(MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_ROLE_SELECTOR_PLACEHOLDER, settings.getLanguage()))
                             .build();
 
                     rows.add(ActionRow.of(roleSelector));
-                    rows.add(ActionRow.of(Button.secondary("setup:embed", "Continua ➡")));
-                    // to be removed: content += "\nIl ruolo pubblico attuale è " + References.role(e.getGuild(), settings.getPublicRole());
+                    rows.add(ActionRow.of(Button.secondary("setup:embed", continueButton)));
                 }
                 case "embed" -> {
-                    content = """
-                            Clicca sul pulsante 'Modifica' per cambiare l'embed che viene mostrato.
-                            Al momento è disponibile solo un placeholder per la descrizione dell'embed: {CHANNEL} che viene rimpiazzato con la menzione del canale vocale dedicato alla creazione delle stanze.
-                            Quando hai fatto, clicca continua per passare al prossimo passaggio.""";
+                    content = MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_CONTENT, settings.getLanguage());
 
                     rows.add(ActionRow.of(
-                            Button.success("setup:embed_preview", "Anteprima 👀"),
-                            Button.primary("setup:embed_impl", "Modifica"),
-                            Button.secondary("setup:inactivity", "Continua ➡")
+                            Button.success("setup:embed_preview", MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW_BUTTON, settings.getLanguage())),
+                            Button.primary("setup:embed_impl", MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_EDIT_BUTTON, settings.getLanguage())),
+                            Button.secondary("setup:inactivity", continueButton)
                     ));
                 }
                 case "embed_impl" -> {
-                    e.replyModal(Modal.create("setup:embed_impl", "Inserisci")
-                                    .addActionRow(TextInput.create("title", "Titolo", TextInputStyle.SHORT)
+                    e.replyModal(Modal.create("setup:embed_impl", MessageProvider.getMessage(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
+                                    .addActionRow(TextInput.create("title", MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_MODAL_TITLE, settings.getLanguage()), TextInputStyle.SHORT)
                                             .setValue(settings.getTitle())
                                             .setMaxLength(128)
                                             .build())
-                                    .addActionRow(TextInput.create("desc", "Descrizione", TextInputStyle.PARAGRAPH)
+                                    .addActionRow(TextInput.create("desc", MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_MODAL_DESC, settings.getLanguage()), TextInputStyle.PARAGRAPH)
                                             .setValue(settings.getDescriptionRaw())
                                             .setMaxLength(1024)
                                             .build())

@@ -75,7 +75,7 @@ public enum Messages {
     COMMAND_SETUP_STEPS_INTERFACE_CONTENT("commands.setup.steps.interface.content"),
     COMMAND_SETUP_STEPS_INTERFACE_PREVIEW("commands.setup.steps.interface.preview_prefix"),
     COMMAND_SETUP_STEPS_INTERFACE_PREVIEW_BUTTON("commands.setup.steps.interface.preview_button"),
-    COMMAND_SETUP_STEPS_INTERFACE_MODIFY_BUTTON("commands.setup.steps.interface.modify_button"),
+    COMMAND_SETUP_STEPS_INTERFACE_EDIT_BUTTON("commands.setup.steps.interface.edit_button"),
     COMMAND_SETUP_STEPS_INTERFACE_MODAL_TITLE("commands.setup.steps.interface.modal_title_label"),
     COMMAND_SETUP_STEPS_INTERFACE_MODAL_DESC("commands.setup.steps.interface.modal_desc_label"),
     COMMAND_SETUP_STEPS_INTERFACE_UPDATED("commands.setup.steps.interface.updated"),
