@@ -53,6 +53,7 @@ public class ActivityChecker implements Runnable {
                                         success -> {
                                             vc.setPinned(false);
                                             localMapper.update(vc);
-                                        })));
+                                        }).queue()
+                        ));
     }
 }

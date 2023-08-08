@@ -118,34 +118,30 @@ public class SetupCommand implements Slash, Interaction {
                     return null;
                 }
                 case "embed_preview" -> {
-                    e.reply("""
-                                    Ecco la tua preview:
-                                                                
-                                    # %s
+                    String reply = MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW, settings.getLanguage()) +
+                            "\n\n# " + settings.getTitle() +
+                            "\n\n" + settings.getDescription();
 
-                                    %s
-                                    """.formatted(settings.getTitle(), settings.getDescription()))
-                            .setEphemeral(true)
-                            .queue();
+                    e.reply(reply).setEphemeral(true).queue();
 
                     return null;
                 }
                 case "inactivity" -> {
-                    content = """
-                            **SOLAMENTE le stanze fissate** hanno una "data di scadenza" per evitare che le categorie si riempiano di stanze inutilizzate.
-                            Di default numero di giorni dopo i quali la stanza viene cancellata è -1, cioè la funzione è disabilitata. Puoi scegliere tra 3 a 7 giorni.""";
+                    content = MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INACTIVITY_CONTENT, settings.getLanguage());
 
                     StringSelectMenu.Builder menu = StringSelectMenu.create("setup:inactivity")
-                            .setPlaceholder("Cancella la stanza dopo...")
-                            .addOption("Disabilita", "-1", Emoji.fromUnicode("❌"));
+                            .setPlaceholder(MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INACTIVITY_SELECTION_PLACEHOLDER, settings.getLanguage()))
+                            .addOption(MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INACTIVITY_SELECTION_DEFAULT, settings.getLanguage()), "-1", Emoji.fromUnicode("❌"));
 
                     for (int i = 3; i <= 7; i++) {
-                        menu.addOption(i + " giorni", String.valueOf(i), daysEmojis.getOrDefault(i, Emoji.fromUnicode("❓")));
+                        menu.addOption(i + " " + MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INACTIVITY_DAYS, settings.getLanguage()),
+                                String.valueOf(i),
+                                daysEmojis.getOrDefault(i, Emoji.fromUnicode("❓")));
                     }
 
                     String defaultOption = String.valueOf(settings.getMaxInactivity());
                     rows.add(ActionRow.of(menu.setDefaultValues(defaultOption).build()));
-                    rows.add(ActionRow.of(Button.secondary("setup:inactivity_impl", "Continua ➡")));
+                    rows.add(ActionRow.of(Button.secondary("setup:inactivity_impl", continueButton)));
                 }
                 case "inactivity_impl" -> {
                     e.deferReply(true).queue();
@@ -199,7 +195,7 @@ public class SetupCommand implements Slash, Interaction {
 
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-                e.reply(">>> Messaggio aggiornato! :white_check_mark:")
+                e.reply(MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_INTERFACE_UPDATED, settings.getLanguage()))
                         .setEphemeral(true)
                         .queue();
             }
@@ -253,12 +249,12 @@ public class SetupCommand implements Slash, Interaction {
                 settings.setPublicRole(newRole.getId());
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-                e.reply(">>> Ruolo aggiornato :white_check_mark:")
+                e.reply(MessageProvider.getMessage(Messages.COMMAND_SETUP_STEPS_ROLE_UPDATED, settings.getLanguage()))
                         .setEphemeral(true)
                         .queue(success -> {
                             if (message.getButtons().stream().noneMatch(button -> button.getId() != null && button.getId().endsWith("embed"))) {
                                 List<ActionRow> rows = new ArrayList<>(message.getActionRows());
-                                rows.add(ActionRow.of(Button.secondary("setup:embed", "Continua ➡")));
+                                rows.add(ActionRow.of(Button.secondary("setup:embed", MessageProvider.getMessage(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage()))));
 
                                 message.editMessage(MessageEditBuilder.fromMessage(message)
                                                 .setComponents(rows)
@@ -299,7 +295,7 @@ public class SetupCommand implements Slash, Interaction {
                     throwable.getMessage(),
                     guild.getName());
 
-            hook.sendMessage(">>> Qualcosa è andato storto. Riprova! :x:")
+            hook.sendMessage(">>> " + MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         };
@@ -363,15 +359,13 @@ public class SetupCommand implements Slash, Interaction {
                                 });
                             } else {
                                 textChannel.sendMessage(new MessageCreateBuilder()
-                                                .setContent("""
-                                                        Impossibile creare il menu! :x:
-                                                        Usa il comando `/maggiordomo setupMenu` in questo canale per riprovare.""")
+                                                .setContent(MessageProvider.getMessage(Messages.COMMAND_SETUP_MENU_ERROR, settings.getLanguage()))
                                                 .build())
                                         .queue();
                             }
 
                             // Manda il feedback all'utente
-                            hook.sendMessage(">>> Setup completato! :white_check_mark:")
+                            hook.sendMessage(">>> " + MessageProvider.getMessage(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
                                     .setEphemeral(true)
                                     .queue();
                         }, errorHandler);
@@ -388,7 +382,7 @@ public class SetupCommand implements Slash, Interaction {
             // quindi facciamo partire un check forzato per rendere effettivi i cambiamenti da subito
             new Thread(new ActivityChecker(guild.getId())).start();
 
-            hook.sendMessage(">>> Setup completato! :white_check_mark:")
+            hook.sendMessage(">>> " + MessageProvider.getMessage(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         }
@@ -408,7 +402,11 @@ public class SetupCommand implements Slash, Interaction {
 
     @Override
     public Parameter[] getParameters(String lang) {
-        return new Parameter[]{ new Parameter(OptionType.STRING, "lang", "Language of the server (default is English)", false)};
+        return new Parameter[]{ new Parameter(
+                OptionType.STRING,
+                "lang",
+                MessageProvider.getMessage(Messages.COMMAND_SETUP_PARAMETER_LANGUAGE, lang),
+                false)};
     }
 
     @Override
@@ -428,6 +426,6 @@ public class SetupCommand implements Slash, Interaction {
 
     @Override
     public String getDescription(String lang) {
-        return "Crea la categoria dedicata alle stanze";
+        return MessageProvider.getMessage(Messages.COMMAND_SETUP_DESCRIPTION, lang);
     }
 }

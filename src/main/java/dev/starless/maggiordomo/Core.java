@@ -249,7 +249,7 @@ public class Core implements Module {
                 .ifPresent(vc -> {
                     VoiceChannel channel = event.getGuild().getVoiceChannelById(vc.getChannel());
                     if (channel != null) {
-                        localMapper.scheduleForDeletion(vc, channel);
+                        localMapper.scheduleForDeletion(vc, channel).queue();
                     }
                 });
     }

@@ -127,7 +127,8 @@ commands:
     cannot_create_menu: |-
       Could not create the interface! :x:
       Use the `/maggiordomo setupMenu` in the dashboard channel to retry..
-    success: ">>> Setup completed! :white_check_mark:"
+
+    success: "Setup completed! :white_check_mark:"
 
     steps:
       role:
@@ -177,7 +178,7 @@ interactions:
 
   # A generic error message used when a command does not execute correctly
   # and no specific error message is provided
-  generic_error: "An error occurred during this interaction."
+  generic_error: "Something went wrong. Try again later! :x:"
 
   # This message is displayed when a command is on cooldown
   # and cannot be executed at that moment.

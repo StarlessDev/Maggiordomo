@@ -130,7 +130,8 @@ commands:
     cannot_create_menu: |-
       Impossibile creare il menu! :x:
       Usa il comando `/maggiordomo setupMenu` in questo canale per riprovare.
-    success: ">>> Setup completato! :white_check_mark:"
+
+    success: "Setup completato! :white_check_mark:"
 
     steps:
       role:
@@ -181,7 +182,7 @@ interactions:
 
   # A generic error message used when a command does not execute correctly
   # and no specific error message is provided
-  generic_error: "Si è verificato un errore durante l'interazione."
+  generic_error: "Qualcosa è andato storto. Riprova! :x:"
 
   # This message is displayed when a command is on cooldown
   # and cannot be executed at that moment.
