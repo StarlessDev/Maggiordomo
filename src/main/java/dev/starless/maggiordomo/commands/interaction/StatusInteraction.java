@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.VCStatus;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -25,9 +25,9 @@ public class StatusInteraction implements Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        String open = MessageProvider.getMessage(Messages.VC_OPEN_STATUS, settings.getLanguage());
-        String locked = MessageProvider.getMessage(Messages.VC_LOCKED_STATUS, settings.getLanguage());
-        String content = MessageProvider.getMessage(Messages.INTERACTION_STATUS_CURRENT, settings.getLanguage(), (vc.getStatus().equals(VCStatus.OPEN) ? open : locked).toLowerCase());
+        String open = Translations.get(Messages.VC_OPEN_STATUS, settings.getLanguage());
+        String locked = Translations.get(Messages.VC_LOCKED_STATUS, settings.getLanguage());
+        String content = Translations.get(Messages.INTERACTION_STATUS_CURRENT, settings.getLanguage(), (vc.getStatus().equals(VCStatus.OPEN) ? open : locked).toLowerCase());
 
         e.reply(new MessageCreateBuilder()
                         .setContent(content)
@@ -51,7 +51,7 @@ public class StatusInteraction implements Interaction {
             // Controlla se il ruolo esiste
             Role usersRole = e.getGuild().getRoleById(settings.getPublicRole());
             if (usersRole == null) {
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INVALID_PUB_ROLE, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INVALID_PUB_ROLE, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -86,7 +86,7 @@ public class StatusInteraction implements Interaction {
                 Messages successMessage = status.equals(VCStatus.OPEN) ? Messages.INTERACTION_SUCCESS_OPEN : Messages.INTERACTION_SUCCESS_LOCKED;
                 Color embedColor = status.equals(VCStatus.OPEN) ? new Color(239, 210, 95) : new Color(100, 160, 94);
                 e.replyEmbeds(new EmbedBuilder()
-                                .setDescription(MessageProvider.getMessage(successMessage, settings.getLanguage()))
+                                .setDescription(Translations.get(successMessage, settings.getLanguage()))
                                 .setColor(embedColor)
                                 .build())
                         .setEphemeral(true)
@@ -94,7 +94,7 @@ public class StatusInteraction implements Interaction {
 
                 return vc;
             } catch (IllegalArgumentException ex) {
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }

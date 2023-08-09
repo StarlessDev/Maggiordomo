@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +36,9 @@ public abstract class FilterInteraction implements Interaction {
         } else {
             TextInputStyle textStyle = type.equals(FilterType.CONTAINS) ? TextInputStyle.PARAGRAPH : TextInputStyle.SHORT;
 
-            e.replyModal(Modal.create(getName(), MessageProvider.getMessage(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
+            e.replyModal(Modal.create(getName(), Translations.get(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
                             .addActionRow(TextInput.create("input", "input", textStyle)
-                                    .setValue(MessageProvider.getMessage(Messages.FILTER_EXPLANATION, settings.getLanguage()))
+                                    .setValue(Translations.get(Messages.FILTER_EXPLANATION, settings.getLanguage()))
                                     .setRequiredRange(1, 256)
                                     .build())
                             .build())
@@ -87,8 +87,8 @@ public abstract class FilterInteraction implements Interaction {
         Set<String> words = settings.getFilterWords(type);
         int maxPages = (int) Math.ceil(words.size() / 10D);
 
-        String filterName = MessageProvider.getMessage(type.equals(FilterType.CONTAINS) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage());
-        String content = MessageProvider.getMessage(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage(), filterName);
+        String filterName = Translations.get(type.equals(FilterType.CONTAINS) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage());
+        String content = Translations.get(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage(), filterName);
 
         MessageCreateBuilder builder = new MessageCreateBuilder().setContent(content);
 
@@ -103,7 +103,7 @@ public abstract class FilterInteraction implements Interaction {
 
         return builder.addActionRow(
                         PageUtils.getBackButton(getName(), page),
-                        Button.secondary(getName() + ":add", MessageProvider.getMessage(Messages.COMMAND_FILTERS_ADD_BUTTON, settings.getLanguage())),
+                        Button.secondary(getName() + ":add", Translations.get(Messages.COMMAND_FILTERS_ADD_BUTTON, settings.getLanguage())),
                         PageUtils.getNextButton(getName(), maxPages, page))
                 .build();
     }

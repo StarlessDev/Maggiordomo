@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -31,7 +31,7 @@ public class BannedCommand implements Slash {
         if (success) {
             e.replyEmbeds(new EmbedBuilder()
                             // String.format(isAdded ? "Il ruolo %s è stato rimosso dalla blacklist" : "Ora il ruolo %s è stato aggiunto alla blacklist", role.getAsMention())
-                            .setDescription(MessageProvider.getMessage(message, settings.getLanguage()))
+                            .setDescription(Translations.get(message, settings.getLanguage()))
                             .setColor(toBeRemoved ? new Color(239, 210, 95) : new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -47,7 +47,7 @@ public class BannedCommand implements Slash {
     public Parameter[] getParameters(String lang) {
         return new Parameter[]{new Parameter(OptionType.ROLE,
                 "role",
-                MessageProvider.getMessage(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang),
+                Translations.get(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang),
                 true)};
     }
 
@@ -58,6 +58,6 @@ public class BannedCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return MessageProvider.getMessage(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang);
+        return Translations.get(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang);
     }
 }

@@ -45,6 +45,11 @@ public enum Messages {
     COMMAND_FILTERS_MESSAGE_CONTENT("commands.filters.message_content"),
     COMMAND_FILTERS_ADD_BUTTON("commands.filters.add_button"),
 
+    COMMAND_LANGUAGE_DESCRIPTION("commands.language.description"),
+    COMMAND_LANGUAGE_PARAMETER_LANG("commands.language.parameters.language"),
+    COMMAND_LANGUAGE_SUCCESS("commands.language.success"),
+    COMMAND_LANGUAGE_FAIL("commands.language.unsupported"),
+
     COMMAND_MENU_DESCRIPTION("commands.menu.description"),
     COMMAND_MENU_SUCCESS("commands.menu.success"),
     COMMAND_MENU_FAIL("commands.menu.fail"),
@@ -54,7 +59,7 @@ public enum Messages {
     COMMAND_PREMIUM_ROLE_SUCCESS_ADDED("commands.premium_role.success_added"),
     COMMAND_PREMIUM_ROLE_SUCCESS_REMOVED("commands.premium_role.success_removed"),
 
-    COMMAND_RECOVER_DESCRIPTION("commands.recover"),
+    COMMAND_RECOVER_DESCRIPTION("commands.recover.description"),
     COMMAND_RECOVER_PARAMETER_CHANNEL("commands.recover.parameters.channel"),
     COMMAND_RECOVER_PARAMETER_PINNED("commands.recover.parameters.pinned"),
     COMMAND_RECOVER_MISSING_OWNER("commands.recover.missing_owner"),
@@ -66,7 +71,6 @@ public enum Messages {
     COMMAND_RELOAD_PERMS_WAITING("commands.reload_perms.waiting"),
 
     COMMAND_SETUP_DESCRIPTION("commands.setup.description"),
-    COMMAND_SETUP_PARAMETER_LANGUAGE("commands.setup.parameters.language"),
     COMMAND_SETUP_EXPLANATION("commands.setup.explanation"),
     COMMAND_SETUP_START_BUTTON_LABEL("commands.setup.start_button"),
     COMMAND_SETUP_CONTINUE_BUTTON_LABEL("commands.setup.continue_button"),

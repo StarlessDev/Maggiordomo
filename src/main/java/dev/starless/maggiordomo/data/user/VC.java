@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.data.user;
 
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.enums.VCStatus;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.mongo.annotations.MongoKey;
 import dev.starless.mongo.annotations.MongoObject;
@@ -66,7 +66,7 @@ public class VC {
         this(member.getGuild().getId(),
                 member.getId(),
                 "-1",
-                MessageProvider.getMessage(Messages.VC_NAME, language, member.getEffectiveName()));
+                Translations.get(Messages.VC_NAME, language, member.getEffectiveName()));
     }
 
     public void addRecordPlayer(RecordType type, String id) {

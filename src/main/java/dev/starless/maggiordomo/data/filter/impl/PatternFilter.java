@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.data.filter.IFilter;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 
 import java.util.List;
@@ -27,7 +27,7 @@ public class PatternFilter implements IFilter {
         if (results.isEmpty()) {
             return new FilterResult();
         } else {
-            StringBuilder sb = new StringBuilder(MessageProvider.getMessage(Messages.FILTER_FLAG_PATTERN, settings.getLanguage()));
+            StringBuilder sb = new StringBuilder(Translations.get(Messages.FILTER_FLAG_PATTERN, settings.getLanguage()));
             results.forEach(result -> sb.append("・ `").append(result.group()).append("`\n"));
 
             return new FilterResult(true, sb.toString());

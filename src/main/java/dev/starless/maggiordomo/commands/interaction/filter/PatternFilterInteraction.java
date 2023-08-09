@@ -3,7 +3,7 @@ package dev.starless.maggiordomo.commands.interaction.filter;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
@@ -26,7 +26,7 @@ public class PatternFilterInteraction extends FilterInteraction {
                 settings.modifyFilters(FilterType.REGEX, set -> set.add(pattern.pattern()));
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
             } catch (PatternSyntaxException ex) {
-                e.reply(MessageProvider.getMessage(Messages.FILTER_PATTERN_ERROR, settings.getLanguage()) + "\n" + ex.getMessage())
+                e.reply(Translations.get(Messages.FILTER_PATTERN_ERROR, settings.getLanguage()) + "\n" + ex.getMessage())
                         .setEphemeral(true)
                         .queue();
             }

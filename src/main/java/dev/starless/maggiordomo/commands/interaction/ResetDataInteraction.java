@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -38,7 +38,7 @@ public class ResetDataInteraction implements Interaction {
             e.replyEmbeds(Embeds.errorEmbed())
                     .setEphemeral(true)
                     .queue();
-        } else if (mapping.getAsString().equalsIgnoreCase(MessageProvider.getMessage(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
+        } else if (mapping.getAsString().equalsIgnoreCase(Translations.get(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) { // Risparmiamo query importanti in questo modo...
                 Bot.getInstance().getCore()
@@ -51,7 +51,7 @@ public class ResetDataInteraction implements Interaction {
             vc.getTrusted().clear();
             vc.getBanned().clear();
 
-            e.reply(MessageProvider.getMessage(Messages.INTERACTION_RESET_SUCCESS, settings.getLanguage()))
+            e.reply(Translations.get(Messages.INTERACTION_RESET_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
 

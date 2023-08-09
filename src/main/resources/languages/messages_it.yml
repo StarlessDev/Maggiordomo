@@ -80,7 +80,20 @@ commands:
       Ci sono due tipi di filtri: **base** e **regex**.
       I filtri base controllano semplicemente se una parola è presente all'interno del nome della stanza.
       Il secondo tipo invece usa le espressioni regolari (Regex) e controlla se ci sono una o più corripondenze.
-  
+
+  language:
+    description: "Cambia la lingua dei messaggi del bot"
+
+    parameters:
+      language: "La nuova lingua del server (di default è l'inglese)"
+
+    # The %s will be replaced with the name of the new language
+    success: "La lingua è stata impostata su `%s`."
+
+    # The %s will be replaced with the name of the language
+    # the user tried to set
+    unsupported: "La lingua `%s` non è supportata (o non è stata trovata)."
+
   menu:
     description: "Manda il menu per controllare le proprie stanze"
     success: "Menu creato!"
@@ -119,8 +132,6 @@ commands:
 
   setup:
     description: "Crea la categoria dedicata alle stanze"
-    parameters:
-      language: "Lingua del server (di default è l'inglese)"
 
     # The first message the user will see
     explanation: |-
@@ -131,6 +142,7 @@ commands:
       ・ Giorni di inattività massimi delle stanze fissate
       
       Una volta terminato un passaggio clicca "Continua" per passare al prossimo.
+      Ricorda di leggere la [documentazione](https://maggiordomo.starless.dev) per capire meglio le funzioni e il funzionamento di Maggiordomo.
 
     # The label of the button that starts the setup process
     start_button: "Inizia 📖"

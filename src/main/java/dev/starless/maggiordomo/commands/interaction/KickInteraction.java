@@ -3,7 +3,7 @@ package dev.starless.maggiordomo.commands.interaction;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
 import dev.starless.maggiordomo.utils.discord.Embeds;
@@ -29,13 +29,13 @@ public class KickInteraction implements Interaction {
         if (voiceChannel != null) {
             List<Member> joinedMembers = voiceChannel.getMembers();
             if (joinedMembers.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else {
                 int page = PageUtils.getPageFromId(id);
                 if (page == -1) {
-                    e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
+                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
 
@@ -56,7 +56,7 @@ public class KickInteraction implements Interaction {
                 }
 
                 int maxPages = (int) Math.ceil(joinedMembers.size() / 25D);
-                String content = MessageProvider.getMessageFormatted(Messages.INTERACTION_KICK_MESSAGE_CONTENT, settings.getLanguage(),
+                String content = Translations.getFormatted(Messages.INTERACTION_KICK_MESSAGE_CONTENT, settings.getLanguage(),
                         "current", page + 1,
                         "total", maxPages);
 
@@ -74,7 +74,7 @@ public class KickInteraction implements Interaction {
 
             return vc;
         } else {
-            e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
@@ -93,13 +93,13 @@ public class KickInteraction implements Interaction {
                         .findFirst()
                         .ifPresent(member -> e.getGuild().kickVoiceMember(member).queue(unused ->
                                 e.replyEmbeds(new EmbedBuilder()
-                                                .setDescription(MessageProvider.getMessage(Messages.INTERACTION_KICK_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                                                .setDescription(Translations.get(Messages.INTERACTION_KICK_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                                                 .setColor(new Color(239, 210, 95))
                                                 .build())
                                         .setEphemeral(true)
                                         .queue()));
             } else {
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_KICK_ERROR_NOT_FOUND, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_KICK_ERROR_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }

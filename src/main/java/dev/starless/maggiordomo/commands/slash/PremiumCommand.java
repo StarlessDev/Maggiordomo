@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -28,7 +28,7 @@ public class PremiumCommand implements Slash {
         Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
         Messages messages = isAdded ? Messages.COMMAND_PREMIUM_ROLE_SUCCESS_REMOVED : Messages.COMMAND_PREMIUM_ROLE_SUCCESS_ADDED;
-        String desc = MessageProvider.getMessage(messages, settings.getLanguage(), role.getAsMention());
+        String desc = Translations.get(messages, settings.getLanguage(), role.getAsMention());
 
         if (success) {
             e.replyEmbeds(new EmbedBuilder()
@@ -48,7 +48,7 @@ public class PremiumCommand implements Slash {
     public Parameter[] getParameters(String lang) {
         return new Parameter[]{new Parameter(OptionType.ROLE,
                 "role",
-                MessageProvider.getMessage(Messages.COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE, lang),
+                Translations.get(Messages.COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE, lang),
                 true)};
     }
 
@@ -59,6 +59,6 @@ public class PremiumCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return MessageProvider.getMessage(Messages.COMMAND_PREMIUM_ROLE_DESCRIPTION, lang);
+        return Translations.get(Messages.COMMAND_PREMIUM_ROLE_DESCRIPTION, lang);
     }
 }

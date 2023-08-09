@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Perms;
@@ -33,7 +33,7 @@ public class ReloadPermsCommand implements Slash {
                 .getChannelMapper()
                 .getMapper(e.getGuild());
 
-        e.reply(MessageProvider.getMessage(Messages.COMMAND_RELOAD_PERMS_WAITING, settings.getLanguage()))
+        e.reply(Translations.get(Messages.COMMAND_RELOAD_PERMS_WAITING, settings.getLanguage()))
                 .setEphemeral(true)
                 .queue();
 
@@ -89,6 +89,6 @@ public class ReloadPermsCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return MessageProvider.getMessage(Messages.COMMAND_RELOAD_PERMS_DESCRIPTION, lang);
+        return Translations.get(Messages.COMMAND_RELOAD_PERMS_DESCRIPTION, lang);
     }
 }

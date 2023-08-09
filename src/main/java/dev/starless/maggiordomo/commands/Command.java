@@ -8,7 +8,7 @@ public interface Command {
     String getName();
 
     default String getDescription(String lang) {
-        return "";
+        return null;
     }
 
     default boolean hasPermission(Member member, Settings settings) {

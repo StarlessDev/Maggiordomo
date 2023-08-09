@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Embeds;
@@ -21,10 +21,10 @@ public class DeleteInteraction implements Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), MessageProvider.getMessage(Messages.CONFIRMATION_MODAL_TITLE, settings.getLanguage()))
-                        .addActionRow(TextInput.create("vc:confirmation", MessageProvider.getMessage(Messages.CONFIRMATION_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
+        e.replyModal(Modal.create(getName(), Translations.get(Messages.CONFIRMATION_MODAL_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("vc:confirmation", Translations.get(Messages.CONFIRMATION_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
                                 .setMaxLength(31)
-                                .setValue(MessageProvider.getMessage(Messages.CONFIRMATION_MODAL_INPUT_VALUE, settings.getLanguage()))
+                                .setValue(Translations.get(Messages.CONFIRMATION_MODAL_INPUT_VALUE, settings.getLanguage()))
                                 .build())
                         .build())
                 .queue();
@@ -39,7 +39,7 @@ public class DeleteInteraction implements Interaction {
             e.replyEmbeds(Embeds.errorEmbed())
                     .setEphemeral(true)
                     .queue();
-        } else if (mapping.getAsString().equalsIgnoreCase(MessageProvider.getMessage(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
+        } else if (mapping.getAsString().equalsIgnoreCase(Translations.get(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
             LocalVCMapper localMapper = Bot.getInstance().getCore()
                     .getChannelMapper()
                     .getMapper(e.getGuild());
@@ -51,7 +51,7 @@ public class DeleteInteraction implements Interaction {
                 localMapper.scheduleForDeletion(vc, channel).queue();
             }
 
-            e.reply(MessageProvider.getMessage(Messages.INTERACTION_DELETE_SUCCESS, settings.getLanguage()))
+            e.reply(Translations.get(Messages.INTERACTION_DELETE_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         }

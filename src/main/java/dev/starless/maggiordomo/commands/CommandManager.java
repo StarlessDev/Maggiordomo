@@ -5,6 +5,7 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Cooldown;
 import dev.starless.maggiordomo.data.Settings;
+import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.mongo.objects.QueryBuilder;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
@@ -43,6 +44,7 @@ public class CommandManager {
         }
 
         jda.getGuilds().forEach(this::update);
+        BotLogger.info("Commands updated!");
     }
 
     public void update(Guild guild) {

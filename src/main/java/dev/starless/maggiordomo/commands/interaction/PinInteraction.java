@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -26,7 +26,7 @@ public class PinInteraction implements Interaction {
         Messages message = vc.isPinned() ? Messages.INTERACTION_PIN_PINNED : Messages.INTERACTION_PIN_UNPINNED;
         e.replyEmbeds(new EmbedBuilder()
                         .setColor(new Color(123, 0, 212))
-                        .setDescription(MessageProvider.getMessage(message, settings.getLanguage()))
+                        .setDescription(Translations.get(message, settings.getLanguage()))
                         .build())
                 .setEphemeral(true)
                 .queue();

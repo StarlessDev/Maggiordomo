@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.data;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.filter.FilterType;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.mongo.annotations.MongoKey;
 import dev.starless.mongo.annotations.MongoObject;
@@ -63,8 +63,8 @@ public class Settings {
         this.language = "en";
         this.maxInactivity = -1L;
 
-        this.title = MessageProvider.getMessage(Messages.SETTINGS_INTERFACE_TITLE, language);
-        this.descriptionRaw = MessageProvider.getMessage(Messages.SETTINGS_INTERFACE_DESCRIPTION, language);
+        this.title = Translations.get(Messages.SETTINGS_INTERFACE_TITLE, language);
+        this.descriptionRaw = Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, language);
     }
 
     public Settings(Guild guild) {

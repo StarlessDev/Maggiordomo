@@ -71,6 +71,19 @@ commands:
     success_added: "The role %s was added to the blacklist"
     success_removed: "The role %s was removed from the blacklist"
 
+  language:
+    description: "Change the language of the bot's messages"
+
+    parameters:
+      language: "The new language"
+
+    # The %s will be replaced with the name of the new language
+    success: "The language has been set to `%s`"
+
+    # The %s will be replaced with the name of the language
+    # the user tried to set
+    unsupported: "The language `%s` is not supported (or not found)."
+
   filters:
     description: "Manage the words filtered from the channel's names"
 
@@ -119,18 +132,20 @@ commands:
 
   setup:
     description: "Create the category dedicated to the voice channels"
-    parameters:
-      language: "Language of the server (by default it's English)"
 
     # The first message the user will see
     explanation: |-
       ## Setup
+      First things first, check using the command `/maggiordomo language` if your language is supported by the bot.
+      If your language is missing and you want it supported, you can help translating the bot by opening a pull request.
+      
       What will you decide next:
       ・ Public role
       ・ Details of the personalization interface: title and description of the embed
       ・ The maximum inactivity days of pinned channels
       
       Once you completed a step, click on "Continue" to advance to the next step.
+      Remember to read our [documentation](https://maggiordomo.starless.dev) to better understand the features and functioning of Maggiordomo.
 
     # The label of the button that starts the setup process
     start_button: "Start 📖"

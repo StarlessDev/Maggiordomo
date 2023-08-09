@@ -14,7 +14,7 @@ import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.interfaces.Module;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.utils.discord.References;
@@ -69,18 +69,25 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 public class Core implements Module {
 
     private final MongoStorage storage;
 
-    @Getter private VCManager channelMapper;
-    @Getter private SettingsMapper settingsMapper;
+    @Getter
+    private VCManager channelMapper;
+    @Getter
+    private SettingsMapper settingsMapper;
 
     private ScheduledExecutorService activityService;
+    @Getter
     private CommandManager commands;
 
     public Core(Config config) {
+        // Translations are already needed for the Settings schema
+        Translations.init();
+
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
                 .registerSchema(new Schema(Settings.class)
                         .entry("categories", "categoryID", document -> {
@@ -98,14 +105,13 @@ public class Core implements Module {
                         .entry("publicRole", "-1")
                         .entry("language", "en")
                         .entry("maxInactivity", -1L)
-                        .entry("title", MessageProvider.getMessage(Messages.SETTINGS_INTERFACE_TITLE, "en"))
+                        .entry("title", Translations.get(Messages.SETTINGS_INTERFACE_TITLE, "en"))
                         .entry("filterStrings", new HashMap<>())
-                        .entry("descriptionRaw", MessageProvider.getMessage(Messages.SETTINGS_INTERFACE_DESCRIPTION, "en")));
+                        .entry("descriptionRaw", Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, "en")));
     }
 
     @Override
     public void onEnable(JDA jda) {
-        MessageProvider.init();
         storage.init();
 
         activityService = Executors.newScheduledThreadPool(jda.getGuilds().size());
@@ -163,6 +169,7 @@ public class Core implements Module {
                 .command(new RecoverCommand())
                 .command(new ReloadPermsCommand())
                 .command(new FiltersCommand())
+                .command(new LanguageCommand())
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
@@ -336,6 +343,33 @@ public class Core implements Module {
         }
     }
 
+    public boolean updateLanguage(Guild guild, Settings settings, String newLanguage) {
+        if (Translations.getLanguageCodes().contains(newLanguage)) {
+            // Change the title of the guide if it has not been changed
+            String title = settings.getTitle();
+            if (title.equals(Translations.get(Messages.SETTINGS_INTERFACE_TITLE, settings.getLanguage()))) {
+                settings.setTitle(Translations.get(Messages.SETTINGS_INTERFACE_TITLE, newLanguage));
+            }
+
+            // Do the same for the description
+            String desc = settings.getDescriptionRaw();
+            if(desc.equals(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, settings.getLanguage()))) {
+                settings.setDescriptionRaw(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, newLanguage));
+            }
+
+            // Set the new language
+            settings.setLanguage(newLanguage);
+
+            // Update cache, database and commands
+            settingsMapper.update(settings);
+            commands.update(guild);
+
+            return true;
+        }
+
+        return false;
+    }
+
     public MessageCreateData createMenu(String guild) {
         Optional<Settings> op = settingsMapper.search(QueryBuilder.init()
                 .add("guild", guild)
@@ -495,7 +529,7 @@ public class Core implements Module {
         String sub = e.getSubcommandName(); // Ottieni il nome del sottocomando
         if (sub == null) { // Se è nullo, significa che non è stato inserito
             e.reply(new MessageCreateBuilder()
-                            .setContent(MessageProvider.getMessage(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
+                            .setContent(Translations.get(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
                             .build())
                     .setEphemeral(true)
                     .queue();
@@ -515,13 +549,13 @@ public class Core implements Module {
 
                                     command.execute(settings, e);
                                 } else {
-                                    e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.NO_PERMISSION, settings.getLanguage())))
+                                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.NO_PERMISSION, settings.getLanguage())))
                                             .setEphemeral(true)
                                             .queue();
                                 }
                             },
                             () -> e.reply(new MessageCreateBuilder()
-                                            .setContent(MessageProvider.getMessage(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
+                                            .setContent(Translations.get(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
                                             .build())
                                     .setEphemeral(true)
                                     .queue());
@@ -575,7 +609,7 @@ public class Core implements Module {
         Settings settings = opSettings.get();
         boolean handledCorrectly = handleMenuInteraction(event, settings, event.getMember(), id);
         if (!handledCorrectly && !event.isAcknowledged()) {
-            event.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
+            event.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
@@ -586,7 +620,7 @@ public class Core implements Module {
         LocalVCMapper localMapper = channelMapper.getMapper(settings.getGuild());
 
         if (settings.isBanned(member)) {
-            event.reply(MessageProvider.getMessage(Messages.NO_PERMISSION_BANNED, settings.getLanguage()))
+            event.reply(Translations.get(Messages.NO_PERMISSION_BANNED, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
             return false;
@@ -610,7 +644,7 @@ public class Core implements Module {
             if (interaction.hasPermission(event.getMember(), settings)) {
                 // Se non è in fase di creazione
                 if (vc != null && localMapper.isBeingCreated(vc)) {
-                    event.reply(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage()))
+                    event.reply(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage()))
                             .setEphemeral(true)
                             .queue();
                     return false;
@@ -627,7 +661,7 @@ public class Core implements Module {
                         event.replyEmbeds(new EmbedBuilder()
                                         .setColor(new Color(213, 178, 70))
                                         .setAuthor("Warning")
-                                        .setDescription(MessageProvider.getMessage(Messages.ON_COOLDOWN, settings.getLanguage(), result.nextExecutionInstant().toMillis() / 1000D))
+                                        .setDescription(Translations.get(Messages.ON_COOLDOWN, settings.getLanguage(), result.nextExecutionInstant().toMillis() / 1000D))
                                         .build())
                                 .setEphemeral(true)
                                 .queue();
@@ -661,7 +695,7 @@ public class Core implements Module {
                 }
             } else {
                 // Mostra un messaggio di errore
-                event.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.NO_PERMISSION, settings.getLanguage())))
+                event.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.NO_PERMISSION, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }

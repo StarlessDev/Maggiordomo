@@ -6,7 +6,7 @@ import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.enums.VCStatus;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Embeds;
@@ -39,7 +39,7 @@ public class RecoverCommand implements Slash {
         if (voiceMapping.getChannelType().equals(ChannelType.VOICE)) {
             String publicRole = settings.getPublicRole();
             if (publicRole == null) {
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INVALID_PUB_ROLE, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INVALID_PUB_ROLE, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -88,7 +88,7 @@ public class RecoverCommand implements Slash {
                 }
 
                 if (user == null) {
-                    e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.COMMAND_RECOVER_MISSING_OWNER, settings.getLanguage())))
+                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.COMMAND_RECOVER_MISSING_OWNER, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
                     return;
@@ -121,18 +121,18 @@ public class RecoverCommand implements Slash {
                 localMapper.insert(vc);
 
                 e.replyEmbeds(new EmbedBuilder()
-                                .setDescription(MessageProvider.getMessage(Messages.COMMAND_RECOVER_SUCCESS, settings.getLanguage(), vc.getTitle()))
+                                .setDescription(Translations.get(Messages.COMMAND_RECOVER_SUCCESS, settings.getLanguage(), vc.getTitle()))
                                 .setColor(new Color(101, 162, 95))
                                 .build())
                         .setEphemeral(true)
                         .queue();
             } else {
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.COMMAND_RECOVER_NOT_CORRUPTED, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.COMMAND_RECOVER_NOT_CORRUPTED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }
         } else {
-            e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.COMMAND_RECOVER_NOT_A_VC, settings.getLanguage())))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.COMMAND_RECOVER_NOT_A_VC, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
@@ -142,8 +142,8 @@ public class RecoverCommand implements Slash {
     public Parameter[] getParameters(String lang) {
 
         return new Parameter[]{
-                new Parameter(OptionType.CHANNEL, "voice", MessageProvider.getMessage(Messages.COMMAND_RECOVER_PARAMETER_CHANNEL, lang), true),
-                new Parameter(OptionType.BOOLEAN, "pinned", MessageProvider.getMessage(Messages.COMMAND_RECOVER_PARAMETER_PINNED, lang), true)};
+                new Parameter(OptionType.CHANNEL, "voice", Translations.get(Messages.COMMAND_RECOVER_PARAMETER_CHANNEL, lang), true),
+                new Parameter(OptionType.BOOLEAN, "pinned", Translations.get(Messages.COMMAND_RECOVER_PARAMETER_PINNED, lang), true)};
     }
 
     private boolean matches(Permission[] data, EnumSet<Permission> toCheck) {
@@ -167,6 +167,6 @@ public class RecoverCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return MessageProvider.getMessage(Messages.COMMAND_RECOVER_DESCRIPTION, lang);
+        return Translations.get(Messages.COMMAND_RECOVER_DESCRIPTION, lang);
     }
 }

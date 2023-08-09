@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.Member;
@@ -28,11 +28,11 @@ public class ListInteraction implements Interaction {
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.reply(new MessageCreateBuilder()
-                        .setContent(MessageProvider.getMessage(Messages.INTERACTION_LIST_SELECTION_CONTENT, settings.getLanguage()))
+                        .setContent(Translations.get(Messages.INTERACTION_LIST_SELECTION_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
-                                .setPlaceholder(MessageProvider.getMessage(Messages.INTERACTION_LIST_SELECTION_PLACEHOLDER, settings.getLanguage()))
-                                .addOption(MessageProvider.getMessage(Messages.VC_BANNED, settings.getLanguage()), "BAN")
-                                .addOption(MessageProvider.getMessage(Messages.VC_TRUSTED, settings.getLanguage()), "TRUST")
+                                .setPlaceholder(Translations.get(Messages.INTERACTION_LIST_SELECTION_PLACEHOLDER, settings.getLanguage()))
+                                .addOption(Translations.get(Messages.VC_BANNED, settings.getLanguage()), "BAN")
+                                .addOption(Translations.get(Messages.VC_TRUSTED, settings.getLanguage()), "TRUST")
                                 .build()))
                         .build())
                 .setEphemeral(true)
@@ -58,14 +58,14 @@ public class ListInteraction implements Interaction {
             } catch (IllegalArgumentException ex) {
                 // ...se per qualche motivo ambiguo non esiste
                 // mandiamo un messaggio di errore altrettanto ambiguo
-                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
                 return null;
             }
 
-            StringBuilder sb = new StringBuilder(MessageProvider.getMessage(Messages.INTERACTION_LIST_CONTENT, settings.getLanguage())).append("\n\n");
+            StringBuilder sb = new StringBuilder(Translations.get(Messages.INTERACTION_LIST_CONTENT, settings.getLanguage())).append("\n\n");
             AtomicInteger integer = new AtomicInteger(0); // Numero iniziale di record
 
             // Filtra i record e forma il messaggio
@@ -92,7 +92,7 @@ public class ListInteraction implements Interaction {
             int streamCount = integer.get();
             if (streamCount == 0) {
                 // Messaggio nel caso che non ci sia nessuno
-                sb.append(MessageProvider.getMessage(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(RecordType.BAN) ? ":rainbow: " : ":cry:");
+                sb.append(Translations.get(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(RecordType.BAN) ? ":rainbow: " : ":cry:");
             } else {
                 sb.setLength(sb.length() - 2);
 
@@ -131,6 +131,6 @@ public class ListInteraction implements Interaction {
 
     @Override
     public String getName() {
-        return "kick";
+        return "list";
     }
 }
