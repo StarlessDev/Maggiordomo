@@ -5,13 +5,18 @@ import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.data.Settings;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 public interface Slash extends Command {
 
     void execute(Settings settings, SlashCommandInteractionEvent e);
 
-    default Parameter[] getParameters() {
+    default void autocomplete(Settings settings, CommandAutoCompleteInteractionEvent e) {
+
+    }
+
+    default Parameter[] getParameters(String lang) {
         return new Parameter[0];
     }
 

@@ -1,10 +1,11 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.VCStatus;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -20,21 +21,21 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
 import java.awt.*;
 
-@CommandInfo(name = "status", description = "Imposta se tutti possono entrare nella tua stanza oppure solo quelli trustati")
 public class StatusInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        String content = String.format("Al momento la stanza è **%s**",
-                vc.getStatus().equals(VCStatus.OPEN) ? "aperta" : "chiusa");
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+        String open = Translations.get(Messages.VC_OPEN_STATUS, settings.getLanguage());
+        String locked = Translations.get(Messages.VC_LOCKED_STATUS, settings.getLanguage());
+        String content = Translations.get(Messages.INTERACTION_STATUS_CURRENT, settings.getLanguage(), (vc.getStatus().equals(VCStatus.OPEN) ? open : locked).toLowerCase());
 
         e.reply(new MessageCreateBuilder()
                         .setContent(content)
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
                                 .setMaxValues(1)
                                 .setPlaceholder("Come vuoi la tua stanza?")
-                                .addOption("Aperta", VCStatus.OPEN.name())
-                                .addOption("Chiusa", VCStatus.LOCKED.name())
+                                .addOption(open, VCStatus.OPEN.name())
+                                .addOption(locked, VCStatus.LOCKED.name())
                                 .build()))
                         .build())
                 .setEphemeral(true)
@@ -44,13 +45,13 @@ public class StatusInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
-        String label = e.getValues().get(0);
-        if (label != null) {
+    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+        if (!e.getValues().isEmpty()) {
+            String label = e.getValues().get(0);
             // Controlla se il ruolo esiste
             Role usersRole = e.getGuild().getRoleById(settings.getPublicRole());
             if (usersRole == null) {
-                e.replyEmbeds(Embeds.errorEmbed("Il ruolo degli utenti è invalido!"))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INVALID_PUB_ROLE, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -72,7 +73,7 @@ public class StatusInteraction implements Interaction {
                         everyonePerms = everyonePerms.setAllowed(Permission.VOICE_CONNECT);
                     }
 
-                    if(channel.getMembers().size() > 0) {
+                    if(!channel.getMembers().isEmpty()) {
                         everyonePerms = everyonePerms.grant(Permission.VIEW_CHANNEL);
                     } else {
                         everyonePerms = everyonePerms.deny(Permission.VIEW_CHANNEL);
@@ -82,10 +83,10 @@ public class StatusInteraction implements Interaction {
                 }
 
                 // Setta il messaggio di risposta
-                String statusDescription = status.equals(VCStatus.OPEN) ? "aperta a tutti" : "aperta solo agli utenti trustati";
+                Messages successMessage = status.equals(VCStatus.OPEN) ? Messages.INTERACTION_SUCCESS_OPEN : Messages.INTERACTION_SUCCESS_LOCKED;
                 Color embedColor = status.equals(VCStatus.OPEN) ? new Color(239, 210, 95) : new Color(100, 160, 94);
                 e.replyEmbeds(new EmbedBuilder()
-                                .setDescription(String.format("Ora la tua stanza è %s.", statusDescription))
+                                .setDescription(Translations.get(successMessage, settings.getLanguage()))
                                 .setColor(embedColor)
                                 .build())
                         .setEphemeral(true)
@@ -93,15 +94,10 @@ public class StatusInteraction implements Interaction {
 
                 return vc;
             } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-                e.replyEmbeds(Embeds.errorEmbed())
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }
-        } else {
-            e.replyEmbeds(Embeds.errorEmbed("Non hai selezionato niente? :face_with_spiral_eyes:"))
-                    .setEphemeral(true)
-                    .queue();
         }
 
         return null;
@@ -115,5 +111,10 @@ public class StatusInteraction implements Interaction {
     @Override
     public long timeout() {
         return 30;
+    }
+
+    @Override
+    public String getName() {
+        return "status";
     }
 }

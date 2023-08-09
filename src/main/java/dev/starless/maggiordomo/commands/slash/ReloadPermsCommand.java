@@ -1,12 +1,12 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.mongo.objects.QueryBuilder;
@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@CommandInfo(name = "refreshperms", description = "Aggiorna i permessi di tutte le vocali")
 public class ReloadPermsCommand implements Slash {
 
     @Override
@@ -33,6 +32,10 @@ public class ReloadPermsCommand implements Slash {
         LocalVCMapper localMapper = Bot.getInstance().getCore()
                 .getChannelMapper()
                 .getMapper(e.getGuild());
+
+        e.reply(Translations.get(Messages.COMMAND_RELOAD_PERMS_WAITING, settings.getLanguage()))
+                .setEphemeral(true)
+                .queue();
 
         localMapper.bulkSearch(QueryBuilder.init()
                         .add("guild", e.getGuild().getId())
@@ -48,7 +51,6 @@ public class ReloadPermsCommand implements Slash {
                                         Arrays.asList(Perms.voiceOwnerPerms),
                                         Collections.emptyList());
                             } else {
-                                BotLogger.warn("Deleting %s since the owner left!");
                                 localMapper.scheduleForDeletion(vc, channel).complete();
                                 localMapper.delete(vc);
                                 return;
@@ -73,12 +75,20 @@ public class ReloadPermsCommand implements Slash {
                             // PublicRole
                             Role role = e.getGuild().getRoleById(settings.getPublicRole());
                             if (role != null) {
-                                manager = Perms.setPublicPerms(manager, vc.getStatus(), role, channel.getMembers().size() > 0);
+                                manager = Perms.setPublicPerms(manager, vc.getStatus(), role, !channel.getMembers().isEmpty());
                             }
 
-                            manager.queueAfter(count.incrementAndGet() * 250L,
-                                    TimeUnit.MILLISECONDS,
-                                    success -> BotLogger.info(vc.getTitle() + " got its perms refreshed"));
+                            manager.queueAfter(count.incrementAndGet() * 250L, TimeUnit.MILLISECONDS);
                         }));
+    }
+
+    @Override
+    public String getName() {
+        return "refreshperms";
+    }
+
+    @Override
+    public String getDescription(String lang) {
+        return Translations.get(Messages.COMMAND_RELOAD_PERMS_DESCRIPTION, lang);
     }
 }

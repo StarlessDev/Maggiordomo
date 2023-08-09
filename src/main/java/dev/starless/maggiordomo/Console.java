@@ -57,7 +57,7 @@ public class Console extends Thread {
                     guilds.subList(start, end).forEach(str -> sb.append("- \"").append(str).append("\"\n"));
                     BotLogger.info(sb.substring(0, sb.length() - 1));
                 } else {
-                    BotLogger.info("Questa pagina è vuota.");
+                    BotLogger.info("This page is empty.");
                 }
             }
         }

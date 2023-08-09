@@ -2,6 +2,8 @@ package dev.starless.maggiordomo.data.user;
 
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.enums.VCStatus;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.mongo.annotations.MongoKey;
 import dev.starless.mongo.annotations.MongoObject;
 import lombok.EqualsAndHashCode;
@@ -60,8 +62,11 @@ public class VC {
         this(guild, user, channel, "-1", name, 2, VCStatus.LOCKED, false);
     }
 
-    public VC(Member member) {
-        this(member.getGuild().getId(), member.getId(), "-1", "Stanza di " + member.getEffectiveName());
+    public VC(Member member, String language) {
+        this(member.getGuild().getId(),
+                member.getId(),
+                "-1",
+                Translations.get(Messages.VC_NAME, language, member.getEffectiveName()));
     }
 
     public void addRecordPlayer(RecordType type, String id) {

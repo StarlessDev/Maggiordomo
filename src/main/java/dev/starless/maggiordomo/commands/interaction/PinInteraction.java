@@ -1,10 +1,11 @@
 package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -13,20 +14,19 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 
 import java.awt.*;
 
-@CommandInfo(name = "pin", description = "Fa in modo che la tua stanza non si elimini se non viene utilizzata")
 public class PinInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         Bot.getInstance().getCore()
                 .getChannelMapper()
                 .getMapper(e.getGuild())
                 .togglePinStatus(e.getGuild(), settings, vc);
 
-        String content = String.format("Ora la tua stanza%s è bloccata :thumbsup:", vc.isPinned() ? "" : " non");
+        Messages message = vc.isPinned() ? Messages.INTERACTION_PIN_PINNED : Messages.INTERACTION_PIN_UNPINNED;
         e.replyEmbeds(new EmbedBuilder()
                         .setColor(new Color(123, 0, 212))
-                        .setDescription(content)
+                        .setDescription(Translations.get(message, settings.getLanguage()))
                         .build())
                 .setEphemeral(true)
                 .queue();
@@ -42,6 +42,11 @@ public class PinInteraction implements Interaction {
     @Override
     public long timeout() {
         return 30;
+    }
+
+    @Override
+    public String getName() {
+        return "pin";
     }
 
     @Override

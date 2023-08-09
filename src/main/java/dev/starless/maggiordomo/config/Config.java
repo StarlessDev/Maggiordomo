@@ -3,6 +3,7 @@ package dev.starless.maggiordomo.config;
 import com.vdurmont.semver4j.Semver;
 import dev.starless.maggiordomo.Main;
 import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.utils.ConfigUtils;
 import lombok.Getter;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
@@ -38,26 +39,20 @@ public class Config {
             // Se non esiste, cerchiamo di crearla
             try {
                 if (configFile.createNewFile()) {
-                    BotLogger.info("La configurazione è stata creata. Modificala e riavvia il bot");
+                    BotLogger.info("The config has been created. Stop the bot to edit it.");
                 } else {
-                    BotLogger.error("Impossibile creare la configurazione");
+                    BotLogger.error("Could not create the config file");
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                BotLogger.error("An error occurred while creating the config directory: " + e.getMessage());
             }
         }
 
-        loader = YamlConfigurationLoader.builder()
-                .nodeStyle(NodeStyle.BLOCK)
-                .path(Paths.get(configFile.toURI()))
-                .build();
+        loader = ConfigUtils.loaderFromFile(configFile);
         try {
             root = loader.load();
         } catch (IOException e) {
-            BotLogger.error("Impossibile caricare la configurazione: " + e.getMessage());
-            if (e.getCause() != null) {
-                e.getCause().printStackTrace();
-            }
+            BotLogger.error("Could not load the config: " + e.getMessage());
             return false;
         }
 
@@ -67,7 +62,7 @@ public class Config {
             // usando la libreria semver4j
             configUpdating = new Semver(getString(ConfigEntry.CONFIG_VERSION)).isLowerThan(Main.getVersion());
             if (configUpdating) {
-                BotLogger.info(String.format("Aggiornamento della config alla versione %s.", Main.getVersion()));
+                BotLogger.info(String.format("Updating the configuration to v%s.", Main.getVersion()));
 
                 // Get and delete the old nodes
                 getNodeValues(oldValues, root);
@@ -75,7 +70,7 @@ public class Config {
                 // Insert the new config version
                 set(ConfigEntry.CONFIG_VERSION, Main.getVersion(), true); // Imposta la nuova versione della config
             } else {
-                BotLogger.info("La config è già aggiornata.");
+                BotLogger.info("The configuration is up to date.");
             }
         } else {
             set(ConfigEntry.CONFIG_VERSION, Main.getVersion(), false);
@@ -120,7 +115,7 @@ public class Config {
     private void getNodeValues(Map<String, Object> map, CommentedConfigurationNode node) {
         node.childrenMap().forEach((obj, subNode) -> {
             // if the subnode has a children, run the function recursively
-            if (subNode.childrenMap().size() != 0) {
+            if (!subNode.childrenMap().isEmpty()) {
                 getNodeValues(map, subNode);
             } else {
                 // Build the node string path

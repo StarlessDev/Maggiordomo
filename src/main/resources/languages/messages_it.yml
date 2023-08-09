@@ -1,0 +1,428 @@
+# Translations of the strings related to the objects
+# where data is stored
+data:
+  # String related to voice channels
+  vc:
+    # A default name which is assigned the first time a user
+    # creates a temporary voice channel
+    default_name: "Stanza di %s"
+
+    # The "opened" status of a voice channel
+    open_status: "Aperta"
+
+    # The "closed" status of a voice channel
+    closed_status: "Chiusa"
+
+    # Banned users
+    banned: "Bannati"
+
+    # Trusted users
+    trusted: "Trustati"
+
+  # Strings related to the guild's settings
+  settings:
+    # Default title and description of the interface/menu embed
+    # The placeholder {CHANNEL} is going to be replaced with the mention of the vc generator channel
+    embed_title: "Comandi disponibili :books:"
+    embed_description: |-
+      Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**.
+      Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.
+
+    # Default name of the category which holds every voice channel
+    category_name: "rooms"
+
+  # Strings related to the voice channel name filters
+  filters:
+    name_contains: "Filtri base"
+    name_pattern: "Filtri regex"
+
+    # The %s will be replaced is going to be replaced with the filter type
+    explaination: |-
+      # %s
+      Qua sotto sono elencate le voci che hai inserito già nella lista.
+      Clicca su un'opzione per rimuoverla dalla lista.
+
+    flag_prefix: "Questo nome non è permesso perchè"
+
+    # The '%s' is going to be replaced with the flagged word
+    flag_contains: "contiene la parola `%s`"
+
+    # Please note that the '\n' at the end is required, because
+    # a list of the flagged words is going to be appended to this string
+    flag_pattern: "le seguenti parti del nome violano le regole:\n"
+
+    # Message shown due to a possible syntax error in a regular expression
+    regex_error: ">>> :x: Errore di sintassi!"
+
+# Translations for slash commands
+commands:
+  # Every command will have an editable description and parameter descriptions
+  # Since the commands are not global, but separate between guilds,
+  # so we can provide a different translation everytime
+  ban_role:
+    description: "Aggiungi/Togli ruoli dalla blacklist"
+    parameters:
+      role: "Ruolo che verrà messo nella lista ban"
+
+    # Il %s verrà rimpiazzato con una menzione del ruolo aggiunto/rimosso
+    success_added: "Ora il ruolo %s è stato aggiunto alla blacklist"
+    success_removed: "Il ruolo %s è stato rimosso dalla blacklist"
+
+  filters:
+    description: "Gestisci le parole vietate nei nomi delle stanze"
+
+    # The label of the button which adds a filter
+    add_button: "📖 Aggiungi"
+
+    # This is just an explanation of the two types of filters
+    message_content: |-
+      # Filtri 🚧
+      Ci sono due tipi di filtri: **base** e **regex**.
+      I filtri base controllano semplicemente se una parola è presente all'interno del nome della stanza.
+      Il secondo tipo invece usa le espressioni regolari (Regex) e controlla se ci sono una o più corripondenze.
+
+  language:
+    description: "Cambia la lingua dei messaggi del bot"
+
+    parameters:
+      language: "La nuova lingua del server (di default è l'inglese)"
+
+    # The %s will be replaced with the name of the new language
+    success: "La lingua è stata impostata su `%s`."
+
+    # The %s will be replaced with the name of the language
+    # the user tried to set
+    unsupported: "La lingua `%s` non è supportata (o non è stata trovata)."
+
+  menu:
+    description: "Manda il menu per controllare le proprie stanze"
+    success: "Menu creato!"
+    fail: "Impossibile creare il menu!"
+
+  premium_role:
+    description: "Aggiungi/Rimuovi un ruolo dalla lista premium"
+    parameters:
+      role: "Ruolo a cui verranno dati permessi in più"
+
+    # Il %s verrà rimpiazzato con una menzione del ruolo aggiunto/rimosso
+    success_added: "Ora il ruolo %s ha i permessi 'premium'"
+    success_removed: "Al ruolo %s sono stati rimossi i permessi premium)"
+
+  recover:
+    description: "Recupera una VC da un canale vocale"
+    parameters:
+      channel: "Canale vocale da recuperare"
+      pinned: "Indica se il canale è bloccato o no"
+
+    # The owner of the voice channel is not found in the server
+    missing_owner: "Owner del canale non trovato!"
+
+    # The %s will be replaced with the mention of the recovered channel
+    success: "Recuperata la stanza %s"
+
+    # This message is shown if the channel has no corrupted data
+    not_corrupted: "Questo canale vocale è già registrato!"
+
+    # This message is shown if the selected channel is not a voice channel
+    not_a_voice_channel: "Devi selezionare un canale vocale!"
+
+  reload_perms:
+    description: "Aggiorna i permessi di tutte le vocali"
+    waiting: "Sto mettendo in coda gli aggiornamenti necessari... ⏳"
+
+  setup:
+    description: "Crea la categoria dedicata alle stanze"
+
+    # The first message the user will see
+    explanation: |-
+      ## Setup
+      Cosa andrai a personalizzare tra poco:
+      ・ Public role
+      ・ Dettagli della guida: titolo e descrizione dell'embed
+      ・ Giorni di inattività massimi delle stanze fissate
+      
+      Una volta terminato un passaggio clicca "Continua" per passare al prossimo.
+      Ricorda di leggere la [documentazione](https://maggiordomo.starless.dev) per capire meglio le funzioni e il funzionamento di Maggiordomo.
+
+    # The label of the button that starts the setup process
+    start_button: "Inizia 📖"
+
+    # The label of the button that allows the user to advance to the
+    # next step of the setup process
+    continue_button: "Continua ➡"
+
+    cannot_create_menu: |-
+      Impossibile creare il menu! :x:
+      Usa il comando `/maggiordomo setupMenu` in questo canale per riprovare.
+
+    success: "Setup completato! :white_check_mark:"
+
+    steps:
+      role:
+        # The %s will be replaced with a mention of the current chosen role
+        content: |-
+          Seleziona il ruolo che tutti gli utenti devono avere per usare il bot (anche everyone è supportato).
+          Se hai già impostato il ruolo, puoi cliccare sul pulsante 'Continua'.
+          Il ruolo pubblico attuale è `%s`
+
+        role_selector_placeholder: "Seleziona un ruolo"
+        updated: ">>> Ruolo aggiornato :white_check_mark:"
+
+      interface:
+        content: |-
+          Clicca sul pulsante 'Modifica' per cambiare l'embed che viene mostrato.
+          Al momento è disponibile solo un placeholder per la descrizione dell'embed: {CHANNEL} che viene rimpiazzato con la menzione del canale vocale dedicato alla creazione delle stanze.
+          Quando hai fatto, clicca continua per passare al prossimo passaggio.
+
+        preview_prefix: "Ecco la tua preview:"
+        preview_button: "Anteprima 👀"
+        edit_button: "Modifica"
+
+        modal_title_label: "Titolo"
+        modal_desc_label: "Descrizione"
+
+        updated: ">>> Messaggio aggiornato! :white_check_mark:"
+
+      inactivity:
+        content: |-
+          **SOLAMENTE le stanze fissate** hanno una "data di scadenza" per evitare che le categorie si riempiano di stanze inutilizzate.
+          Di default numero di giorni dopo i quali la stanza viene cancellata è -1, cioè la funzione è disabilitata. Puoi scegliere tra 3 a 7 giorni.
+
+        day_selection_placeholer: "Cancella la stanza dopo..."
+        day_selection_default: "Disabilita"
+        days: "giorni"
+
+interactions:
+  # Used when a user has no permission to use a command/interaction
+  no_permission: "Non hai il permesso di usare questa funzione! :books:"
+
+  # This message is display when a user with a banned role tries
+  # to use the bot
+  no_permission_banned: "Sei stato bannato dalle stanze private! :x:"
+
+  # Used when a nonexistent command is requested to be executed
+  # (This should never happen unless something is very wrong)
+  not_found: "Comando non trovato 😵"
+
+  # A generic error message used when a command does not execute correctly
+  # and no specific error message is provided
+  generic_error: "Qualcosa è andato storto. Riprova! :x:"
+
+  # This message is displayed when a command is on cooldown
+  # and cannot be executed at that moment.
+  # The '%.1f' is going to be replaced with the remaining seconds
+  # that the user has to wait (e.g. 20.8).
+  on_cooldown: |-
+    Questo comando ha un **cooldown**!
+    Per favore, attendi ancora __%.1fs__
+
+  # From now on all the strings
+  # refer to the respective menu interactions
+  ban:
+    # Message shown if you try to ban yourself from your own room
+    self_error: "Non puoi bannarti dalla tua stessa stanza!"
+
+    # Message shown if you try to ban a user who is already banned
+    already_banned: "Questo giocatore è già bannato"
+
+    # Message shown if you try to ban a trusted user
+    # (you need to untrust the user first)
+    trusted_error: "Non puoi bannare un utente trustato!"
+
+    # Message shown when you try to ban ad administrator from your room
+    # (it wouldn't work even if the command was not blocked)
+    admin_error: "Non puoi bannare un amministratore dalla stanza!"
+
+    # Message shown if the target is banned successfully
+    success: "%s è stato bannato dalla stanza."
+
+    # This is the embed that will be sent in the DMs of the
+    # user that got banned
+    notification:
+      title: "Sei stato bannato! :no_entry_sign:"
+      # Placeholders:
+      # {ISSUER} will be sostitued
+      description: |-
+        {ISSUER}, il proprietario della stanza `{TARGET}`,
+        ti ha bannato da essa!
+        
+        **Non potrai più rientrare, nè vedere la stanza vocale!**
+
+  delete:
+    # Message shown if the voice channel is deleted and its data is reset
+    success: "La tua stanza è stata cancellata con successo. :white_check_mark:"
+
+  kick:
+    # Message shown when the user tries to kick someone
+    # from an empty voice channel
+    error_empty: "Non c'è nessuno nella tua stanza!"
+
+    # Message shown if the user never created a voice channel
+    error_not_found: "Stanza non trovata!"
+
+    # Pretty self explainatory
+    message_content: |-
+      Seleziona un utente.
+      *Pagina ({CURRENT}/{TOTAL})*
+
+    # Message shown if the target user is kicked successfully
+    success: "L'utente %s è stato kickato dalla stanza! :dash:"
+
+  list:
+    # Strings used in the selection menu
+    selection_content: "Seleziona una delle opzioni qua sotto :point_down:"
+    selection_placeholder: "Quale lista vuoi vedere?"
+
+    # Strings used in the message which actually contains the list
+    list_content: "Ecco a te la lista! :point_down:\n\n"
+    # There will be an emoji after this string
+    # (:rainbow: or :cry:) so leave a space at the end of the string
+    list_empty: "*Non c'è nessuno qui* "
+
+  pin:
+    # Message shown when the room is pinned/unpinned
+    pinned: "Ora la tua stanza è bloccata :thumbsup:"
+    unpinned: "Ora la tua stanza è sbloccata :thumbsup:"
+
+  reset:
+    success: "I tuoi dati sono stati resettati con successo :white_check_mark:"
+
+  size:
+    # Message shown if the user does not input an actual number
+    format_error: "Devi inserire un numero valido! :x:"
+    success: "Ora la stanza può ospitare %s utenti! :eyes:"
+
+  status:
+    # Displays the current status of the room
+    # %s will be replaced with open or locked
+    current_status: "Al momento la stanza è **%s**"
+
+    # The title of the selection menu, which will
+    # have only two options OPEN and LOCKED
+    selection_title: "Come vuoi la tua stanza?"
+
+    success_open: "Ora la tua stanza è aperta a tutti"
+    success_locked: "Ora la tua stanza è aperta solo a te e agli utenti trustati"
+
+  title:
+    # Modal used to input the new voice channel title
+    modal:
+      title: "Inserisci"
+      input_label: "Titolo"
+      # The %s will be replaced with the user's nickname
+      input_placeholder: "Stanza di %s"
+
+    success: "Titolo cambiato! :pencil:"
+
+  trust:
+    # Message shown when a user tries to trust (him/her)self
+    self_error: "Questa è già la tua stanza!"
+
+    # Message shown when the selected user is already trusted
+    already_trusted: "Questo giocatore è già trustato"
+
+    # Message shown when the selected user is banned
+    # (you need to unban the user first)
+    banned_error: "Non puoi trustare un utente bannato!"
+
+    # Message shown when the selected user is banned from the bot
+    target_banned: "Questo utente è bannato dall'utilizzo di questo bot!"
+
+    # The %s will be replaced with the selected users' nickname
+    success: "Hai scelto di fidarti di %s :ok_hand:"
+
+    # This embed will be sent to the trusted user in his/her DMs
+    notification:
+      title: "Sei stato trustato! :innocent:"
+      description: |-
+        {OWNER}, il proprietario della stanza `{TARGET}`,
+        ha deciso di fidarsi di te.
+        
+        **Ora puoi entrare nella sua stanza a tuo piacimento!**
+        *(Anche se chiusa al resto del server)*
+        :point_right: Ricorda di non abusarne!
+
+  unban:
+    empty: "*Non ci sono utenti bannati* :rainbow:"
+
+    # The %s will be replaced by the selected users nickname/username
+    success: "%s è stato sbannato dalla stanza."
+
+    # Embed that will be sent to an unbanned user in the DMs
+    notification:
+      title: "Sei stato sbannato! :tada:"
+      description: |-
+        {OWNER} ti ha rimosso dalla lista dei bannati!
+        
+        Ora puoi vedere e rientrare nella sua stanza `{CHANNEL_NAME}`.
+
+  untrust:
+    empty: "*Non ci sono utenti trustati* :sob:"
+
+    success: "Hai smesso di fidarti di %s e gli hai tolto i permessi."
+
+    # There is no notification for untrust, because too many friendships
+    # were being broken due to that notification. (Yes, I was requested to remove this)
+    # Sometimes ignorance is a bliss, lmao.
+
+# Strings that are used by multiple interactions
+common:
+  # This is the text that the user will input to confirm
+  # a particular action (e.g. deleting the room and its data
+  # or resetting the trusted users)
+  confirmation_value: "si"
+
+  # This is the modal that will appear to confirm that
+  # the user actually wants to execute a potentially destructive command
+  confirmation_modal:
+    title: "Sei sicuro?"
+    # The text above the textinput
+    input_label: "Risposta"
+    # The value of the textinput
+    input_value: "Scrivi qua \"Si\" se sei sicuro"
+
+  # This is the modal that will be used to
+  # input a specific user
+  member_modal:
+    title: "Inserisci"
+
+    # The default value that will appear in the
+    # textbot in the modal
+    input_value: "username#0001, @username o un id"
+
+    # Message shown when the member to ban it's not found
+    # (probably due to an invalid input)
+    input_error: "Errore! Devi inserire un username#tag, @username o ID valido."
+
+  # This selection menu is used to select a user from a list
+  user_selection_menu:
+    # The message above the selection menu
+    message_content: "Scegli un utente :point_down:"
+
+    # The placeholder of the selection menu
+    placeholder: "Utente"
+
+  filters_menu:
+    title: "Inserisci"
+
+    value_basic: |-
+      Inserisci le parole da inserire una sotto all'altra.
+      in
+      questo
+      modo
+
+    value_pattern: "Inserisci qua l'espressione"
+
+  # Message shown when the public role is not found
+  # This is a setup error and should not happen often
+  invalid_public_role: "Il ruolo degli utenti è invalido!"
+
+  # Message shown if a user has not the public role
+  no_public_role: "Quell'utente non ha accesso alle stanze private."
+
+  # Message shown if the user does not select anything
+  # in a selectionmenu (should never happen)
+  error_no_selection: "Non hai selezionato niente? :face_with_spiral_eyes:"
+
+  # Message shown when a user is not found by JDA
+  error_member_not_found: "Questo utente non è più nel server"

@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
@@ -9,6 +8,8 @@ import dev.starless.maggiordomo.data.filter.IFilter;
 import dev.starless.maggiordomo.data.filter.impl.ContainsFilter;
 import dev.starless.maggiordomo.data.filter.impl.PatternFilter;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -21,19 +22,15 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Set;
 
-@CommandInfo(name = "rename", description = "Cambia il nome della tua stanza")
 public class TitleInteraction implements Interaction {
 
-    Set<IFilter> filters = new HashSet<>();
     private final ContainsFilter containsFilter = new ContainsFilter();
     private final PatternFilter patternFilter = new PatternFilter();
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:title");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -48,9 +45,9 @@ public class TitleInteraction implements Interaction {
                 };
 
                 for (String string : settings.getFilterStrings().getOrDefault(type, new HashSet<>())) {
-                    FilterResult result = filter.apply(newTitle, string);
+                    FilterResult result = filter.apply(settings, newTitle, string);
                     if (result.flagged()) {
-                        e.reply("Questo nome non è permesso perchè " + result.message())
+                        e.reply(Translations.get(Messages.FILTER_FLAG_PREFIX, settings.getLanguage()) + " " + result.message())
                                 .setEphemeral(true)
                                 .queue();
                         return null;
@@ -66,7 +63,7 @@ public class TitleInteraction implements Interaction {
             }
 
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription("Titolo cambiato! :pencil:")
+                            .setDescription(Translations.get(Messages.INTERACTION_TITLE_SUCCESS, settings.getLanguage()))
                             .setColor(new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -77,13 +74,13 @@ public class TitleInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), "Inserisci")
-                        .addActionRow(TextInput.create("vc:title", "Titolo", TextInputStyle.SHORT)
+    public VC onButtonInteraction(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
+        e.replyModal(Modal.create(getName(), Translations.get(Messages.INTERACTION_TITLE_MODAL_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("vc:title", Translations.get(Messages.INTERACTION_TITLE_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
                                 .setRequired(true)
                                 .setRequiredRange(1, 99)
                                 .setValue(vc.getTitle())
-                                .setPlaceholder("Stanza di " + e.getUser().getName())
+                                .setPlaceholder(Translations.get(Messages.INTERACTION_TITLE_MODAL_INPUT_PLACEHOLDER, settings.getLanguage(), e.getUser().getName()))
                                 .build())
                         .build())
                 .queue();
@@ -99,5 +96,10 @@ public class TitleInteraction implements Interaction {
     @Override
     public long timeout() {
         return 30;
+    }
+
+    @Override
+    public String getName() {
+        return "rename";
     }
 }

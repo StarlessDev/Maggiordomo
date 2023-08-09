@@ -1,12 +1,13 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.enums.VCStatus;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.data.user.VC;
@@ -27,7 +28,6 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-@CommandInfo(name = "recover", description = "Recupera una VC da un canale vocale")
 public class RecoverCommand implements Slash {
 
     @Override
@@ -35,10 +35,11 @@ public class RecoverCommand implements Slash {
         OptionMapping voiceMapping = e.getOption("voice");
         OptionMapping boolMapping = e.getOption("pinned");
         if (voiceMapping == null || boolMapping == null) return;
+
         if (voiceMapping.getChannelType().equals(ChannelType.VOICE)) {
             String publicRole = settings.getPublicRole();
             if (publicRole == null) {
-                e.replyEmbeds(Embeds.errorEmbed("Manca il public role!"))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INVALID_PUB_ROLE, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
                 return;
@@ -87,7 +88,7 @@ public class RecoverCommand implements Slash {
                 }
 
                 if (user == null) {
-                    e.replyEmbeds(Embeds.errorEmbed("Owner del canale non trovato!"))
+                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.COMMAND_RECOVER_MISSING_OWNER, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
                     return;
@@ -120,28 +121,29 @@ public class RecoverCommand implements Slash {
                 localMapper.insert(vc);
 
                 e.replyEmbeds(new EmbedBuilder()
-                                .setDescription(String.format("Recuperata la stanza %s", vc.getTitle()))
+                                .setDescription(Translations.get(Messages.COMMAND_RECOVER_SUCCESS, settings.getLanguage(), vc.getTitle()))
                                 .setColor(new Color(101, 162, 95))
                                 .build())
                         .setEphemeral(true)
                         .queue();
             } else {
-                e.replyEmbeds(Embeds.errorEmbed("Questo canale vocale è già registrato!"))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.COMMAND_RECOVER_NOT_CORRUPTED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }
         } else {
-            e.replyEmbeds(Embeds.errorEmbed("Devi selezionare un canale vocale!"))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.COMMAND_RECOVER_NOT_A_VC, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
     }
 
     @Override
-    public Parameter[] getParameters() {
+    public Parameter[] getParameters(String lang) {
+
         return new Parameter[]{
-                new Parameter(OptionType.CHANNEL, "voice", "Canale vocale da recuperare", true),
-                new Parameter(OptionType.BOOLEAN, "pinned", "Indica se il canale è bloccato o no", true)};
+                new Parameter(OptionType.CHANNEL, "voice", Translations.get(Messages.COMMAND_RECOVER_PARAMETER_CHANNEL, lang), true),
+                new Parameter(OptionType.BOOLEAN, "pinned", Translations.get(Messages.COMMAND_RECOVER_PARAMETER_PINNED, lang), true)};
     }
 
     private boolean matches(Permission[] data, EnumSet<Permission> toCheck) {
@@ -154,6 +156,17 @@ public class RecoverCommand implements Slash {
             }
             return false;
         });
-        return cache.size() == 0;
+
+        return cache.isEmpty();
+    }
+
+    @Override
+    public String getName() {
+        return "recover";
+    }
+
+    @Override
+    public String getDescription(String lang) {
+        return Translations.get(Messages.COMMAND_RECOVER_DESCRIPTION, lang);
     }
 }

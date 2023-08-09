@@ -2,6 +2,8 @@ package dev.starless.maggiordomo.data;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.filter.FilterType;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.mongo.annotations.MongoKey;
 import dev.starless.mongo.annotations.MongoObject;
 import lombok.Data;
@@ -36,12 +38,13 @@ public class Settings {
     private String voiceID;
     private String menuID;
     private String publicRole;
+    private String language;
     private long maxInactivity;
 
     private String title;
     private String descriptionRaw;
 
-    public Settings(String guild) {
+    public Settings(String guild, String everyone) {
         this.guild = guild;
 
         this.premiumRoles = new HashSet<>();
@@ -56,17 +59,16 @@ public class Settings {
         this.channelID = "-1";
         this.voiceID = "-1";
         this.menuID = "-1";
-        this.publicRole = "-1";
+        this.publicRole = everyone;
+        this.language = "en";
         this.maxInactivity = -1L;
 
-        this.title = "Comandi disponibili :books:";
-        this.descriptionRaw = """
-                Entra in {CHANNEL} per creare la tua stanza e usa questo pannello per **personalizzarla**.
-                Ad ogni bottone è associata una __emoji__: qua sotto puoi leggere la spiegazione dei vari comandi e poi cliccare sul pulsante corrispondente per eseguirlo.""";
+        this.title = Translations.get(Messages.SETTINGS_INTERFACE_TITLE, language);
+        this.descriptionRaw = Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, language);
     }
 
     public Settings(Guild guild) {
-        this(guild.getId());
+        this(guild.getId(), guild.getPublicRole().getId());
     }
 
     public void forEachCategory(Guild guild, Consumer<Category> action) {
@@ -116,7 +118,7 @@ public class Settings {
         Category newCategory;
         try { // Try to create the category
             String categoryName = "rooms";
-            if (categories.size() > 0) {
+            if (!categories.isEmpty()) {
                 categoryName += " (" + (categories.size() + 1) + ")";
             }
 
@@ -186,11 +188,11 @@ public class Settings {
     }
 
     public Category getMainCategory(Guild guild) {
-        return categories.size() > 0 ? guild.getCategoryById(categories.get(0)) : null;
+        return !categories.isEmpty() ? guild.getCategoryById(categories.get(0)) : null;
     }
 
     public boolean isMainCategory(String categoryID) {
-        return categories.size() > 0 && categories.get(0).equals(categoryID);
+        return !categories.isEmpty() && categories.get(0).equals(categoryID);
     }
 
     public String getDescription() {

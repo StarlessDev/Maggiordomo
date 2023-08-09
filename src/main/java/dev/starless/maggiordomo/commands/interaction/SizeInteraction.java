@@ -1,9 +1,10 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -17,11 +18,10 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
 
-@CommandInfo(name = "size", description = "Imposta il numero massimo di utenti nella tua stanza")
 public class SizeInteraction implements Interaction {
 
     @Override
-    public VC execute(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:size");
         if (mapping == null) {
             e.replyEmbeds(Embeds.errorEmbed())
@@ -34,7 +34,7 @@ public class SizeInteraction implements Interaction {
                 if (size < 0 || size > 99) throw new NumberFormatException();
 
             } catch (NumberFormatException ex) {
-                e.replyEmbeds(Embeds.errorEmbed("Devi inserire un numero valido! :x:"))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_SIZE_FORMAT_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -48,7 +48,7 @@ public class SizeInteraction implements Interaction {
             }
 
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(String.format("Ora la stanza può ospitare %s utenti! :eyes:", size != 0 ? size : "∞"))
+                            .setDescription(Translations.get(Messages.INTERACTION_SIZE_SUCCESS, settings.getLanguage(), size != 0 ? size : "∞"))
                             .setColor(new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -61,9 +61,9 @@ public class SizeInteraction implements Interaction {
     }
 
     @Override
-    public VC execute(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), "Inserisci")
-                        .addActionRow(TextInput.create("vc:size", "Numero", TextInputStyle.SHORT)
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+        e.replyModal(Modal.create(getName(), Translations.get(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("vc:size", "Number", TextInputStyle.SHORT)
                                 .setRequiredRange(1, 2)
                                 .setPlaceholder("1-99")
                                 .build())
@@ -76,5 +76,10 @@ public class SizeInteraction implements Interaction {
     @Override
     public Emoji emoji() {
         return Emoji.fromUnicode("👥");
+    }
+
+    @Override
+    public String getName() {
+        return "size";
     }
 }

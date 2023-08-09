@@ -9,7 +9,7 @@ plugins {
 group = "dev.starless.maggiordomo"
 version = "2.0.3"
 
-var jdaVersion = "5.0.0-beta.12"
+var jdaVersion = "5.0.0-beta.13"
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"

@@ -1,10 +1,11 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.types.Slash;
-import dev.starless.maggiordomo.commands.CommandInfo;
 import dev.starless.maggiordomo.commands.Parameter;
+import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
+import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Role;
@@ -13,7 +14,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 
 import java.awt.*;
 
-@CommandInfo(name = "premium", description = "Aggiungi/Rimuovi un ruolo dalla lista premium")
 public class PremiumCommand implements Slash {
 
     @Override
@@ -27,9 +27,12 @@ public class PremiumCommand implements Slash {
         // Aggiorna il database
         Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
+        Messages messages = isAdded ? Messages.COMMAND_PREMIUM_ROLE_SUCCESS_REMOVED : Messages.COMMAND_PREMIUM_ROLE_SUCCESS_ADDED;
+        String desc = Translations.get(messages, settings.getLanguage(), role.getAsMention());
+
         if (success) {
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(String.format(isAdded ? "Al ruolo %s sono stati rimossi i permessi premium)" : "Ora il ruolo %s ha i permessi 'premium'", role.getAsMention()))
+                            .setDescription(desc)
                             .setColor(isAdded ? new Color(239, 210, 95) : new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -42,7 +45,20 @@ public class PremiumCommand implements Slash {
     }
 
     @Override
-    public Parameter[] getParameters() {
-        return new Parameter[]{new Parameter(OptionType.ROLE, "role", "Ruolo a cui verranno dati permessi in più", true)};
+    public Parameter[] getParameters(String lang) {
+        return new Parameter[]{new Parameter(OptionType.ROLE,
+                "role",
+                Translations.get(Messages.COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE, lang),
+                true)};
+    }
+
+    @Override
+    public String getName() {
+        return "premium";
+    }
+
+    @Override
+    public String getDescription(String lang) {
+        return Translations.get(Messages.COMMAND_PREMIUM_ROLE_DESCRIPTION, lang);
     }
 }
