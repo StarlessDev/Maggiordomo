@@ -14,16 +14,16 @@ import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.interfaces.Module;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.logging.BotLogger;
-import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.storage.VCManager;
 import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
+import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import dev.starless.mongo.MongoStorage;
 import dev.starless.mongo.objects.Query;
@@ -65,24 +65,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.*;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
 
 public class Core implements Module {
 
     private final MongoStorage storage;
 
-    @Getter
-    private VCManager channelMapper;
-    @Getter
-    private SettingsMapper settingsMapper;
+    @Getter private VCManager channelMapper;
+    @Getter private SettingsMapper settingsMapper;
 
     private ScheduledExecutorService activityService;
-    @Getter
-    private CommandManager commands;
+    @Getter private CommandManager commands;
 
     public Core(Config config) {
         // Translations are already needed for the Settings schema
@@ -353,7 +352,7 @@ public class Core implements Module {
 
             // Do the same for the description
             String desc = settings.getDescriptionRaw();
-            if(desc.equals(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, settings.getLanguage()))) {
+            if (desc.equals(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, settings.getLanguage()))) {
                 settings.setDescriptionRaw(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, newLanguage));
             }
 
@@ -563,15 +562,18 @@ public class Core implements Module {
     }
 
     @SubscribeEvent
-    public void onAutocomplete(CommandAutoCompleteInteractionEvent e) {
+    public void onAutocomplete(@NotNull CommandAutoCompleteInteractionEvent e) {
         if (!e.getInteraction().isFromGuild()) return;
+
+        String subcommand = e.getSubcommandName();
+        if (subcommand == null) return;
 
         // Handle command autocomplete
         settingsMapper.search(QueryBuilder.init()
                         .add("guild", e.getGuild().getId())
                         .create())
                 .ifPresent(settings -> commands.getCommands().stream()
-                        .filter(command -> command.getName().equalsIgnoreCase(e.getName()))
+                        .filter(command -> command.getName().equalsIgnoreCase(subcommand))
                         .findFirst()
                         .ifPresent(command -> command.autocomplete(settings, e)));
     }

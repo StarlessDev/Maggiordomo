@@ -25,7 +25,7 @@ public class LanguageCommand implements Slash {
         boolean success = Bot.getInstance().getCore().updateLanguage(e.getGuild(), settings, code);
         if (success) {
             String langName = DefaultLanguages.fromCode(code).map(DefaultLanguages::getName).orElse(code);
-            e.reply(Translations.get(Messages.COMMAND_LANGUAGE_FAIL, settings.getLanguage(), langName))
+            e.reply(Translations.get(Messages.COMMAND_LANGUAGE_SUCCESS, settings.getLanguage(), langName))
                     .setEphemeral(true)
                     .queue();
         } else {
@@ -38,7 +38,7 @@ public class LanguageCommand implements Slash {
     @Override
     public void autocomplete(Settings settings, CommandAutoCompleteInteractionEvent e) {
         if (e.getFocusedOption().getName().equals("lang")) {
-            List<net.dv8tion.jda.api.interactions.commands.Command.Choice> options = Translations.getLanguageCodes()
+            List<Command.Choice> options = Translations.getLanguageCodes()
                     .stream()
                     .filter(code -> code.toLowerCase().startsWith(e.getFocusedOption().getValue().toLowerCase()))
                     .map(code -> DefaultLanguages.fromCode(code)
@@ -56,6 +56,7 @@ public class LanguageCommand implements Slash {
                 OptionType.STRING,
                 "lang",
                 Translations.get(Messages.COMMAND_LANGUAGE_PARAMETER_LANG, lang),
+                true,
                 true)
         };
     }

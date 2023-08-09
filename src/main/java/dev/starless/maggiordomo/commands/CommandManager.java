@@ -114,7 +114,7 @@ public class CommandManager {
                     }
 
                     for (Parameter param : command.getParameters(language)) {
-                        data.addOption(param.type(), param.name(), param.description(), param.required());
+                        data.addOption(param.type(), param.name(), param.description(), param.required(), param.autocomplete());
                     }
                     return data;
                 })
