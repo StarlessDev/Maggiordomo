@@ -5,6 +5,8 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -26,12 +28,11 @@ public class ListInteraction implements Interaction {
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.reply(new MessageCreateBuilder()
-                        .setContent("Seleziona una delle opzioni qua sotto :point_down:")
+                        .setContent(MessageProvider.getMessage(Messages.INTERACTION_LIST_SELECTION_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
-                                .setMaxValues(1)
-                                .setPlaceholder("Quale lista vuoi vedere?")
-                                .addOption("Bannati", "BAN")
-                                .addOption("Trustati", "TRUST")
+                                .setPlaceholder(MessageProvider.getMessage(Messages.INTERACTION_LIST_SELECTION_PLACEHOLDER, settings.getLanguage()))
+                                .addOption(MessageProvider.getMessage(Messages.VC_BANNED, settings.getLanguage()), "BAN")
+                                .addOption(MessageProvider.getMessage(Messages.VC_TRUSTED, settings.getLanguage()), "TRUST")
                                 .build()))
                         .build())
                 .setEphemeral(true)
@@ -42,31 +43,29 @@ public class ListInteraction implements Interaction {
 
     @Override
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
-        String label = e.getValues().get(0);
-        int page;
-        try {
-            page = Integer.parseInt(id.split(":")[1]);
-        } catch (NumberFormatException | IndexOutOfBoundsException ex) {
-            page = 0;
-        }
+        if (!e.getValues().isEmpty()) {
+            String label = e.getValues().get(0);
+            int page;
+            try {
+                page = Integer.parseInt(id.split(":")[1]);
+            } catch (NumberFormatException | IndexOutOfBoundsException ex) {
+                page = 0;
+            }
 
-        if (label != null) {
             RecordType type;
             try {
                 type = RecordType.valueOf(label); // Ottieni il tipo selezionato...
             } catch (IllegalArgumentException ex) {
-                ex.printStackTrace();
-
                 // ...se per qualche motivo ambiguo non esiste
                 // mandiamo un messaggio di errore altrettanto ambiguo
-                e.replyEmbeds(Embeds.errorEmbed())
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
                 return null;
             }
 
-            StringBuilder sb = new StringBuilder("Ecco a te la lista! :point_down:\n\n");
+            StringBuilder sb = new StringBuilder(MessageProvider.getMessage(Messages.INTERACTION_LIST_CONTENT, settings.getLanguage())).append("\n\n");
             AtomicInteger integer = new AtomicInteger(0); // Numero iniziale di record
 
             // Filtra i record e forma il messaggio
@@ -93,7 +92,7 @@ public class ListInteraction implements Interaction {
             int streamCount = integer.get();
             if (streamCount == 0) {
                 // Messaggio nel caso che non ci sia nessuno
-                sb.append("*Non c'è nessuno qui* ").append(type.equals(RecordType.BAN) ? ":rainbow: " : ":cry:");
+                sb.append(MessageProvider.getMessage(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(RecordType.BAN) ? ":rainbow: " : ":cry:");
             } else {
                 sb.setLength(sb.length() - 2);
 
@@ -118,10 +117,6 @@ public class ListInteraction implements Interaction {
 
             // Manda il tutto
             e.reply(builder.setContent(sb.toString()).build())
-                    .setEphemeral(true)
-                    .queue();
-        } else {
-            e.replyEmbeds(Embeds.errorEmbed("Non hai selezionato niente? :face_with_spiral_eyes:"))
                     .setEphemeral(true)
                     .queue();
         }

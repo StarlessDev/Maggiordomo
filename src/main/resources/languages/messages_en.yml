@@ -36,12 +36,16 @@ data:
     name_contains: "Basic filters"
     name_pattern: "Regex filters"
 
+    # The label of the button which adds a filter
+    add_button: "📖 Add"
+
+    # The %s will be replaced is going to be replaced with the filter type
     explaination: |-
       # {TYPE}
       Below are listed the entries you have already added to the list.
       Click an option to remove it from the list.
 
-    flag_prefix: "You are not allowed to use this name because "
+    flag_prefix: "You are not allowed to use this name because"
 
     # The '%s' is going to be replaced with the flagged word
     flag_contains: "it contains the word `%s`"
@@ -49,6 +53,9 @@ data:
     # Please note that the '\n' at the end is required, because
     # a list of the flagged words is going to be appended to this string
     flag_pattern: "the following the parts of the name violate our rules:\n"
+
+    # Message shown due to a possible syntax error in a regular expression
+    regex_error: ">>> :x: Errore di sintassi!"
 
 # Translations for slash commands
 commands:
@@ -379,6 +386,16 @@ common:
 
     # The placeholder of the selection menu
     placeholder: "User"
+
+  filters_menu:
+    title: "Input"
+
+    value_basic: |-
+      Write the words you want to add one below another.
+      like
+      this
+
+    value_pattern: "Write here the expression"
 
   # Message shown when the public role is not found
   # This is a setup error and should not happen often

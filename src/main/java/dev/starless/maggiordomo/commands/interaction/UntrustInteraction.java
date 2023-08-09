@@ -5,6 +5,8 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
@@ -29,7 +31,7 @@ public class UntrustInteraction implements Interaction {
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if(page == -1) {
-            e.replyEmbeds(Embeds.errorEmbed("An internal error has occurred.\nThis should never happen!"))
+            e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
 
@@ -41,11 +43,10 @@ public class UntrustInteraction implements Interaction {
 
         MessageCreateBuilder builder = new MessageCreateBuilder();
         if (recordsNumber == 0) {
-            builder.setContent("*Non ci sono utenti con i permessi* :sob:");
+            builder.setContent(MessageProvider.getMessage(Messages.INTERACTION_UNBAN_NOTIFICATION_DESC, settings.getLanguage()));
         } else {
             StringSelectMenu.Builder menuBuilder = StringSelectMenu.create(getName())
-                    .setPlaceholder("Utente")
-                    .setMaxValues(1);
+                    .setPlaceholder(MessageProvider.getMessage(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
 
             records.stream()
                     .filter(record -> record.type().equals(RecordType.TRUST))
@@ -60,14 +61,14 @@ public class UntrustInteraction implements Interaction {
 
             // Credo che a volte, se gli utenti sono bannati ed escono dal server,
             // i membri non vengono trovati e JDA lancia una exception
-            if (menuBuilder.getOptions().size() == 0) {
-                builder.setContent("*Non ci sono utenti trustati* :rainbow:");
+            if (menuBuilder.getOptions().isEmpty()) {
+                builder.setContent(MessageProvider.getMessage(Messages.INTERACTION_UNTRUST_EMPTY, settings.getLanguage()));
             } else {
                 int maxPages = (int) Math.ceil(recordsNumber / 10D);
                 Button backButton = PageUtils.getBackButton(getName(), page);
                 Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
 
-                builder.setContent("Scegli un utente :point_down:")
+                builder.setContent(MessageProvider.getMessage(Messages.USER_SELECTION_MESSAGE_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(menuBuilder.build()))
                         .addComponents(ActionRow.of(backButton, nextButton));
             }
@@ -81,14 +82,14 @@ public class UntrustInteraction implements Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings guild, String id, StringSelectInteractionEvent e) {
-        String memberId = e.getValues().get(0);
-        if (memberId != null) {
+    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+        if (!e.getValues().isEmpty()) {
+            String memberId = e.getValues().get(0);
             Member member = e.getGuild().getMemberById(memberId);
             if (member == null) {
                 vc.removeRecordPlayer(RecordType.TRUST, member.getId());
 
-                e.replyEmbeds(Embeds.errorEmbed("Questo utente non è più nel server"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -99,7 +100,7 @@ public class UntrustInteraction implements Interaction {
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(String.format("Hai smesso di fidarti di %s e gli hai tolto i permessi.", member.getEffectiveName()))
+                            .setDescription(MessageProvider.getMessage(Messages.INTERACTION_UNTRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                             .setColor(new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -109,10 +110,6 @@ public class UntrustInteraction implements Interaction {
             if (channel != null) Perms.reset(member, channel.getManager());
 
             return vc;
-        } else {
-            e.replyEmbeds(Embeds.errorEmbed())
-                    .setEphemeral(true)
-                    .queue();
         }
 
         return null;

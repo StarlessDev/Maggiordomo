@@ -4,6 +4,8 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -21,10 +23,10 @@ public class PinInteraction implements Interaction {
                 .getMapper(e.getGuild())
                 .togglePinStatus(e.getGuild(), settings, vc);
 
-        String content = String.format("Ora la tua stanza%s è bloccata :thumbsup:", vc.isPinned() ? "" : " non");
+        Messages message = vc.isPinned() ? Messages.INTERACTION_PIN_PINNED : Messages.INTERACTION_PIN_UNPINNED;
         e.replyEmbeds(new EmbedBuilder()
                         .setColor(new Color(123, 0, 212))
-                        .setDescription(content)
+                        .setDescription(MessageProvider.getMessage(message, settings.getLanguage()))
                         .build())
                 .setEphemeral(true)
                 .queue();

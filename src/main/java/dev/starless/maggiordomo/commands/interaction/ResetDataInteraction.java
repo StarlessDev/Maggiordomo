@@ -4,6 +4,8 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -36,7 +38,7 @@ public class ResetDataInteraction implements Interaction {
             e.replyEmbeds(Embeds.errorEmbed())
                     .setEphemeral(true)
                     .queue();
-        } else if (mapping.getAsString().equalsIgnoreCase("si")) {
+        } else if (mapping.getAsString().equalsIgnoreCase(MessageProvider.getMessage(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) { // Risparmiamo query importanti in questo modo...
                 Bot.getInstance().getCore()
@@ -49,7 +51,7 @@ public class ResetDataInteraction implements Interaction {
             vc.getTrusted().clear();
             vc.getBanned().clear();
 
-            e.reply("I tuoi dati sono stati resettati con successo :white_check_mark:")
+            e.reply(MessageProvider.getMessage(Messages.INTERACTION_RESET_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
 

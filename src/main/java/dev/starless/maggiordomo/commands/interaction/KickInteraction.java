@@ -3,6 +3,8 @@ package dev.starless.maggiordomo.commands.interaction;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -27,13 +29,13 @@ public class KickInteraction implements Interaction {
         if (voiceChannel != null) {
             List<Member> joinedMembers = voiceChannel.getMembers();
             if (joinedMembers.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed("Non c'è nessuno nella tua stanza!"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else {
                 int page = PageUtils.getPageFromId(id);
                 if (page == -1) {
-                    e.replyEmbeds(Embeds.errorEmbed("An internal error has occurred.\nThis should never happen!"))
+                    e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.GENERIC_ERROR, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
 
@@ -54,10 +56,9 @@ public class KickInteraction implements Interaction {
                 }
 
                 int maxPages = (int) Math.ceil(joinedMembers.size() / 25D);
-                String content = """
-                        Seleziona un utente.
-                        *Pagina (%d/%d)*"""
-                        .formatted(page + 1, maxPages);
+                String content = MessageProvider.getMessageFormatted(Messages.INTERACTION_KICK_MESSAGE_CONTENT, settings.getLanguage(),
+                        "current", page + 1,
+                        "total", maxPages);
 
                 Button backButton = PageUtils.getBackButton(getName(), page);
                 Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
@@ -73,7 +74,7 @@ public class KickInteraction implements Interaction {
 
             return vc;
         } else {
-            e.replyEmbeds(Embeds.errorEmbed("Non c'è nessuno nella tua stanza!"))
+            e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
@@ -83,8 +84,8 @@ public class KickInteraction implements Interaction {
 
     @Override
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
-        String label = e.getValues().get(0);
-        if (label != null) {
+        if (!e.getValues().isEmpty()) {
+            String label = e.getValues().get(0);
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) {
                 channel.getMembers().stream()
@@ -92,20 +93,16 @@ public class KickInteraction implements Interaction {
                         .findFirst()
                         .ifPresent(member -> e.getGuild().kickVoiceMember(member).queue(unused ->
                                 e.replyEmbeds(new EmbedBuilder()
-                                                .setDescription(String.format("L'utente %s è stato kickato dalla stanza! :dash:", member.getEffectiveName()))
+                                                .setDescription(MessageProvider.getMessage(Messages.INTERACTION_KICK_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                                                 .setColor(new Color(239, 210, 95))
                                                 .build())
                                         .setEphemeral(true)
                                         .queue()));
             } else {
-                e.replyEmbeds(Embeds.errorEmbed("Stanza non trovata!"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_KICK_ERROR_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }
-        } else {
-            e.replyEmbeds(Embeds.errorEmbed("Non hai selezionato niente? :face_with_spiral_eyes:"))
-                    .setEphemeral(true)
-                    .queue();
         }
 
         return null;

@@ -3,6 +3,8 @@ package dev.starless.maggiordomo.commands.interaction;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -32,7 +34,7 @@ public class SizeInteraction implements Interaction {
                 if (size < 0 || size > 99) throw new NumberFormatException();
 
             } catch (NumberFormatException ex) {
-                e.replyEmbeds(Embeds.errorEmbed("Devi inserire un numero valido! :x:"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_SIZE_FORMAT_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -46,7 +48,7 @@ public class SizeInteraction implements Interaction {
             }
 
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(String.format("Ora la stanza può ospitare %s utenti! :eyes:", size != 0 ? size : "∞"))
+                            .setDescription(MessageProvider.getMessage(Messages.INTERACTION_SIZE_SUCCESS, settings.getLanguage(), size != 0 ? size : "∞"))
                             .setColor(new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -59,9 +61,9 @@ public class SizeInteraction implements Interaction {
     }
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), "Inserisci")
-                        .addActionRow(TextInput.create("vc:size", "Numero", TextInputStyle.SHORT)
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+        e.replyModal(Modal.create(getName(), MessageProvider.getMessage(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("vc:size", "Number", TextInputStyle.SHORT)
                                 .setRequiredRange(1, 2)
                                 .setPlaceholder("1-99")
                                 .build())

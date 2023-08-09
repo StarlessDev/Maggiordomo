@@ -4,6 +4,8 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.Matcher;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
@@ -36,7 +38,7 @@ public class TrustInteraction implements Interaction {
         } else {
             Optional<Member> optionalMember = Matcher.getMemberFromInput(e.getGuild(), mapping.getAsString());
             if (optionalMember.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed("Errore! Devi inserire un username#tag, @username o ID valido!"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.MEMBER_MODAL_INPUT_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -45,15 +47,15 @@ public class TrustInteraction implements Interaction {
 
             Member member = optionalMember.get();
             if (vc.getUser().equals(member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed("Questa è già la tua stanza!"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_TRUST_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed("Questo giocatore è già trustato"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_TRUST_ALREADY_TRUSTED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed("Non puoi trustare un utente bannato!"))
+                e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_TRUST_BANNED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else {
@@ -62,11 +64,11 @@ public class TrustInteraction implements Interaction {
                         .toList();
 
                 if (!memberRoles.contains(settings.getPublicRole())) {
-                    e.replyEmbeds(Embeds.errorEmbed("Quell'utente non ha il ruolo necessario!"))
+                    e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
                 } else if (memberRoles.stream().anyMatch(role -> settings.getBannedRoles().contains(role))) {
-                    e.replyEmbeds(Embeds.errorEmbed("Questo utente è bannato dall'utilizzo di questo bot!"))
+                    e.replyEmbeds(Embeds.errorEmbed(MessageProvider.getMessage(Messages.INTERACTION_TRUST_TARGET_BANNED, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
                 } else {
@@ -76,7 +78,7 @@ public class TrustInteraction implements Interaction {
 
                     // Rispondi alla richiesta
                     e.replyEmbeds(new EmbedBuilder()
-                                    .setDescription("Hai scelto di fidarti di " + member.getEffectiveName() + " :ok_hand:")
+                                    .setDescription(MessageProvider.getMessage(Messages.INTERACTION_TRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                                     .setColor(new Color(100, 160, 94))
                                     .build())
                             .setEphemeral(true)
@@ -88,17 +90,11 @@ public class TrustInteraction implements Interaction {
                     // Avvisa l'utente trustato in dm
                     member.getUser().openPrivateChannel()
                             .queue(dm -> dm.sendMessageEmbeds(new EmbedBuilder()
-                                                    .setTitle("Sei stato trustato! :innocent:")
+                                                    .setTitle(MessageProvider.getMessage(Messages.INTERACTION_TRUST_NOTIFICATION_TITLE, settings.getLanguage(), member.getEffectiveName()))
                                                     .setColor(new Color(100, 160, 94))
-                                                    .setDescription(String.format("""
-                                                        %s, il proprietario della stanza `%s`,
-                                                        ha deciso di fidarsi di te.
-                                                                                                                
-                                                        **Ora puoi entrare nella sua stanza a tuo piacimento!**
-                                                        *(Anche se chiusa al resto del server)*
-                                                        :point_right: Ricorda di non abusarne!
-                                                        """, e.getUser().getAsMention(), vc.getTitle()
-                                                    ))
+                                                    .setDescription(MessageProvider.getMessageFormatted(Messages.INTERACTION_TRUST_NOTIFICATION_DESC, settings.getLanguage(),
+                                                            "owner", e.getUser().getAsMention(),
+                                                            "target", vc.getTitle()))
                                                     .build())
                                             .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer()),
                                     throwable -> RestUtils.emptyConsumer());
@@ -112,10 +108,10 @@ public class TrustInteraction implements Interaction {
     }
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings guild, String id, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), "Inserisci")
-                        .addActionRow(TextInput.create("trust:id", "utente", TextInputStyle.SHORT)
-                                .setValue("username#0001, @username o un id")
+    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+        e.replyModal(Modal.create(getName(), MessageProvider.getMessage(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("trust:id", "user", TextInputStyle.SHORT)
+                                .setValue(MessageProvider.getMessage(Messages.MEMBER_MODAL_INPUT_VALUE, settings.getLanguage()))
                                 .build())
                         .build())
                 .queue();

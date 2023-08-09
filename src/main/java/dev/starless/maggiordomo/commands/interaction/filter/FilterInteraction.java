@@ -5,6 +5,8 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.MessageProvider;
+import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -13,6 +15,8 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -23,8 +27,6 @@ import java.util.Set;
 public abstract class FilterInteraction implements Interaction {
 
     private final FilterType type;
-    private final String messageContent;
-    private final Modal inputModal;
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
@@ -32,7 +34,15 @@ public abstract class FilterInteraction implements Interaction {
         if (page != -1) {
             e.reply(createMenu(settings, page)).queue();
         } else {
-            e.replyModal(inputModal).queue();
+            TextInputStyle textStyle = type.equals(FilterType.CONTAINS) ? TextInputStyle.PARAGRAPH : TextInputStyle.SHORT;
+
+            e.replyModal(Modal.create(getName(), MessageProvider.getMessage(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
+                            .addActionRow(TextInput.create("input", "input", textStyle)
+                                    .setValue(MessageProvider.getMessage(Messages.FILTER_EXPLANATION, settings.getLanguage()))
+                                    .setRequiredRange(1, 256)
+                                    .build())
+                            .build())
+                    .queue();
         }
 
         return null;
@@ -77,9 +87,13 @@ public abstract class FilterInteraction implements Interaction {
         Set<String> words = settings.getFilterWords(type);
         int maxPages = (int) Math.ceil(words.size() / 10D);
 
-        MessageCreateBuilder builder = new MessageCreateBuilder().setContent(messageContent);
+        String filterName = MessageProvider.getMessage(type.equals(FilterType.CONTAINS) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage());
+        String content = MessageProvider.getMessage(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage(), filterName);
+
+        MessageCreateBuilder builder = new MessageCreateBuilder().setContent(content);
+
         if (!words.isEmpty()) {
-            StringSelectMenu.Builder menu = StringSelectMenu.create(getName()).setPlaceholder("Valori inseriti");
+            StringSelectMenu.Builder menu = StringSelectMenu.create(getName());
             words.stream()
                     .skip(10L * page)
                     .limit(10)
@@ -89,7 +103,7 @@ public abstract class FilterInteraction implements Interaction {
 
         return builder.addActionRow(
                         PageUtils.getBackButton(getName(), page),
-                        Button.secondary(getName() + ":add", "📖 Aggiungi"),
+                        Button.secondary(getName() + ":add", MessageProvider.getMessage(Messages.COMMAND_FILTERS_ADD_BUTTON, settings.getLanguage())),
                         PageUtils.getNextButton(getName(), maxPages, page))
                 .build();
     }

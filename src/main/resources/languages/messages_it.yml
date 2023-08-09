@@ -36,12 +36,13 @@ data:
     name_contains: "Filtri base"
     name_pattern: "Filtri regex"
 
+    # The %s will be replaced is going to be replaced with the filter type
     explaination: |-
-      # {TYPE}
+      # %s
       Qua sotto sono elencate le voci che hai inserito già nella lista.
       Clicca su un'opzione per rimuoverla dalla lista.
 
-    flag_prefix: "Questo nome non è permesso perchè "
+    flag_prefix: "Questo nome non è permesso perchè"
 
     # The '%s' is going to be replaced with the flagged word
     flag_contains: "contiene la parola `%s`"
@@ -49,6 +50,9 @@ data:
     # Please note that the '\n' at the end is required, because
     # a list of the flagged words is going to be appended to this string
     flag_pattern: "le seguenti parti del nome violano le regole:\n"
+
+    # Message shown due to a possible syntax error in a regular expression
+    regex_error: ">>> :x: Errore di sintassi!"
 
 # Translations for slash commands
 commands:
@@ -66,6 +70,9 @@ commands:
 
   filters:
     description: "Gestisci le parole vietate nei nomi delle stanze"
+
+    # The label of the button which adds a filter
+    add_button: "📖 Aggiungi"
 
     # This is just an explanation of the two types of filters
     message_content: |-
@@ -382,6 +389,17 @@ common:
 
     # The placeholder of the selection menu
     placeholder: "Utente"
+
+  filters_menu:
+    title: "Inserisci"
+
+    value_basic: |-
+      Inserisci le parole da inserire una sotto all'altra.
+      in
+      questo
+      modo
+
+    value_pattern: "Inserisci qua l'espressione"
 
   # Message shown when the public role is not found
   # This is a setup error and should not happen often

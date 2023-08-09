@@ -10,7 +10,7 @@ public enum Messages {
     // Strings related to the VC object
     VC_NAME("data.vc.default_name"),
     VC_OPEN_STATUS("data.vc.open_status"),
-    VC_CLOSED_STATUS("data.vc.closed_status"),
+    VC_LOCKED_STATUS("data.vc.closed_status"),
     VC_BANNED("data.vc.banned"),
     VC_TRUSTED("data.vc.trusted"),
 
@@ -20,11 +20,13 @@ public enum Messages {
     SETTINGS_CATEGORY_NAME("data.settings.category_name"),
 
     // Strings related to the filters (classes in the data.filter package)
-    FILTER_BASIC("data.filters.name_contains"),
-    FILTER_PATTERN("data.filters.name_pattern"),
-    FILTER_FLAG_PREFIX("data.filters.flag_prefix"),
-    FILTER_FLAG_CONTAINS("data.filters.flag_contains"),
-    FILTER_FLAG_PATTERN("data.filters.flag_pattern"),
+    FILTER_BASIC("data.settings.filters.name_contains"),
+    FILTER_PATTERN("data.settings.filters.name_pattern"),
+    FILTER_EXPLANATION("data.settings.filters.explanation"),
+    FILTER_FLAG_PREFIX("data.settings.filters.flag_prefix"),
+    FILTER_FLAG_CONTAINS("data.settings.filters.flag_contains"),
+    FILTER_FLAG_PATTERN("data.settings.filters.flag_pattern"),
+    FILTER_PATTERN_ERROR("data.settings.filters.regex_error"),
 
     // Generic strings that are used throughout all the interactions
     NO_PERMISSION("interactions.no_permission"),
@@ -41,6 +43,7 @@ public enum Messages {
 
     COMMAND_FILTERS_DESCRIPTION("commands.filters.description"),
     COMMAND_FILTERS_MESSAGE_CONTENT("commands.filters.message_content"),
+    COMMAND_FILTERS_ADD_BUTTON("commands.filters.add_button"),
 
     COMMAND_MENU_DESCRIPTION("commands.menu.description"),
     COMMAND_MENU_SUCCESS("commands.menu.success"),
@@ -121,6 +124,11 @@ public enum Messages {
     INTERACTION_SUCCESS_OPEN("interactions.status.success_open"),
     INTERACTION_SUCCESS_LOCKED("interactions.status.success_locked"),
 
+    INTERACTION_TITLE_SUCCESS("interactions.title.success"),
+    INTERACTION_TITLE_MODAL_TITLE("interactions.title.modal.title"),
+    INTERACTION_TITLE_MODAL_INPUT_LABEL("interactions.title.modal.input_label"),
+    INTERACTION_TITLE_MODAL_INPUT_PLACEHOLDER("interactions.title.modal.input_placeholder"),
+
     INTERACTION_TRUST_SELF_ERROR("interactions.trust.self_error"),
     INTERACTION_TRUST_ALREADY_TRUSTED("interactions.trust.already_trusted"),
     INTERACTION_TRUST_BANNED_ERROR("interactions.trust.banned_error"),
@@ -142,11 +150,18 @@ public enum Messages {
     CONFIRMATION_MODAL_TITLE("common.confirmation_modal.title"),
     CONFIRMATION_MODAL_INPUT_LABEL("common.confirmation_modal.input_label"),
     CONFIRMATION_MODAL_INPUT_VALUE("common.confirmation_modal.input_value"),
+
     MEMBER_MODAL_TITLE("common.member_modal.title"),
     MEMBER_MODAL_INPUT_VALUE("common.member_modal.input_value"),
     MEMBER_MODAL_INPUT_ERROR("common.input_error"),
+
     USER_SELECTION_MESSAGE_CONTENT("common.user_selection_menu.message_content"),
     USER_SELECTION_PLACEHOLDER("common.user_selection_menu.placeholder"),
+
+    FILTER_MENU_TITLE("common.filters_menu.title"),
+    FILTER_MENU_VALUE_BASIC("common.filters_menu.value_basic"),
+    FILTER_MENU_VALUE_PATTERN("common.filters_menu.value_pattern"),
+
     INVALID_PUB_ROLE("common.invalid_public_role"),
     NO_PUBLIC_ROLE("common.no_public_role"),
     NO_SELECTION("common.error_not_selection"),
