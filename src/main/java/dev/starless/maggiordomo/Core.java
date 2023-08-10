@@ -344,6 +344,8 @@ public class Core implements Module {
     }
 
     public boolean updateLanguage(Guild guild, Settings settings, String newLanguage) {
+        if(settings.getLanguage().equals(newLanguage)) return true;
+
         if (Translations.getLanguageCodes().contains(newLanguage)) {
             // Change the title of the guide if it has not been changed
             String title = settings.getTitle();
