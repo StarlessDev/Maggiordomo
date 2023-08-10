@@ -25,11 +25,11 @@ public class LanguageCommand implements Slash {
         boolean success = Bot.getInstance().getCore().updateLanguage(e.getGuild(), settings, code);
         if (success) {
             String langName = DefaultLanguages.fromCode(code).map(DefaultLanguages::getName).orElse(code);
-            e.reply(Translations.get(Messages.COMMAND_LANGUAGE_SUCCESS, settings.getLanguage(), langName))
+            e.reply(Translations.string(Messages.COMMAND_LANGUAGE_SUCCESS, settings.getLanguage(), langName))
                     .setEphemeral(true)
                     .queue();
         } else {
-            e.reply(Translations.get(Messages.COMMAND_LANGUAGE_FAIL, settings.getLanguage(), code))
+            e.reply(Translations.string(Messages.COMMAND_LANGUAGE_FAIL, settings.getLanguage(), code))
                     .setEphemeral(true)
                     .queue();
         }
@@ -55,7 +55,7 @@ public class LanguageCommand implements Slash {
         return new Parameter[]{new Parameter(
                 OptionType.STRING,
                 "lang",
-                Translations.get(Messages.COMMAND_LANGUAGE_PARAMETER_LANG, lang),
+                Translations.string(Messages.COMMAND_LANGUAGE_PARAMETER_LANG, lang),
                 true,
                 true)
         };
@@ -68,6 +68,6 @@ public class LanguageCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_LANGUAGE_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_LANGUAGE_DESCRIPTION, lang);
     }
 }

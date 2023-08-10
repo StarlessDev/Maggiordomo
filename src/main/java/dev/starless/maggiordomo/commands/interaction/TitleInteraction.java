@@ -47,7 +47,7 @@ public class TitleInteraction implements Interaction {
                 for (String string : settings.getFilterStrings().getOrDefault(type, new HashSet<>())) {
                     FilterResult result = filter.apply(settings, newTitle, string);
                     if (result.flagged()) {
-                        e.reply(Translations.get(Messages.FILTER_FLAG_PREFIX, settings.getLanguage()) + " " + result.message())
+                        e.reply(Translations.string(Messages.FILTER_FLAG_PREFIX, settings.getLanguage()) + " " + result.message())
                                 .setEphemeral(true)
                                 .queue();
                         return null;
@@ -63,7 +63,7 @@ public class TitleInteraction implements Interaction {
             }
 
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(Translations.get(Messages.INTERACTION_TITLE_SUCCESS, settings.getLanguage()))
+                            .setDescription(Translations.string(Messages.INTERACTION_TITLE_SUCCESS, settings.getLanguage()))
                             .setColor(new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -75,12 +75,12 @@ public class TitleInteraction implements Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), Translations.get(Messages.INTERACTION_TITLE_MODAL_TITLE, settings.getLanguage()))
-                        .addActionRow(TextInput.create("vc:title", Translations.get(Messages.INTERACTION_TITLE_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
+        e.replyModal(Modal.create(getName(), Translations.string(Messages.INTERACTION_TITLE_MODAL_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("vc:title", Translations.string(Messages.INTERACTION_TITLE_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
                                 .setRequired(true)
                                 .setRequiredRange(1, 99)
                                 .setValue(vc.getTitle())
-                                .setPlaceholder(Translations.get(Messages.INTERACTION_TITLE_MODAL_INPUT_PLACEHOLDER, settings.getLanguage(), e.getUser().getName()))
+                                .setPlaceholder(Translations.string(Messages.INTERACTION_TITLE_MODAL_INPUT_PLACEHOLDER, settings.getLanguage(), e.getUser().getName()))
                                 .build())
                         .build())
                 .queue();

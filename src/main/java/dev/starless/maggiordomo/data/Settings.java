@@ -63,8 +63,8 @@ public class Settings {
         this.language = "en";
         this.maxInactivity = -1L;
 
-        this.title = Translations.get(Messages.SETTINGS_INTERFACE_TITLE, language);
-        this.descriptionRaw = Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, language);
+        this.title = Translations.string(Messages.SETTINGS_INTERFACE_TITLE, language);
+        this.descriptionRaw = Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, language);
     }
 
     public Settings(Guild guild) {

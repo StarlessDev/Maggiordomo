@@ -32,7 +32,7 @@ public class UnbanInteraction implements Interaction {
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if (page == -1) {
-            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
 
@@ -44,10 +44,10 @@ public class UnbanInteraction implements Interaction {
 
         MessageCreateBuilder builder = new MessageCreateBuilder();
         if (recordsNumber == 0) {
-            builder.setContent(Translations.get(Messages.INTERACTION_UNBAN_EMPTY, settings.getLanguage()));
+            builder.setContent(Translations.string(Messages.INTERACTION_UNBAN_EMPTY, settings.getLanguage()));
         } else {
             StringSelectMenu.Builder menuBuilder = StringSelectMenu.create(getName())
-                    .setPlaceholder(Translations.get(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
+                    .setPlaceholder(Translations.string(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
 
             records.stream()
                     .filter(record -> record.type().equals(RecordType.BAN))
@@ -63,13 +63,13 @@ public class UnbanInteraction implements Interaction {
             // Credo che a volte, se gli utenti sono bannati ed escono dal server,
             // i membri non vengono trovati e JDA lancia una exception
             if (menuBuilder.getOptions().isEmpty()) {
-                builder.setContent(Translations.get(Messages.INTERACTION_UNBAN_EMPTY, settings.getLanguage()));
+                builder.setContent(Translations.string(Messages.INTERACTION_UNBAN_EMPTY, settings.getLanguage()));
             } else {
                 int maxPages = (int) Math.ceil(recordsNumber / 10D);
                 Button backButton = PageUtils.getBackButton(getName(), page);
                 Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
 
-                builder.setContent(Translations.get(Messages.USER_SELECTION_MESSAGE_CONTENT, settings.getLanguage()))
+                builder.setContent(Translations.string(Messages.USER_SELECTION_MESSAGE_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(menuBuilder.build()))
                         .addComponents(ActionRow.of(backButton, nextButton));
             }
@@ -88,7 +88,7 @@ public class UnbanInteraction implements Interaction {
         if (memberId != null) {
             Member member = e.getGuild().getMemberById(memberId);
             if (member == null) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -99,7 +99,7 @@ public class UnbanInteraction implements Interaction {
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(Translations.get(Messages.INTERACTION_UNBAN_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                            .setDescription(Translations.string(Messages.INTERACTION_UNBAN_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                             .setColor(new Color(239, 210, 95))
                             .build())
                     .setEphemeral(true)
@@ -111,9 +111,9 @@ public class UnbanInteraction implements Interaction {
             // Manda un messaggio all'utente sbannato
             member.getUser().openPrivateChannel()
                     .queue(dm -> dm.sendMessageEmbeds(new EmbedBuilder()
-                                            .setTitle(Translations.get(Messages.INTERACTION_UNBAN_NOTIFICATION_TITLE, settings.getLanguage()))
+                                            .setTitle(Translations.string(Messages.INTERACTION_UNBAN_NOTIFICATION_TITLE, settings.getLanguage()))
                                             .setColor(new Color(239, 210, 95))
-                                            .setDescription(Translations.getFormatted(Messages.INTERACTION_UNBAN_NOTIFICATION_DESC, settings.getLanguage(),
+                                            .setDescription(Translations.stringFormatted(Messages.INTERACTION_UNBAN_NOTIFICATION_DESC, settings.getLanguage(),
                                                     "owner", e.getUser().getAsMention(),
                                                     "channel_name", vc.getTitle()))
                                             .build())
@@ -122,7 +122,7 @@ public class UnbanInteraction implements Interaction {
 
             return vc;
         } else {
-            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }

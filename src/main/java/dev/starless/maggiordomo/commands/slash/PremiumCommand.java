@@ -28,7 +28,7 @@ public class PremiumCommand implements Slash {
         Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
         Messages messages = isAdded ? Messages.COMMAND_PREMIUM_ROLE_SUCCESS_REMOVED : Messages.COMMAND_PREMIUM_ROLE_SUCCESS_ADDED;
-        String desc = Translations.get(messages, settings.getLanguage(), role.getAsMention());
+        String desc = Translations.string(messages, settings.getLanguage(), role.getAsMention());
 
         if (success) {
             e.replyEmbeds(new EmbedBuilder()
@@ -48,7 +48,7 @@ public class PremiumCommand implements Slash {
     public Parameter[] getParameters(String lang) {
         return new Parameter[]{new Parameter(OptionType.ROLE,
                 "role",
-                Translations.get(Messages.COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE, lang),
+                Translations.string(Messages.COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE, lang),
                 true)};
     }
 
@@ -59,6 +59,6 @@ public class PremiumCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_PREMIUM_ROLE_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_PREMIUM_ROLE_DESCRIPTION, lang);
     }
 }

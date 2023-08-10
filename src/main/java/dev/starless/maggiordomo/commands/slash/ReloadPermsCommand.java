@@ -33,7 +33,7 @@ public class ReloadPermsCommand implements Slash {
                 .getChannelMapper()
                 .getMapper(e.getGuild());
 
-        e.reply(Translations.get(Messages.COMMAND_RELOAD_PERMS_WAITING, settings.getLanguage()))
+        e.reply(Translations.string(Messages.COMMAND_RELOAD_PERMS_WAITING, settings.getLanguage()))
                 .setEphemeral(true)
                 .queue();
 
@@ -89,6 +89,6 @@ public class ReloadPermsCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_RELOAD_PERMS_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_RELOAD_PERMS_DESCRIPTION, lang);
     }
 }

@@ -26,7 +26,7 @@ public class PinInteraction implements Interaction {
         Messages message = vc.isPinned() ? Messages.INTERACTION_PIN_PINNED : Messages.INTERACTION_PIN_UNPINNED;
         e.replyEmbeds(new EmbedBuilder()
                         .setColor(new Color(123, 0, 212))
-                        .setDescription(Translations.get(message, settings.getLanguage()))
+                        .setDescription(Translations.string(message, settings.getLanguage()))
                         .build())
                 .setEphemeral(true)
                 .queue();

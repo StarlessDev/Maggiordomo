@@ -38,7 +38,7 @@ public class TrustInteraction implements Interaction {
         } else {
             Optional<Member> optionalMember = Matcher.getMemberFromInput(e.getGuild(), mapping.getAsString());
             if (optionalMember.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.MEMBER_MODAL_INPUT_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.MEMBER_MODAL_INPUT_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -47,15 +47,15 @@ public class TrustInteraction implements Interaction {
 
             Member member = optionalMember.get();
             if (vc.getUser().equals(member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_TRUST_SELF_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_TRUST_ALREADY_TRUSTED, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_ALREADY_TRUSTED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_TRUST_BANNED_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_BANNED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else {
@@ -64,11 +64,11 @@ public class TrustInteraction implements Interaction {
                         .toList();
 
                 if (!memberRoles.contains(settings.getPublicRole())) {
-                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
+                    e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
                 } else if (memberRoles.stream().anyMatch(role -> settings.getBannedRoles().contains(role))) {
-                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_TRUST_TARGET_BANNED, settings.getLanguage())))
+                    e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_TARGET_BANNED, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
                 } else {
@@ -78,7 +78,7 @@ public class TrustInteraction implements Interaction {
 
                     // Rispondi alla richiesta
                     e.replyEmbeds(new EmbedBuilder()
-                                    .setDescription(Translations.get(Messages.INTERACTION_TRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                                    .setDescription(Translations.string(Messages.INTERACTION_TRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                                     .setColor(new Color(100, 160, 94))
                                     .build())
                             .setEphemeral(true)
@@ -90,9 +90,9 @@ public class TrustInteraction implements Interaction {
                     // Avvisa l'utente trustato in dm
                     member.getUser().openPrivateChannel()
                             .queue(dm -> dm.sendMessageEmbeds(new EmbedBuilder()
-                                                    .setTitle(Translations.get(Messages.INTERACTION_TRUST_NOTIFICATION_TITLE, settings.getLanguage(), member.getEffectiveName()))
+                                                    .setTitle(Translations.string(Messages.INTERACTION_TRUST_NOTIFICATION_TITLE, settings.getLanguage(), member.getEffectiveName()))
                                                     .setColor(new Color(100, 160, 94))
-                                                    .setDescription(Translations.getFormatted(Messages.INTERACTION_TRUST_NOTIFICATION_DESC, settings.getLanguage(),
+                                                    .setDescription(Translations.stringFormatted(Messages.INTERACTION_TRUST_NOTIFICATION_DESC, settings.getLanguage(),
                                                             "owner", e.getUser().getAsMention(),
                                                             "target", vc.getTitle()))
                                                     .build())
@@ -109,9 +109,9 @@ public class TrustInteraction implements Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), Translations.get(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
+        e.replyModal(Modal.create(getName(), Translations.string(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
                         .addActionRow(TextInput.create("trust:id", "user", TextInputStyle.SHORT)
-                                .setValue(Translations.get(Messages.MEMBER_MODAL_INPUT_VALUE, settings.getLanguage()))
+                                .setValue(Translations.string(Messages.MEMBER_MODAL_INPUT_VALUE, settings.getLanguage()))
                                 .build())
                         .build())
                 .queue();

@@ -27,7 +27,7 @@ public class MenuCommand implements Slash {
                     Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
                     e.getInteraction().getHook().sendMessageEmbeds(new EmbedBuilder()
-                                    .setDescription(Translations.get(Messages.COMMAND_MENU_SUCCESS, settings.getLanguage()))
+                                    .setDescription(Translations.string(Messages.COMMAND_MENU_SUCCESS, settings.getLanguage()))
                                     .setColor(Color.decode("#65A25F"))
                                     .build())
                             .setEphemeral(true)
@@ -35,7 +35,7 @@ public class MenuCommand implements Slash {
                 });
             } else {
                 e.getInteraction().getHook().sendMessageEmbeds(new EmbedBuilder()
-                                .setDescription(Translations.get(Messages.COMMAND_MENU_FAIL, settings.getLanguage()))
+                                .setDescription(Translations.string(Messages.COMMAND_MENU_FAIL, settings.getLanguage()))
                                 .setColor(Color.red)
                                 .build())
                         .setEphemeral(true)
@@ -55,6 +55,6 @@ public class MenuCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_MENU_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_MENU_DESCRIPTION, lang);
     }
 }
