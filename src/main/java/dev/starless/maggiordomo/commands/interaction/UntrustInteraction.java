@@ -31,7 +31,7 @@ public class UntrustInteraction implements Interaction {
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if(page == -1) {
-            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
 
@@ -43,10 +43,10 @@ public class UntrustInteraction implements Interaction {
 
         MessageCreateBuilder builder = new MessageCreateBuilder();
         if (recordsNumber == 0) {
-            builder.setContent(Translations.get(Messages.INTERACTION_UNBAN_NOTIFICATION_DESC, settings.getLanguage()));
+            builder.setContent(Translations.string(Messages.INTERACTION_UNBAN_NOTIFICATION_DESC, settings.getLanguage()));
         } else {
             StringSelectMenu.Builder menuBuilder = StringSelectMenu.create(getName())
-                    .setPlaceholder(Translations.get(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
+                    .setPlaceholder(Translations.string(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
 
             records.stream()
                     .filter(record -> record.type().equals(RecordType.TRUST))
@@ -62,13 +62,13 @@ public class UntrustInteraction implements Interaction {
             // Credo che a volte, se gli utenti sono bannati ed escono dal server,
             // i membri non vengono trovati e JDA lancia una exception
             if (menuBuilder.getOptions().isEmpty()) {
-                builder.setContent(Translations.get(Messages.INTERACTION_UNTRUST_EMPTY, settings.getLanguage()));
+                builder.setContent(Translations.string(Messages.INTERACTION_UNTRUST_EMPTY, settings.getLanguage()));
             } else {
                 int maxPages = (int) Math.ceil(recordsNumber / 10D);
                 Button backButton = PageUtils.getBackButton(getName(), page);
                 Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
 
-                builder.setContent(Translations.get(Messages.USER_SELECTION_MESSAGE_CONTENT, settings.getLanguage()))
+                builder.setContent(Translations.string(Messages.USER_SELECTION_MESSAGE_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(menuBuilder.build()))
                         .addComponents(ActionRow.of(backButton, nextButton));
             }
@@ -89,7 +89,7 @@ public class UntrustInteraction implements Interaction {
             if (member == null) {
                 vc.removeRecordPlayer(RecordType.TRUST, member.getId());
 
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -100,7 +100,7 @@ public class UntrustInteraction implements Interaction {
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()
-                            .setDescription(Translations.get(Messages.INTERACTION_UNTRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                            .setDescription(Translations.string(Messages.INTERACTION_UNTRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                             .setColor(new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)

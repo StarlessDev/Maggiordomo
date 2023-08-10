@@ -37,7 +37,7 @@ public class BanInteraction implements Interaction {
         } else {
             Optional<Member> optionalMember = Matcher.getMemberFromInput(e.getGuild(), mapping.getAsString());
             if (optionalMember.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.MEMBER_MODAL_INPUT_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.MEMBER_MODAL_INPUT_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
 
@@ -46,23 +46,23 @@ public class BanInteraction implements Interaction {
 
             Member member = optionalMember.get();
             if (vc.getUser().equals(member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_BAN_SELF_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_BAN_ALREADY_BANNED, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_ALREADY_BANNED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (member.getRoles().stream().noneMatch(role -> settings.getPublicRole().equals(role.getId()))) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else if (member.hasPermission(Permission.ADMINISTRATOR)) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_BAN_ADMIN_ERROR, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_ADMIN_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else {
@@ -72,7 +72,7 @@ public class BanInteraction implements Interaction {
 
                 // Rispondi alla richiesta
                 e.replyEmbeds(new EmbedBuilder()
-                                .setDescription(Translations.get(Messages.INTERACTION_BAN_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                                .setDescription(Translations.string(Messages.INTERACTION_BAN_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                                 .setColor(new Color(239, 210, 95))
                                 .build())
                         .setEphemeral(true)
@@ -91,14 +91,14 @@ public class BanInteraction implements Interaction {
                 // Avvisa l'utente bannato in dm
                 member.getUser().openPrivateChannel()
                         .queue(dm -> dm.sendMessageEmbeds(new EmbedBuilder()
-                                                .setTitle(Translations.get(Messages.INTERACTION_BAN_NOTIFICATION_TITLE, settings.getLanguage()))
+                                                .setTitle(Translations.string(Messages.INTERACTION_BAN_NOTIFICATION_TITLE, settings.getLanguage()))
                                                 .setColor(new Color(239, 210, 95))
-                                                .setDescription(Translations.getFormatted(Messages.INTERACTION_BAN_NOTIFICATION_DESC, settings.getLanguage(),
+                                                .setDescription(Translations.stringFormatted(Messages.INTERACTION_BAN_NOTIFICATION_DESC, settings.getLanguage(),
                                                         "issuer", e.getUser().getAsMention(),
                                                         "target", vc.getTitle()))
                                                 .build())
                                         .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer()),
-                                throwable -> e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
+                                throwable -> e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
                                         .setEphemeral(true)
                                         .queue());
 
@@ -111,9 +111,9 @@ public class BanInteraction implements Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create( getName(), Translations.get(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
+        e.replyModal(Modal.create( getName(), Translations.string(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
                         .addActionRow(TextInput.create("ban:id", "user", TextInputStyle.SHORT)
-                                .setValue(Translations.get(Messages.MEMBER_MODAL_INPUT_VALUE, settings.getLanguage()))
+                                .setValue(Translations.string(Messages.MEMBER_MODAL_INPUT_VALUE, settings.getLanguage()))
                                 .build())
                         .build())
                 .queue();

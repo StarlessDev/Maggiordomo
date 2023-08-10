@@ -38,6 +38,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.channel.ChannelDeleteEvent;
@@ -104,9 +105,9 @@ public class Core implements Module {
                         .entry("publicRole", "-1")
                         .entry("language", "en")
                         .entry("maxInactivity", -1L)
-                        .entry("title", Translations.get(Messages.SETTINGS_INTERFACE_TITLE, "en"))
+                        .entry("title", Translations.string(Messages.SETTINGS_INTERFACE_TITLE, "en"))
                         .entry("filterStrings", new HashMap<>())
-                        .entry("descriptionRaw", Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, "en")));
+                        .entry("descriptionRaw", Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, "en")));
     }
 
     @Override
@@ -346,15 +347,18 @@ public class Core implements Module {
         if (Translations.getLanguageCodes().contains(newLanguage)) {
             // Change the title of the guide if it has not been changed
             String title = settings.getTitle();
-            if (title.equals(Translations.get(Messages.SETTINGS_INTERFACE_TITLE, settings.getLanguage()))) {
-                settings.setTitle(Translations.get(Messages.SETTINGS_INTERFACE_TITLE, newLanguage));
+            if (title.equals(Translations.string(Messages.SETTINGS_INTERFACE_TITLE, settings.getLanguage()))) {
+                settings.setTitle(Translations.string(Messages.SETTINGS_INTERFACE_TITLE, newLanguage));
             }
 
             // Do the same for the description
             String desc = settings.getDescriptionRaw();
-            if (desc.equals(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, settings.getLanguage()))) {
-                settings.setDescriptionRaw(Translations.get(Messages.SETTINGS_INTERFACE_DESCRIPTION, newLanguage));
+            if (desc.equals(Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, settings.getLanguage()))) {
+                settings.setDescriptionRaw(Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, newLanguage));
             }
+
+            // Change the guide
+            updateMenu(guild, settings);
 
             // Set the new language
             settings.setLanguage(newLanguage);
@@ -397,11 +401,38 @@ public class Core implements Module {
         String content = "# " + settings.getTitle() + "\n\n" + settings.getDescription();
 
         MessageCreateBuilder builder = new MessageCreateBuilder()
-                .addFiles(FileUpload.fromData(getClass().getResourceAsStream("/guide.png"), "guide.png"))
                 .setContent(content)
-                .addComponents(buttonRows);
+                .addComponents(buttonRows)
+                .setSuppressedNotifications(true);
+
+        // Add the image guide
+        FileUpload guide = Translations.guide(settings.getLanguage());
+        if(guide != null) {
+            builder.addFiles(guide);
+        }
 
         return builder.build();
+    }
+
+    public void updateMenu(Guild guild, Settings settings) {
+        TextChannel channel = guild.getTextChannelById(settings.getChannelID());
+        if (channel != null) {
+            channel.retrieveMessageById(settings.getMenuID()).queue(message -> {
+                message.delete().queue();
+
+                MessageCreateData data = Bot.getInstance().getCore().createMenu(guild.getId());
+                if (data != null) {
+                    channel.sendMessage(data).queue(updatedMessage -> {
+                        settings.setMenuID(updatedMessage.getId());
+                        Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                    });
+                } else {
+                    BotLogger.warn("Could not update the menu of the guild (build failed): " + guild.getName());
+                }
+            }, throwable -> BotLogger.warn("Could not update the menu of the guild (no message): " + guild.getName()));
+        } else {
+            BotLogger.warn("Could not update the menu of the guild (no channel): " + guild.getName());
+        }
     }
 
     private void handleJoin(Guild guild, AudioChannel channel, Member member) {
@@ -528,7 +559,7 @@ public class Core implements Module {
         String sub = e.getSubcommandName(); // Ottieni il nome del sottocomando
         if (sub == null) { // Se è nullo, significa che non è stato inserito
             e.reply(new MessageCreateBuilder()
-                            .setContent(Translations.get(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
+                            .setContent(Translations.string(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
                             .build())
                     .setEphemeral(true)
                     .queue();
@@ -548,13 +579,13 @@ public class Core implements Module {
 
                                     command.execute(settings, e);
                                 } else {
-                                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.NO_PERMISSION, settings.getLanguage())))
+                                    e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PERMISSION, settings.getLanguage())))
                                             .setEphemeral(true)
                                             .queue();
                                 }
                             },
                             () -> e.reply(new MessageCreateBuilder()
-                                            .setContent(Translations.get(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
+                                            .setContent(Translations.string(Messages.COMMAND_NOT_FOUND, settings.getLanguage()))
                                             .build())
                                     .setEphemeral(true)
                                     .queue());
@@ -611,7 +642,7 @@ public class Core implements Module {
         Settings settings = opSettings.get();
         boolean handledCorrectly = handleMenuInteraction(event, settings, event.getMember(), id);
         if (!handledCorrectly && !event.isAcknowledged()) {
-            event.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
+            event.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
@@ -622,7 +653,7 @@ public class Core implements Module {
         LocalVCMapper localMapper = channelMapper.getMapper(settings.getGuild());
 
         if (settings.isBanned(member)) {
-            event.reply(Translations.get(Messages.NO_PERMISSION_BANNED, settings.getLanguage()))
+            event.reply(Translations.string(Messages.NO_PERMISSION_BANNED, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
             return false;
@@ -646,7 +677,7 @@ public class Core implements Module {
             if (interaction.hasPermission(event.getMember(), settings)) {
                 // Se non è in fase di creazione
                 if (vc != null && localMapper.isBeingCreated(vc)) {
-                    event.reply(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage()))
+                    event.reply(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage()))
                             .setEphemeral(true)
                             .queue();
                     return false;
@@ -663,7 +694,7 @@ public class Core implements Module {
                         event.replyEmbeds(new EmbedBuilder()
                                         .setColor(new Color(213, 178, 70))
                                         .setAuthor("Warning")
-                                        .setDescription(Translations.get(Messages.ON_COOLDOWN, settings.getLanguage(), result.nextExecutionInstant().toMillis() / 1000D))
+                                        .setDescription(Translations.string(Messages.ON_COOLDOWN, settings.getLanguage(), result.nextExecutionInstant().toMillis() / 1000D))
                                         .build())
                                 .setEphemeral(true)
                                 .queue();
@@ -697,7 +728,7 @@ public class Core implements Module {
                 }
             } else {
                 // Mostra un messaggio di errore
-                event.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.NO_PERMISSION, settings.getLanguage())))
+                event.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PERMISSION, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }

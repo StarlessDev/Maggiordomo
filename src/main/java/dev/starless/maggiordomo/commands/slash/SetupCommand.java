@@ -1,12 +1,10 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.DefaultLanguages;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.logging.BotLogger;
@@ -22,15 +20,11 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
@@ -45,7 +39,6 @@ import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 public class SetupCommand implements Slash, Interaction {
@@ -63,8 +56,8 @@ public class SetupCommand implements Slash, Interaction {
     @Override
     public void execute(Settings settings, SlashCommandInteractionEvent e) {
         MessageCreateData message = new MessageCreateBuilder()
-                .setContent(Translations.get(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage()))
-                .setActionRow(Button.primary("setup:role", Translations.get(Messages.COMMAND_SETUP_START_BUTTON_LABEL, settings.getLanguage())))
+                .setContent(Translations.string(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage()))
+                .setActionRow(Button.primary("setup:role", Translations.string(Messages.COMMAND_SETUP_START_BUTTON_LABEL, settings.getLanguage())))
                 .setSuppressEmbeds(true)
                 .build();
 
@@ -76,7 +69,7 @@ public class SetupCommand implements Slash, Interaction {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
-            String continueButton = Translations.get(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage());
+            String continueButton = Translations.string(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage());
             String content = null;
 
             MessageEditBuilder builder = new MessageEditBuilder();
@@ -84,33 +77,33 @@ public class SetupCommand implements Slash, Interaction {
 
             switch (element) {
                 case "role" -> {
-                    content = Translations.get(Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
+                    content = Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
                             settings.getLanguage(),
                             References.role(e.getGuild(), settings.getPublicRole()));
 
                     EntitySelectMenu roleSelector = EntitySelectMenu.create("setup:role", EntitySelectMenu.SelectTarget.ROLE)
-                            .setPlaceholder(Translations.get(Messages.COMMAND_SETUP_STEPS_ROLE_SELECTOR_PLACEHOLDER, settings.getLanguage()))
+                            .setPlaceholder(Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_SELECTOR_PLACEHOLDER, settings.getLanguage()))
                             .build();
 
                     rows.add(ActionRow.of(roleSelector));
                     rows.add(ActionRow.of(Button.secondary("setup:embed", continueButton)));
                 }
                 case "embed" -> {
-                    content = Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_CONTENT, settings.getLanguage());
+                    content = Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_CONTENT, settings.getLanguage());
 
                     rows.add(ActionRow.of(
-                            Button.success("setup:embed_preview", Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW_BUTTON, settings.getLanguage())),
-                            Button.primary("setup:embed_impl", Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_EDIT_BUTTON, settings.getLanguage())),
+                            Button.success("setup:embed_preview", Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW_BUTTON, settings.getLanguage())),
+                            Button.primary("setup:embed_impl", Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_EDIT_BUTTON, settings.getLanguage())),
                             Button.secondary("setup:inactivity", continueButton)
                     ));
                 }
                 case "embed_impl" -> {
-                    e.replyModal(Modal.create("setup:embed_impl", Translations.get(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
-                                    .addActionRow(TextInput.create("title", Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_MODAL_TITLE, settings.getLanguage()), TextInputStyle.SHORT)
+                    e.replyModal(Modal.create("setup:embed_impl", Translations.string(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
+                                    .addActionRow(TextInput.create("title", Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_MODAL_TITLE, settings.getLanguage()), TextInputStyle.SHORT)
                                             .setValue(settings.getTitle())
                                             .setMaxLength(128)
                                             .build())
-                                    .addActionRow(TextInput.create("desc", Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_MODAL_DESC, settings.getLanguage()), TextInputStyle.PARAGRAPH)
+                                    .addActionRow(TextInput.create("desc", Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_MODAL_DESC, settings.getLanguage()), TextInputStyle.PARAGRAPH)
                                             .setValue(settings.getDescriptionRaw())
                                             .setMaxLength(1024)
                                             .build())
@@ -120,7 +113,7 @@ public class SetupCommand implements Slash, Interaction {
                     return null;
                 }
                 case "embed_preview" -> {
-                    String reply = Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW, settings.getLanguage()) +
+                    String reply = Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW, settings.getLanguage()) +
                             "\n\n# " + settings.getTitle() +
                             "\n\n" + settings.getDescription();
 
@@ -129,14 +122,14 @@ public class SetupCommand implements Slash, Interaction {
                     return null;
                 }
                 case "inactivity" -> {
-                    content = Translations.get(Messages.COMMAND_SETUP_STEPS_INACTIVITY_CONTENT, settings.getLanguage());
+                    content = Translations.string(Messages.COMMAND_SETUP_STEPS_INACTIVITY_CONTENT, settings.getLanguage());
 
                     StringSelectMenu.Builder menu = StringSelectMenu.create("setup:inactivity")
-                            .setPlaceholder(Translations.get(Messages.COMMAND_SETUP_STEPS_INACTIVITY_SELECTION_PLACEHOLDER, settings.getLanguage()))
-                            .addOption(Translations.get(Messages.COMMAND_SETUP_STEPS_INACTIVITY_SELECTION_DEFAULT, settings.getLanguage()), "-1", Emoji.fromUnicode("❌"));
+                            .setPlaceholder(Translations.string(Messages.COMMAND_SETUP_STEPS_INACTIVITY_SELECTION_PLACEHOLDER, settings.getLanguage()))
+                            .addOption(Translations.string(Messages.COMMAND_SETUP_STEPS_INACTIVITY_SELECTION_DEFAULT, settings.getLanguage()), "-1", Emoji.fromUnicode("❌"));
 
                     for (int i = 3; i <= 7; i++) {
-                        menu.addOption(i + " " + Translations.get(Messages.COMMAND_SETUP_STEPS_INACTIVITY_DAYS, settings.getLanguage()),
+                        menu.addOption(i + " " + Translations.string(Messages.COMMAND_SETUP_STEPS_INACTIVITY_DAYS, settings.getLanguage()),
                                 String.valueOf(i),
                                 daysEmojis.getOrDefault(i, Emoji.fromUnicode("❓")));
                     }
@@ -192,12 +185,12 @@ public class SetupCommand implements Slash, Interaction {
 
                 // Se il menu è già stato mandato, aggiornalo
                 if (!settings.getMenuID().equals("-1")) {
-                    updateMenu(e.getGuild(), settings);
+                    Bot.getInstance().getCore().updateMenu(e.getGuild(), settings);
                 }
 
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-                e.reply(Translations.get(Messages.COMMAND_SETUP_STEPS_INTERFACE_UPDATED, settings.getLanguage()))
+                e.reply(Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_UPDATED, settings.getLanguage()))
                         .setEphemeral(true)
                         .queue();
             }
@@ -251,12 +244,12 @@ public class SetupCommand implements Slash, Interaction {
                 settings.setPublicRole(newRole.getId());
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-                e.reply(Translations.get(Messages.COMMAND_SETUP_STEPS_ROLE_UPDATED, settings.getLanguage()))
+                e.reply(Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_UPDATED, settings.getLanguage()))
                         .setEphemeral(true)
                         .queue(success -> {
                             if (message.getButtons().stream().noneMatch(button -> button.getId() != null && button.getId().endsWith("embed"))) {
                                 List<ActionRow> rows = new ArrayList<>(message.getActionRows());
-                                rows.add(ActionRow.of(Button.secondary("setup:embed", Translations.get(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage()))));
+                                rows.add(ActionRow.of(Button.secondary("setup:embed", Translations.string(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage()))));
 
                                 message.editMessage(MessageEditBuilder.fromMessage(message)
                                                 .setComponents(rows)
@@ -270,34 +263,13 @@ public class SetupCommand implements Slash, Interaction {
         return null;
     }
 
-    private void updateMenu(Guild guild, Settings settings) {
-        TextChannel channel = guild.getTextChannelById(settings.getChannelID());
-        if (channel != null) {
-            channel.retrieveMessageById(settings.getMenuID()).queue(message -> {
-                message.delete().queue();
-
-                MessageCreateData data = Bot.getInstance().getCore().createMenu(guild.getId());
-                if (data != null) {
-                    channel.sendMessage(data).queue(updatedMessage -> {
-                        settings.setMenuID(updatedMessage.getId());
-                        Bot.getInstance().getCore().getSettingsMapper().update(settings);
-                    });
-                } else {
-                    BotLogger.warn("Could not update the menu of the guild (build failed): " + guild.getName());
-                }
-            }, throwable -> BotLogger.warn("Could not update the menu of the guild (no message): " + guild.getName()));
-        } else {
-            BotLogger.warn("Could not update the menu of the guild (no channel): " + guild.getName());
-        }
-    }
-
     private void completeSetup(Guild guild, InteractionHook hook, Settings settings) {
         Consumer<Throwable> errorHandler = throwable -> {
             BotLogger.error("Something went wrong (%s) while setting up the guild '%s'",
                     throwable.getMessage(),
                     guild.getName());
 
-            hook.sendMessage(">>> " + Translations.get(Messages.GENERIC_ERROR, settings.getLanguage()))
+            hook.sendMessage(">>> " + Translations.string(Messages.GENERIC_ERROR, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         };
@@ -361,13 +333,13 @@ public class SetupCommand implements Slash, Interaction {
                                 });
                             } else {
                                 textChannel.sendMessage(new MessageCreateBuilder()
-                                                .setContent(Translations.get(Messages.COMMAND_SETUP_MENU_ERROR, settings.getLanguage()))
+                                                .setContent(Translations.string(Messages.COMMAND_SETUP_MENU_ERROR, settings.getLanguage()))
                                                 .build())
                                         .queue();
                             }
 
                             // Manda il feedback all'utente
-                            hook.sendMessage(">>> " + Translations.get(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
+                            hook.sendMessage(">>> " + Translations.string(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
                                     .setEphemeral(true)
                                     .queue();
                         }, errorHandler);
@@ -384,7 +356,7 @@ public class SetupCommand implements Slash, Interaction {
             // quindi facciamo partire un check forzato per rendere effettivi i cambiamenti da subito
             new Thread(new ActivityChecker(guild.getId())).start();
 
-            hook.sendMessage(">>> " + Translations.get(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
+            hook.sendMessage(">>> " + Translations.string(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         }
@@ -407,6 +379,6 @@ public class SetupCommand implements Slash, Interaction {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_SETUP_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_SETUP_DESCRIPTION, lang);
     }
 }

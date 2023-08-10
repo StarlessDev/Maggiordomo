@@ -66,7 +66,7 @@ public class VC {
         this(member.getGuild().getId(),
                 member.getId(),
                 "-1",
-                Translations.get(Messages.VC_NAME, language, member.getEffectiveName()));
+                Translations.string(Messages.VC_NAME, language, member.getEffectiveName()));
     }
 
     public void addRecordPlayer(RecordType type, String id) {

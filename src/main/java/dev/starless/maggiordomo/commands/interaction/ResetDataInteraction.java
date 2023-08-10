@@ -38,7 +38,7 @@ public class ResetDataInteraction implements Interaction {
             e.replyEmbeds(Embeds.errorEmbed())
                     .setEphemeral(true)
                     .queue();
-        } else if (mapping.getAsString().equalsIgnoreCase(Translations.get(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
+        } else if (mapping.getAsString().equalsIgnoreCase(Translations.string(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) { // Risparmiamo query importanti in questo modo...
                 Bot.getInstance().getCore()
@@ -51,7 +51,7 @@ public class ResetDataInteraction implements Interaction {
             vc.getTrusted().clear();
             vc.getBanned().clear();
 
-            e.reply(Translations.get(Messages.INTERACTION_RESET_SUCCESS, settings.getLanguage()))
+            e.reply(Translations.string(Messages.INTERACTION_RESET_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
 

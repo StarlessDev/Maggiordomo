@@ -11,10 +11,10 @@ public class FiltersCommand implements Slash {
 
     @Override
     public void execute(Settings settings, SlashCommandInteractionEvent e) {
-        e.reply(Translations.get(Messages.COMMAND_FILTERS_MESSAGE_CONTENT, settings.getLanguage()))
+        e.reply(Translations.string(Messages.COMMAND_FILTERS_MESSAGE_CONTENT, settings.getLanguage()))
                 .addActionRow(
-                        Button.primary("contains", Translations.get(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage())),
-                        Button.secondary("pattern", Translations.get(Messages.FILTER_FLAG_PATTERN, settings.getLanguage()))
+                        Button.primary("contains", Translations.string(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage())),
+                        Button.secondary("pattern", Translations.string(Messages.FILTER_FLAG_PATTERN, settings.getLanguage()))
                 )
                 .queue();
     }
@@ -26,6 +26,6 @@ public class FiltersCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_FILTERS_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_FILTERS_DESCRIPTION, lang);
     }
 }

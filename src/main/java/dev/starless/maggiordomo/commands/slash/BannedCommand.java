@@ -31,7 +31,7 @@ public class BannedCommand implements Slash {
         if (success) {
             e.replyEmbeds(new EmbedBuilder()
                             // String.format(isAdded ? "Il ruolo %s è stato rimosso dalla blacklist" : "Ora il ruolo %s è stato aggiunto alla blacklist", role.getAsMention())
-                            .setDescription(Translations.get(message, settings.getLanguage()))
+                            .setDescription(Translations.string(message, settings.getLanguage()))
                             .setColor(toBeRemoved ? new Color(239, 210, 95) : new Color(100, 160, 94))
                             .build())
                     .setEphemeral(true)
@@ -47,7 +47,7 @@ public class BannedCommand implements Slash {
     public Parameter[] getParameters(String lang) {
         return new Parameter[]{new Parameter(OptionType.ROLE,
                 "role",
-                Translations.get(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang),
+                Translations.string(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang),
                 true)};
     }
 
@@ -58,6 +58,6 @@ public class BannedCommand implements Slash {
 
     @Override
     public String getDescription(String lang) {
-        return Translations.get(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang);
+        return Translations.string(Messages.COMMAND_BAN_ROLE_DESCRIPTION, lang);
     }
 }

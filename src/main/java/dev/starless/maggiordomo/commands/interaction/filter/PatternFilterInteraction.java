@@ -26,7 +26,7 @@ public class PatternFilterInteraction extends FilterInteraction {
                 settings.modifyFilters(FilterType.REGEX, set -> set.add(pattern.pattern()));
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
             } catch (PatternSyntaxException ex) {
-                e.reply(Translations.get(Messages.FILTER_PATTERN_ERROR, settings.getLanguage()) + "\n" + ex.getMessage())
+                e.reply(Translations.string(Messages.FILTER_PATTERN_ERROR, settings.getLanguage()) + "\n" + ex.getMessage())
                         .setEphemeral(true)
                         .queue();
             }

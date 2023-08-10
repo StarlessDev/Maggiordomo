@@ -29,13 +29,13 @@ public class KickInteraction implements Interaction {
         if (voiceChannel != null) {
             List<Member> joinedMembers = voiceChannel.getMembers();
             if (joinedMembers.isEmpty()) {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             } else {
                 int page = PageUtils.getPageFromId(id);
                 if (page == -1) {
-                    e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.GENERIC_ERROR, settings.getLanguage())))
+                    e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
                             .setEphemeral(true)
                             .queue();
 
@@ -56,7 +56,7 @@ public class KickInteraction implements Interaction {
                 }
 
                 int maxPages = (int) Math.ceil(joinedMembers.size() / 25D);
-                String content = Translations.getFormatted(Messages.INTERACTION_KICK_MESSAGE_CONTENT, settings.getLanguage(),
+                String content = Translations.stringFormatted(Messages.INTERACTION_KICK_MESSAGE_CONTENT, settings.getLanguage(),
                         "current", page + 1,
                         "total", maxPages);
 
@@ -74,7 +74,7 @@ public class KickInteraction implements Interaction {
 
             return vc;
         } else {
-            e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
+            e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_KICK_ERROR_EMPTY, settings.getLanguage())))
                     .setEphemeral(true)
                     .queue();
         }
@@ -93,13 +93,13 @@ public class KickInteraction implements Interaction {
                         .findFirst()
                         .ifPresent(member -> e.getGuild().kickVoiceMember(member).queue(unused ->
                                 e.replyEmbeds(new EmbedBuilder()
-                                                .setDescription(Translations.get(Messages.INTERACTION_KICK_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                                                .setDescription(Translations.string(Messages.INTERACTION_KICK_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
                                                 .setColor(new Color(239, 210, 95))
                                                 .build())
                                         .setEphemeral(true)
                                         .queue()));
             } else {
-                e.replyEmbeds(Embeds.errorEmbed(Translations.get(Messages.INTERACTION_KICK_ERROR_NOT_FOUND, settings.getLanguage())))
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_KICK_ERROR_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
             }
