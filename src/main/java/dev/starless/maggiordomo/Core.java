@@ -446,10 +446,6 @@ public class Core implements Module {
         QueryBuilder builder = QueryBuilder.init().add("guild", guildID);
         // Controlla se la gilda ha una categoria setuppata
         settingsMapper.search(builder.create()).ifPresent(settings -> {
-            // Controlla se l'utente è bannato e non fare niente se è il caso
-            isMemberBanned.set(settings.isBanned(member));
-            if (isMemberBanned.get()) return;
-
             // Prendi gli oggetti utili
             Category category = settings.getAvailableCategory(guild);
             Role publicRole = guild.getRoleById(settings.getPublicRole());
@@ -460,6 +456,13 @@ public class Core implements Module {
 
             // Se il canale è il canale di creazione della vc
             if (channel.getId().equals(settings.getVoiceID())) {
+                // Controlla se l'utente è bannato e non fare niente se è il caso e kickalo
+                isMemberBanned.set(settings.isBanned(member));
+                if (isMemberBanned.get()) {
+                    guild.kickVoiceMember(member).queue();
+                    return;
+                }
+
                 // Se esistono dei dati salvati...
                 if (cachedMemberVC.isPresent()) {
                     VC vc = cachedMemberVC.get(); // ...ottienili
