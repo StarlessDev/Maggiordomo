@@ -367,9 +367,9 @@ interactions:
         Now you can see and join `{CHANNEL_NAME}` again.
 
   untrust:
-    empty: "*You do not trust nobody* :sob:"
+    empty: "*You do not trust anybody* :sob:"
 
-    success: "You stopped trusting %s and took away the user's permissions."
+    success: "You stopped trusting %s and took away their permissions."
 
     # There is no notification for untrust, because too many friendships
     # were being broken due to that notification. (Yes, I was requested to remove this)

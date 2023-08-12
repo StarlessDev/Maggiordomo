@@ -20,10 +20,10 @@ public class ResetDataInteraction implements Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        e.replyModal(Modal.create(getName(), "Sei sicuro?")
-                        .addActionRow(TextInput.create("vc:confirmation", "Risposta", TextInputStyle.SHORT)
+        e.replyModal(Modal.create(getName(), Translations.string(Messages.CONFIRMATION_MODAL_TITLE, settings.getLanguage()))
+                        .addActionRow(TextInput.create("vc:confirmation", Translations.string(Messages.CONFIRMATION_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
                                 .setMaxLength(31)
-                                .setValue("Scrivi qua \"Si\" se sei sicuro")
+                                .setValue(Translations.string(Messages.CONFIRMATION_MODAL_INPUT_VALUE, settings.getLanguage()))
                                 .build())
                         .build())
                 .queue();
