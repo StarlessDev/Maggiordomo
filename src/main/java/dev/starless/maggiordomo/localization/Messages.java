@@ -160,7 +160,7 @@ public enum Messages {
 
     MEMBER_MODAL_TITLE("common.member_modal.title"),
     MEMBER_MODAL_INPUT_VALUE("common.member_modal.input_value"),
-    MEMBER_MODAL_INPUT_ERROR("common.input_error"),
+    MEMBER_MODAL_INPUT_ERROR("common.member_modal.input_error"),
 
     USER_SELECTION_MESSAGE_CONTENT("common.user_selection_menu.message_content"),
     USER_SELECTION_PLACEHOLDER("common.user_selection_menu.placeholder"),
