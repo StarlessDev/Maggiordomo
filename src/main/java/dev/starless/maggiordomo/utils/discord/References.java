@@ -38,6 +38,13 @@ public class References {
 
     public String roleName(Guild guild, String id) {
         Role role = guild.getRoleById(id);
-        return "@" + (role != null ? role.getName() : "Unknown");
+        if(role == null) return "@Unknown";
+
+        String out = "";
+        if(role.getIdLong() != guild.getPublicRole().getIdLong()) {
+            out += "@";
+        }
+
+        return out + role.getName();
     }
 }

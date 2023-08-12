@@ -151,6 +151,13 @@ public class Perms {
     public VoiceChannelManager setPublicPerms(VoiceChannelManager manager, VCStatus status, Role publicRole, boolean visible) {
         if (manager == null || publicRole == null) return manager;
 
+        Role everyone = publicRole.getGuild().getPublicRole();
+        if (publicRole.getIdLong() != everyone.getIdLong()) {
+            manager = manager.putRolePermissionOverride(everyone.getIdLong(),
+                    Collections.emptyList(),
+                    List.of(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT, Permission.MESSAGE_SEND));
+        }
+
         List<Permission> allowed = new ArrayList<>(voicePublicAllowedPerms);
         List<Permission> denied = new ArrayList<>(voicePublicDeniedPerms);
 
