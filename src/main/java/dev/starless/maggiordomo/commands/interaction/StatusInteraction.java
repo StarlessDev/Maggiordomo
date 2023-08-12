@@ -33,7 +33,7 @@ public class StatusInteraction implements Interaction {
                         .setContent(content)
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
                                 .setMaxValues(1)
-                                .setPlaceholder("Come vuoi la tua stanza?")
+                                .setPlaceholder(Translations.string(Messages.INTERACTION_SELECTION_TITLE, settings.getLanguage()))
                                 .addOption(open, VCStatus.OPEN.name())
                                 .addOption(locked, VCStatus.LOCKED.name())
                                 .build()))
