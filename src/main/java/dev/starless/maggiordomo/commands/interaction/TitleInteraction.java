@@ -40,7 +40,7 @@ public class TitleInteraction implements Interaction {
             String newTitle = mapping.getAsString();
             for (FilterType type : FilterType.values()) {
                 IFilter filter = switch (type) {
-                    case CONTAINS -> containsFilter;
+                    case BASIC -> containsFilter;
                     case REGEX -> patternFilter;
                 };
 

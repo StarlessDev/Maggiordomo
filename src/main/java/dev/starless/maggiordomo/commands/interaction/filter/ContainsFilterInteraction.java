@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class ContainsFilterInteraction extends FilterInteraction {
 
     public ContainsFilterInteraction() {
-        super(FilterType.CONTAINS);
+        super(FilterType.BASIC);
     }
 
     @Override
@@ -19,7 +19,7 @@ public class ContainsFilterInteraction extends FilterInteraction {
         ModalMapping mapping = e.getValue("input");
         if (mapping != null) {
             String[] words = mapping.getAsString().split("\n");
-            settings.modifyFilters(FilterType.CONTAINS, set -> set.addAll(Arrays.asList(words)));
+            settings.modifyFilters(FilterType.BASIC, set -> set.addAll(Arrays.asList(words)));
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
         }
     }

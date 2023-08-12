@@ -31,6 +31,6 @@ public class ContainsFilter implements IFilter {
 
     @Override
     public FilterType type() {
-        return FilterType.CONTAINS;
+        return FilterType.BASIC;
     }
 }

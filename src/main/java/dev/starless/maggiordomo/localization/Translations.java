@@ -48,7 +48,7 @@ public class Translations {
 
             String guideFileName = "guide_" + lang.getCode() + ".png";
             File guideFile = new File(guidesDir, guideFileName);
-            if(!guideFile.exists()) {
+            if (!guideFile.exists()) {
                 copyFromClasspath(guideFile, "guides/" + guideFileName);
             }
         }

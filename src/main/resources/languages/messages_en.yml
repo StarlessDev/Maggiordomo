@@ -33,17 +33,8 @@ data:
 
   # Strings related to the voice channel name filters
   filters:
-    name_contains: "Basic filters"
-    name_pattern: "Regex filters"
-
-    # The label of the button which adds a filter
-    add_button: "📖 Add"
-
-    # The %s will be replaced is going to be replaced with the filter type
-    explaination: |-
-      # {TYPE}
-      Below are listed the entries you have already added to the list.
-      Click an option to remove it from the list.
+    basic_name: "Basic filters"
+    pattern_name: "Regex filters"
 
     flag_prefix: "You are not allowed to use this name because"
 
@@ -55,7 +46,7 @@ data:
     flag_pattern: "the following the parts of the name violate our rules:\n"
 
     # Message shown due to a possible syntax error in a regular expression
-    regex_error: ">>> :x: Errore di sintassi!"
+    regex_error: ">>> :x: Syntax error!"
 
 # Translations for slash commands
 commands:
@@ -87,12 +78,31 @@ commands:
   filters:
     description: "Manage the words filtered from the channel's names"
 
+    # The label of the button which adds a filter
+    add_button: "📖 Add"
+
     # This is just an explanation of the two types of filters
     message_content: |-
       # Filters 🚧
       There are two types of filters: **basic** e **regex**.
       The basic filters just check if the channel's title contains a certain word.
       The second type uses regular expressions (Regex) and checks if the channel's name has one or more matches.
+
+    # Once you decide what type of filters you want to edit, this message will be displayed
+    # The %s will be replaced is going to be replaced with the filter type
+    explanation: |-
+      # %s
+      Below are listed the entries you have already added to the list.
+      Click an option to remove it from the list.
+
+    # This text will be displayed in the modal to explain how values
+    # need to be written inside the text input
+    basic_input: |-
+      Write the words you want to add one below another
+      like
+      this
+
+    pattern_input: "Write here the expression you want to add"
 
   menu:
     description: "Sends the interface used to edit the channels in this channel"

@@ -20,13 +20,12 @@ public enum Messages {
     SETTINGS_CATEGORY_NAME("data.settings.category_name"),
 
     // Strings related to the filters (classes in the data.filter package)
-    FILTER_BASIC("data.settings.filters.name_contains"),
-    FILTER_PATTERN("data.settings.filters.name_pattern"),
-    FILTER_EXPLANATION("data.settings.filters.explanation"),
-    FILTER_FLAG_PREFIX("data.settings.filters.flag_prefix"),
-    FILTER_FLAG_CONTAINS("data.settings.filters.flag_contains"),
-    FILTER_FLAG_PATTERN("data.settings.filters.flag_pattern"),
-    FILTER_PATTERN_ERROR("data.settings.filters.regex_error"),
+    FILTER_BASIC("data.filters.basic_name"),
+    FILTER_PATTERN("data.filters.pattern_name"),
+    FILTER_FLAG_PREFIX("data.filters.flag_prefix"),
+    FILTER_FLAG_CONTAINS("data.filters.flag_contains"),
+    FILTER_FLAG_PATTERN("data.filters.flag_pattern"),
+    FILTER_PATTERN_ERROR("data.filters.regex_error"),
 
     // Generic strings that are used throughout all the interactions
     NO_PERMISSION("interactions.no_permission"),
@@ -43,7 +42,10 @@ public enum Messages {
 
     COMMAND_FILTERS_DESCRIPTION("commands.filters.description"),
     COMMAND_FILTERS_MESSAGE_CONTENT("commands.filters.message_content"),
+    COMMAND_FILTERS_EXPLANATION("commands.filters.explanation"),
     COMMAND_FILTERS_ADD_BUTTON("commands.filters.add_button"),
+    COMMAND_FILTERS_BASIC_INPUT("commands.filters.basic_input"),
+    COMMAND_FILTERS_PATTERN_INPUT("commands.filters.pattern_input"),
 
     COMMAND_LANGUAGE_DESCRIPTION("commands.language.description"),
     COMMAND_LANGUAGE_PARAMETER_LANG("commands.language.parameters.language"),

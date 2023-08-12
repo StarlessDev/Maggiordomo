@@ -33,14 +33,8 @@ data:
 
   # Strings related to the voice channel name filters
   filters:
-    name_contains: "Filtri base"
-    name_pattern: "Filtri regex"
-
-    # The %s will be replaced is going to be replaced with the filter type
-    explaination: |-
-      # %s
-      Qua sotto sono elencate le voci che hai inserito già nella lista.
-      Clicca su un'opzione per rimuoverla dalla lista.
+    basic_name: "Filtri base"
+    pattern_name: "Filtri regex"
 
     flag_prefix: "Questo nome non è permesso perchè"
 
@@ -80,6 +74,22 @@ commands:
       Ci sono due tipi di filtri: **base** e **regex**.
       I filtri base controllano semplicemente se una parola è presente all'interno del nome della stanza.
       Il secondo tipo invece usa le espressioni regolari (Regex) e controlla se ci sono una o più corripondenze.
+
+    # Once you decide what type of filters you want to edit, this message will be displayed
+    # The %s will be replaced is going to be replaced with the filter type
+    explanation: |-
+      # %s
+      Qua sotto sono elencate le voci che hai inserito già nella lista.
+      Clicca su un'opzione per rimuoverla dalla lista.
+
+    # This text will be displayed in the modal to explain how values
+    # need to be written inside the text input
+    basic_input: |-
+      Scrivi le parole da aggiungere una sotto all'altra
+      ad esempio
+      così
+
+    pattern_input: "Scrivi qua l'espressione da aggiungere"
 
   language:
     description: "Cambia la lingua dei messaggi del bot"
