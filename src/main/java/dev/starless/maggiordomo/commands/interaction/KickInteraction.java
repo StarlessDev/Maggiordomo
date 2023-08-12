@@ -60,8 +60,8 @@ public class KickInteraction implements Interaction {
                         "current", page + 1,
                         "total", maxPages);
 
-                Button backButton = PageUtils.getBackButton(getName(), page);
-                Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
+                Button backButton = PageUtils.getBackButton(getName(), page, settings.getLanguage());
+                Button nextButton = PageUtils.getNextButton(getName(), maxPages, page, settings.getLanguage());
 
                 e.reply(new MessageCreateBuilder()
                                 .setContent(content)

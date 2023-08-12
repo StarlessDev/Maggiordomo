@@ -375,6 +375,10 @@ interactions:
 
 # Strings that are used by multiple interactions
 common:
+  # Buttons used to go forward or back in menus
+  prev_button: "⏪ Previous page"
+  next_button: "Next page ⏩"
+
   # This is the text that the user will input to confirm
   # a particular action (e.g. deleting the room and its data
   # or resetting the trusted users)

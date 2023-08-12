@@ -169,6 +169,8 @@ public enum Messages {
     FILTER_MENU_VALUE_BASIC("common.filters_menu.value_basic"),
     FILTER_MENU_VALUE_PATTERN("common.filters_menu.value_pattern"),
 
+    PREV_BUTTON("common.prev_button"),
+    NEXT_BUTTON("common.next_button"),
     INVALID_PUB_ROLE("common.invalid_public_role"),
     NO_PUBLIC_ROLE("common.no_public_role"),
     NO_SELECTION("common.error_not_selection"),

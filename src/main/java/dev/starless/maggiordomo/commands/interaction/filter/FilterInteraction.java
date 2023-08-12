@@ -109,9 +109,9 @@ public abstract class FilterInteraction implements Interaction {
         }
 
         return builder.addActionRow(
-                        PageUtils.getBackButton(getName(), page),
+                        PageUtils.getBackButton(getName(), page, settings.getLanguage()),
                         Button.secondary(getName() + ":add", Translations.string(Messages.COMMAND_FILTERS_ADD_BUTTON, settings.getLanguage())),
-                        PageUtils.getNextButton(getName(), maxPages, page))
+                        PageUtils.getNextButton(getName(), maxPages, page, settings.getLanguage()))
                 .build();
     }
 }

@@ -66,8 +66,8 @@ public class UnbanInteraction implements Interaction {
                 builder.setContent(Translations.string(Messages.INTERACTION_UNBAN_EMPTY, settings.getLanguage()));
             } else {
                 int maxPages = (int) Math.ceil(recordsNumber / 10D);
-                Button backButton = PageUtils.getBackButton(getName(), page);
-                Button nextButton = PageUtils.getNextButton(getName(), maxPages, page);
+                Button backButton = PageUtils.getBackButton(getName(), page, settings.getLanguage());
+                Button nextButton = PageUtils.getNextButton(getName(), maxPages, page, settings.getLanguage());
 
                 builder.setContent(Translations.string(Messages.USER_SELECTION_MESSAGE_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(menuBuilder.build()))

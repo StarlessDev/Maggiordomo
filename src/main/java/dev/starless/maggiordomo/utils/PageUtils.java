@@ -1,5 +1,7 @@
 package dev.starless.maggiordomo.utils;
 
+import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import org.jetbrains.annotations.NotNull;
@@ -21,14 +23,14 @@ public class PageUtils {
         return page;
     }
 
-    public Button getBackButton(String name, int page) {
-        Button button = Button.secondary(name + ":" + (page - 1), "⏪ Pagina precedente");
+    public Button getBackButton(String name, int page, String language) {
+        Button button = Button.secondary(name + ":" + (page - 1), Translations.string(Messages.PREV_BUTTON, language));
 
         return page <= 0 ? button.asDisabled() : button;
     }
 
-    public Button getNextButton(String name, int maxPages, int page) {
-        Button button = Button.primary(name + ":" + (page + 1), "Prossima pagina ⏩");
+    public Button getNextButton(String name, int maxPages, int page, String language) {
+        Button button = Button.primary(name + ":" + (page + 1), Translations.string(Messages.NEXT_BUTTON, language));
 
         return page + 1 >= maxPages ? button.asDisabled() : button;
     }
