@@ -59,6 +59,11 @@ public class Console extends Thread {
                 } else {
                     BotLogger.info("This page is empty.");
                 }
+            } else if(cmd.startsWith("resetmaincommand")) {
+                // This command is only useful if you are updating from < 2.1.0
+                Bot.getInstance().getJda()
+                        .updateCommands()
+                        .queue(success -> BotLogger.info("Successfully reset main command!"));
             }
         }
     }
