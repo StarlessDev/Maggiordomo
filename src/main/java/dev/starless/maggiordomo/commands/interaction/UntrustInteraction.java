@@ -43,7 +43,7 @@ public class UntrustInteraction implements Interaction {
 
         MessageCreateBuilder builder = new MessageCreateBuilder();
         if (recordsNumber == 0) {
-            builder.setContent(Translations.string(Messages.INTERACTION_UNBAN_NOTIFICATION_DESC, settings.getLanguage()));
+            builder.setContent(Translations.string(Messages.INTERACTION_UNTRUST_EMPTY, settings.getLanguage()));
         } else {
             StringSelectMenu.Builder menuBuilder = StringSelectMenu.create(getName())
                     .setPlaceholder(Translations.string(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
