@@ -54,6 +54,10 @@ public class DeleteInteraction implements Interaction {
             e.reply(Translations.string(Messages.INTERACTION_DELETE_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
+        } else {
+            e.reply(Translations.string(Messages.CONFIRMATION_MODAL_NOT_CONFIRMED, settings.getLanguage()))
+                    .setEphemeral(true)
+                    .queue();
         }
 
         return null;

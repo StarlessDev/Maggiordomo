@@ -390,6 +390,9 @@ common:
     input_label: "Risposta"
     # The value of the textinput
     input_value: "Scrivi qua \"Si\" se sei sicuro"
+    # This message will be displayed when the user
+    # does not confirm the action
+    not_confirmed: ":ok_hand: Azione annullata."
 
   # This is the modal that will be used to
   # input a specific user

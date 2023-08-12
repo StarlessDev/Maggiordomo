@@ -156,6 +156,7 @@ public enum Messages {
     CONFIRMATION_MODAL_TITLE("common.confirmation_modal.title"),
     CONFIRMATION_MODAL_INPUT_LABEL("common.confirmation_modal.input_label"),
     CONFIRMATION_MODAL_INPUT_VALUE("common.confirmation_modal.input_value"),
+    CONFIRMATION_MODAL_NOT_CONFIRMED("common.confirmation_modal.not_confirmed"),
 
     MEMBER_MODAL_TITLE("common.member_modal.title"),
     MEMBER_MODAL_INPUT_VALUE("common.member_modal.input_value"),

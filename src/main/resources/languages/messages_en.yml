@@ -390,6 +390,9 @@ common:
     input_label: "Answer"
     # The value of the textinput
     input_value: "Write here \"yes\" to confirm"
+    # This message will be displayed when the user
+    # does not confirm the action
+    not_confirmed: ":ok_hand: Action canceled."
 
   # This is the modal that will be used to
   # input a specific user

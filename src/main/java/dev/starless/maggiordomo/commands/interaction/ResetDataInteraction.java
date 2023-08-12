@@ -4,8 +4,8 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -56,6 +56,10 @@ public class ResetDataInteraction implements Interaction {
                     .queue();
 
             return vc;
+        } else {
+            e.reply(Translations.string(Messages.CONFIRMATION_MODAL_NOT_CONFIRMED, settings.getLanguage()))
+                    .setEphemeral(true)
+                    .queue();
         }
 
         return null;
