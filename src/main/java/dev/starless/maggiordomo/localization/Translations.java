@@ -17,6 +17,7 @@ import java.util.IllegalFormatException;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Stream;
 
 @UtilityClass
@@ -103,11 +104,13 @@ public class Translations {
             try {
                 String str = string(message, lang);
                 for (int i = 0; i < args.length; i += 2) {
-                    String replaced = ("{" + args[i] + "}").toUpperCase();
+                    String replaced = ("\\{" + args[i] + "}").toUpperCase();
                     String value = String.valueOf(args[i + 1]);
                     str = str.replaceAll(replaced, value);
                 }
-            } catch (Exception ignored) {
+
+                return str;
+            } catch (PatternSyntaxException ignored) {
                 // Just return the error as the string to warn the user about the config error
             }
         }

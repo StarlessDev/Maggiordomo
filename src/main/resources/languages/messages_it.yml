@@ -271,12 +271,10 @@ interactions:
     error_not_found: "Stanza non trovata!"
 
     # Pretty self explainatory
-    message_content: |-
-      Seleziona un utente.
-      *Pagina ({CURRENT}/{TOTAL})*
+    message_content: "Seleziona un utente. *Pagina ({CURRENT}/{TOTAL})*"
 
     # Message shown if the target user is kicked successfully
-    success: "L'utente %s è stato kickato dalla stanza! :dash:"
+    success: "%s è stato kickato dalla stanza! :dash:"
 
   list:
     # Strings used in the selection menu

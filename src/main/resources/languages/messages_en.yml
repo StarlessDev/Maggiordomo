@@ -273,12 +273,10 @@ interactions:
     error_not_found: "I could not find your room!"
 
     # Pretty self explainatory
-    message_content: |-
-      Choose a user.
-      *Page ({CURRENT}/{TOTAL})*
+    message_content: "Choose a user. *Page ({CURRENT}/{TOTAL})*"
 
     # Message shown if the target user is kicked successfully
-    success: "The user %s was kicked from your room. :dash:"
+    success: "%s was kicked from your room. :dash:"
 
   list:
     # Strings used in the selection menu
