@@ -456,7 +456,7 @@ public class Core implements Module {
 
             // Se il canale è il canale di creazione della vc
             if (channel.getId().equals(settings.getVoiceID())) {
-                // Controlla se l'utente è bannato e non fare niente se è il caso e kickalo
+                // Controlla se l'utente è bannato e kickalo se è il caso
                 isMemberBanned.set(settings.isBanned(member));
                 if (isMemberBanned.get()) {
                     guild.kickVoiceMember(member).queue();
