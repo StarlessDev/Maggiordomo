@@ -79,7 +79,7 @@ public class SetupCommand implements Slash, Interaction {
                 case "role" -> {
                     content = Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
                             settings.getLanguage(),
-                            References.role(e.getGuild(), settings.getPublicRole()));
+                            References.roleName(e.getGuild(), settings.getPublicRole()));
 
                     EntitySelectMenu roleSelector = EntitySelectMenu.create("setup:role", EntitySelectMenu.SelectTarget.ROLE)
                             .setPlaceholder(Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_SELECTOR_PLACEHOLDER, settings.getLanguage()))

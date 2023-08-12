@@ -35,4 +35,9 @@ public class References {
         Role role = guild.getRoleById(id);
         return role != null ? role.getAsMention() : "<@&0>";
     }
+
+    public String roleName(Guild guild, String id) {
+        Role role = guild.getRoleById(id);
+        return "@" + (role != null ? role.getName() : "Unknown");
+    }
 }
