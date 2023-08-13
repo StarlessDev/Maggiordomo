@@ -91,7 +91,7 @@ public class Perms {
         if (oldRole == null || newRole == null) return;
 
         Role everyone = guild.getPublicRole();
-        boolean isNewRoleEveryone = everyone.getId().equals(newRole.getId());
+        boolean newRoleNotEveryone = everyone.getIdLong() != newRole.getIdLong();
 
         // In pratica imposta tutti i permessi del vecchio ruolo
         // sul nuovo ruolo
@@ -108,44 +108,52 @@ public class Perms {
                         long allowed = oldPerms.getAllowedRaw();
                         long denied = oldPerms.getDeniedRaw();
 
-                        manager.removePermissionOverride(oldRole)
-                                .putRolePermissionOverride(newRole.getIdLong(), allowed, denied)
-                                .queue();
+                        manager.putRolePermissionOverride(newRole.getIdLong(), allowed, denied);
+
+                        if (oldRole.getIdLong() == everyone.getIdLong()) {
+                            manager.putRolePermissionOverride(oldRole.getIdLong(),
+                                    Collections.emptyList(),
+                                    List.of(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT, Permission.MESSAGE_SEND));
+                        } else {
+                            manager.removePermissionOverride(oldRole);
+                        }
+
+                        manager.queue();
                     }
                 });
-
-                // Reimposta i permessi dei canali
-                TextChannel dashboardChannel = guild.getTextChannelById(settings.getChannelID());
-                if (dashboardChannel != null) {
-                    TextChannelManager manager = dashboardChannel.getManager()
-                            .removePermissionOverride(oldRole)
-                            .putRolePermissionOverride(newRole.getIdLong(), dashboardAllowedPerms, dashboardDeniedPerms);
-
-                    if (isNewRoleEveryone) {
-                        manager.putRolePermissionOverride(everyone.getIdLong(),
-                                0,
-                                Permission.ALL_PERMISSIONS);
-                    }
-
-                    manager.queue();
-                }
-
-                VoiceChannel createChannel = guild.getVoiceChannelById(settings.getVoiceID());
-                if (createChannel != null) {
-                    VoiceChannelManager manager = createChannel.getManager()
-                            .removePermissionOverride(oldRole)
-                            .putRolePermissionOverride(newRole.getIdLong(), Perms.createAllowedPerms, Perms.createDeniedPerms);
-
-                    if(isNewRoleEveryone) {
-                        manager.putRolePermissionOverride(everyone.getIdLong(),
-                                List.of(Permission.VOICE_SPEAK, Permission.VOICE_USE_VAD),
-                                Collections.singletonList(Permission.VIEW_CHANNEL));
-                    }
-
-                    manager.queue();
-                }
             }
         });
+
+        // Reimposta i permessi dei canali
+        TextChannel dashboardChannel = guild.getTextChannelById(settings.getChannelID());
+        if (dashboardChannel != null) {
+            TextChannelManager manager = dashboardChannel.getManager()
+                    .removePermissionOverride(oldRole)
+                    .putRolePermissionOverride(newRole.getIdLong(), dashboardAllowedPerms, dashboardDeniedPerms);
+
+            if (newRoleNotEveryone) {
+                manager.putRolePermissionOverride(everyone.getIdLong(),
+                        0,
+                        Permission.ALL_PERMISSIONS);
+            }
+
+            manager.queue();
+        }
+
+        VoiceChannel createChannel = guild.getVoiceChannelById(settings.getVoiceID());
+        if (createChannel != null) {
+            VoiceChannelManager manager = createChannel.getManager()
+                    .removePermissionOverride(oldRole)
+                    .putRolePermissionOverride(newRole.getIdLong(), Perms.createAllowedPerms, Perms.createDeniedPerms);
+
+            if (newRoleNotEveryone) {
+                manager.putRolePermissionOverride(everyone.getIdLong(),
+                        List.of(Permission.VOICE_SPEAK, Permission.VOICE_USE_VAD),
+                        Collections.singletonList(Permission.VIEW_CHANNEL));
+            }
+
+            manager.queue();
+        }
     }
 
     public VoiceChannelManager setPublicPerms(VoiceChannelManager manager, VCStatus status, Role publicRole, boolean visible) {

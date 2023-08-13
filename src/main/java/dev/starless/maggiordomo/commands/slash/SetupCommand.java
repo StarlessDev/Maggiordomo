@@ -23,8 +23,10 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
@@ -37,6 +39,7 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -86,7 +89,14 @@ public class SetupCommand implements Slash, Interaction {
                             .build();
 
                     rows.add(ActionRow.of(roleSelector));
-                    rows.add(ActionRow.of(Button.secondary("setup:embed", continueButton)));
+                    rows.add(ActionRow.of(
+                            Button.secondary("setup:embed", continueButton),
+                            Button.danger("setup:reset_embed", Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_RESET, settings.getLanguage()))
+                    ));
+                }
+                case "reset_embed" -> {
+                    updatePublicRole(e, settings, e.getGuild().getPublicRole());
+                    return null;
                 }
                 case "embed" -> {
                     content = Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_CONTENT, settings.getLanguage());
@@ -235,32 +245,28 @@ public class SetupCommand implements Slash, Interaction {
                 List<Role> roles = e.getMentions().getRoles();
                 if (roles.isEmpty()) return null;
 
-                Message message = e.getMessage();
-                Role oldRole = e.getGuild().getRoleById(settings.getPublicRole());
-                Role newRole = roles.get(0);
-
-                Perms.updatePublicPerms(e.getGuild(), settings, oldRole, newRole);
-
-                settings.setPublicRole(newRole.getId());
-                Bot.getInstance().getCore().getSettingsMapper().update(settings);
-
-                e.reply(Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_UPDATED, settings.getLanguage()))
-                        .setEphemeral(true)
-                        .queue(success -> {
-                            if (message.getButtons().stream().noneMatch(button -> button.getId() != null && button.getId().endsWith("embed"))) {
-                                List<ActionRow> rows = new ArrayList<>(message.getActionRows());
-                                rows.add(ActionRow.of(Button.secondary("setup:embed", Translations.string(Messages.COMMAND_SETUP_CONTINUE_BUTTON_LABEL, settings.getLanguage()))));
-
-                                message.editMessage(MessageEditBuilder.fromMessage(message)
-                                                .setComponents(rows)
-                                                .build())
-                                        .queue();
-                            }
-                        });
+                updatePublicRole(e, settings, roles.get(0));
             }
         }
 
         return null;
+    }
+
+    private void updatePublicRole(GenericComponentInteractionCreateEvent e, Settings settings, Role newRole) {
+        Message message = e.getMessage();
+        Perms.updatePublicPerms(message.getGuild(), settings, message.getGuild().getRoleById(settings.getPublicRole()), newRole);
+
+        settings.setPublicRole(newRole.getId());
+        Bot.getInstance().getCore().getSettingsMapper().update(settings);
+
+        String content = Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
+                settings.getLanguage(),
+                References.roleName(e.getGuild(), settings.getPublicRole()));
+
+        e.getMessage().editMessage(content)
+                .queue(success -> e.reply(Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_UPDATED, settings.getLanguage()))
+                        .setEphemeral(true)
+                        .queue());
     }
 
     private void completeSetup(Guild guild, InteractionHook hook, Settings settings) {

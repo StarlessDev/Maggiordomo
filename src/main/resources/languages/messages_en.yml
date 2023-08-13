@@ -177,6 +177,7 @@ commands:
           Choose the role that every user must have to use the bot, if you want to choose the role everyone just click on continue.
           The current public role is `%s`.
 
+        reset_button: "Reset to @everyone"
         role_selector_placeholder: "Choose a role"
         updated: ">>> Public role updated :white_check_mark:"
 

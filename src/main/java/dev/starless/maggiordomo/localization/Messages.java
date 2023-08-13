@@ -80,6 +80,7 @@ public enum Messages {
     COMMAND_SETUP_SUCCESS("commands.setup.success"),
     // First step: role
     COMMAND_SETUP_STEPS_ROLE_CONTENT("commands.setup.steps.role.content"),
+    COMMAND_SETUP_STEPS_ROLE_RESET("commands.setup.steps.role.reset_button"),
     COMMAND_SETUP_STEPS_ROLE_SELECTOR_PLACEHOLDER("commands.setup.steps.role.role_selector_placeholder"),
     COMMAND_SETUP_STEPS_ROLE_UPDATED("commands.setup.steps.role.updated"),
     // Second step: interface
