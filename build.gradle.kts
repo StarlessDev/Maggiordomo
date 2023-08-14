@@ -17,12 +17,9 @@ tasks.withType<JavaCompile> {
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://jitpack.io")
-    }
-    maven {
-        url = uri("https://repo.spongepowered.org/maven/")
-    }
+    maven("https://jitpack.io")
+    maven("https://repo.spongepowered.org/maven/")
+    maven("https://oss.sonatype.org/content/repositories/snapshots")
 }
 
 dependencies {
@@ -36,6 +33,7 @@ dependencies {
 
     implementation("com.vdurmont:semver4j:3.1.0") // Semantic versioning util
     implementation("ch.qos.logback:logback-classic:1.4.7") // Logger implementation
+    implementation("cz.jirutka.unidecode:unidecode:1.0.1") // Pearl's unidecode java port
 }
 
 application {

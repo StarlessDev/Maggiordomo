@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import cz.jirutka.unidecode.Unidecode;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
@@ -22,9 +23,23 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
+import java.text.Normalizer;
 import java.util.HashSet;
+import java.util.Map;
 
 public class TitleInteraction implements Interaction {
+
+    private final Unidecode unidecode = Unidecode.toAscii();
+    private final Map<Character, Character> leetMap = Map.of(
+            '1', 'i',
+            '2', 'l',
+            '3', 'e',
+            '4', 'a',
+            '6', 'g',
+            '7', 't',
+            '8', 'b',
+            '0', 'o'
+    );
 
     private final ContainsFilter containsFilter = new ContainsFilter();
     private final PatternFilter patternFilter = new PatternFilter();
@@ -37,7 +52,7 @@ public class TitleInteraction implements Interaction {
                     .setEphemeral(true)
                     .queue();
         } else {
-            String newTitle = mapping.getAsString();
+            String newTitle = normalize(mapping.getAsString());
             for (FilterType type : FilterType.values()) {
                 IFilter filter = switch (type) {
                     case BASIC -> containsFilter;
@@ -86,6 +101,21 @@ public class TitleInteraction implements Interaction {
                 .queue();
 
         return null;
+    }
+
+    private String normalize(String input) {
+        if (!Normalizer.isNormalized(input, Normalizer.Form.NFKC)) {
+            input = Normalizer.normalize(input, Normalizer.Form.NFKC);
+        }
+
+        String ascii = unidecode.decode(input.replaceAll("\\p{M}", "")).replaceAll("\\.|,|-|_|'|`|", "");
+        StringBuilder normalized = new StringBuilder();
+        for (int i = 0; i < ascii.length(); i++) {
+            char c = ascii.charAt(i);
+            normalized.append(Character.toLowerCase(leetMap.getOrDefault(c, c)));
+        }
+
+        return normalized.toString();
     }
 
     @Override

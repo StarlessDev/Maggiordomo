@@ -4,8 +4,8 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.data.filter.IFilter;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 
 public class ContainsFilter implements IFilter {
 
@@ -15,17 +15,8 @@ public class ContainsFilter implements IFilter {
         if (normalFlag) {
             return new FilterResult(true, Translations.string(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage(), value));
         } else {
-            boolean leetFlag = input.toLowerCase()
-                    .replaceAll("1", "i")
-                    .replaceAll("2", "l")
-                    .replaceAll("3", "e")
-                    .replaceAll("4", "a")
-                    .replaceAll("8", "b")
-                    .replaceAll("0", "o")
-                    .contains(value.toLowerCase());
-
             String message = Translations.string(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage(), value) + " (leet speak)";
-            return leetFlag ? new FilterResult(true, message) : new FilterResult();
+            return input.contains(value.toLowerCase()) ? new FilterResult(true, message) : new FilterResult();
         }
     }
 
