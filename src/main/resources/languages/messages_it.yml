@@ -377,7 +377,7 @@ interactions:
 # Strings that are used by multiple interactions
 common:
   # Buttons used to go forward or back in menus
-  back_button: "⏪ Pagina precedente"
+  prev_button: "⏪ Pagina precedente"
   next_button: "Prossima pagina ⏩"
 
   # This is the text that the user will input to confirm
