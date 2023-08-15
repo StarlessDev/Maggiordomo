@@ -1,4 +1,4 @@
-package dev.starless.maggiordomo.tasks;
+package dev.starless.maggiordomo.activity;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;

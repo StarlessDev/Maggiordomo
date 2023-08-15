@@ -8,7 +8,7 @@ import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.logging.BotLogger;
-import dev.starless.maggiordomo.tasks.ActivityChecker;
+import dev.starless.maggiordomo.activity.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
@@ -26,7 +26,6 @@ import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionE
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
@@ -39,7 +38,6 @@ import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.*;
 import java.util.function.Consumer;

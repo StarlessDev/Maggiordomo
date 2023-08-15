@@ -82,6 +82,31 @@ public class Bot implements Service {
         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
 
+    @Override
+    public void stop() {
+        if(jda == null) return;
+
+        if(core != null) {
+            core.onDisable(jda);
+        }
+
+        BotLogger.info("Unregistering listeners...");
+        jda.getEventManager().getRegisteredListeners().forEach(obj -> jda.removeEventListener(obj));
+
+        BotLogger.info("Shutting down JDA...");
+        jda.shutdown();
+
+        // Might be an issue, just to be safe...
+        BotLogger.info("Closing OkHttpClient...");
+        OkHttpClient client = jda.getHttpClient();
+        client.connectionPool().evictAll();
+        client.dispatcher().executorService().shutdown();
+
+        if (server != null) {
+            server.stop();
+        }
+    }
+
     @SubscribeEvent
     public void onReady(@NotNull ReadyEvent event) {
         ready = true;
@@ -102,30 +127,5 @@ public class Bot implements Service {
     @SubscribeEvent
     public void onShutdown(@NotNull ShutdownEvent event) {
         ready = false;
-    }
-
-    @Override
-    public void stop() {
-        if(jda == null) return;
-
-        if(core != null) {
-            core.onDisable(jda);
-        }
-
-        BotLogger.info("Unregistering listeners..."); // Non si sa mai
-        jda.getEventManager().getRegisteredListeners().forEach(obj -> jda.removeEventListener(obj));
-
-        BotLogger.info("Shutting down JDA...");
-        jda.shutdown();
-
-        // Might be an issue, just to be safe...
-        BotLogger.info("Closing OkHttpClient...");
-        OkHttpClient client = jda.getHttpClient();
-        client.connectionPool().evictAll();
-        client.dispatcher().executorService().shutdown();
-
-        if (server != null) {
-            server.stop();
-        }
     }
 }

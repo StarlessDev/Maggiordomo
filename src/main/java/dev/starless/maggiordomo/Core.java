@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo;
 
+import dev.starless.maggiordomo.activity.ActivityManager;
 import dev.starless.maggiordomo.commands.CommandManager;
 import dev.starless.maggiordomo.commands.interaction.*;
 import dev.starless.maggiordomo.commands.interaction.filter.ContainsFilterInteraction;
@@ -20,7 +21,6 @@ import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.storage.VCManager;
 import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
-import dev.starless.maggiordomo.tasks.ActivityChecker;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
@@ -69,8 +69,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -81,7 +79,7 @@ public class Core implements Module {
     @Getter private VCManager channelMapper;
     @Getter private SettingsMapper settingsMapper;
 
-    private ScheduledExecutorService activityService;
+    private ActivityManager activityManager;
     @Getter private CommandManager commands;
 
     public Core(Config config) {
@@ -114,9 +112,9 @@ public class Core implements Module {
     public void onEnable(JDA jda) {
         storage.init();
 
-        activityService = Executors.newScheduledThreadPool(jda.getGuilds().size());
         channelMapper = new VCManager(storage);
         settingsMapper = new SettingsMapper(storage);
+        activityManager = new ActivityManager(jda.getGuilds().size());
 
         jda.getGuilds().forEach(guild -> {
             String guildID = guild.getId();
@@ -157,7 +155,7 @@ public class Core implements Module {
             }
 
             // Attiva il servizio di controllo di attività
-            activityService.scheduleWithFixedDelay(new ActivityChecker(guildID), 0, 1, TimeUnit.HOURS);
+            //activityService.scheduleWithFixedDelay(new ActivityChecker(guildID), 0, 1, TimeUnit.HOURS);
         });
 
         commands = new CommandManager()
@@ -194,6 +192,8 @@ public class Core implements Module {
     public void onDisable(JDA jda) {
         jda.removeEventListener(this);
 
+        activityManager.stop();
+
         int interrupted = 0;
         for (Guild guild : jda.getGuilds()) {
             LocalVCMapper localMapper = channelMapper.getMapper(guild);
@@ -226,22 +226,22 @@ public class Core implements Module {
                 .create());
 
         // Create or get the settings of the guild
-        Settings settings;
-        if (savedSettings.isPresent()) {
-            settings = savedSettings.get();
-        } else {
-            settings = new Settings(e.getGuild());
-            settingsMapper.insert(settings);
+        if (savedSettings.isEmpty()) {
+            settingsMapper.insert(new Settings(e.getGuild()));
         }
 
         // Update commands of the guild
         commands.update(e.getGuild());
+
+        // Start activity monitoring
+        activityManager.startMonitor(e.getGuild().getId());
 
         BotLogger.info("The guild '%s' has just added the bot!", e.getGuild().getName());
     }
 
     @SubscribeEvent
     public void onGuildLeave(@NotNull GuildLeaveEvent e) {
+        activityManager.stopMonitor(e.getGuild().getId()); // Stop monitoring the guilds' activity
         BotLogger.info("The bot departed from the guild '%s'.", e.getGuild().getName());
     }
 
