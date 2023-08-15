@@ -46,6 +46,7 @@ public enum Messages {
     COMMAND_FILTERS_ADD_BUTTON("commands.filters.add_button"),
     COMMAND_FILTERS_BASIC_INPUT("commands.filters.basic_input"),
     COMMAND_FILTERS_PATTERN_INPUT("commands.filters.pattern_input"),
+    COMMAND_FILTERS_UPDATED("commands.filters.updated"),
 
     COMMAND_LANGUAGE_DESCRIPTION("commands.language.description"),
     COMMAND_LANGUAGE_PARAMETER_LANG("commands.language.parameters.language"),
@@ -127,9 +128,9 @@ public enum Messages {
     INTERACTION_SIZE_SUCCESS("interactions.size.success"),
 
     INTERACTION_STATUS_CURRENT("interactions.status.current_status"),
-    INTERACTION_SELECTION_TITLE("interactions.status.selection_title"),
-    INTERACTION_SUCCESS_OPEN("interactions.status.success_open"),
-    INTERACTION_SUCCESS_LOCKED("interactions.status.success_locked"),
+    INTERACTION_STATUS_SELECTION_TITLE("interactions.status.selection_title"),
+    INTERACTION_STATUS_SUCCESS_OPEN("interactions.status.success_open"),
+    INTERACTION_STATUS_SUCCESS_LOCKED("interactions.status.success_locked"),
 
     INTERACTION_TITLE_SUCCESS("interactions.title.success"),
     INTERACTION_TITLE_MODAL_TITLE("interactions.title.modal.title"),

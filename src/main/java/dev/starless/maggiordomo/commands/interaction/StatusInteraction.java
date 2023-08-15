@@ -33,7 +33,7 @@ public class StatusInteraction implements Interaction {
                         .setContent(content)
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
                                 .setMaxValues(1)
-                                .setPlaceholder(Translations.string(Messages.INTERACTION_SELECTION_TITLE, settings.getLanguage()))
+                                .setPlaceholder(Translations.string(Messages.INTERACTION_STATUS_SELECTION_TITLE, settings.getLanguage()))
                                 .addOption(open, VCStatus.OPEN.name())
                                 .addOption(locked, VCStatus.LOCKED.name())
                                 .build()))
@@ -83,7 +83,7 @@ public class StatusInteraction implements Interaction {
                 }
 
                 // Setta il messaggio di risposta
-                Messages successMessage = status.equals(VCStatus.OPEN) ? Messages.INTERACTION_SUCCESS_OPEN : Messages.INTERACTION_SUCCESS_LOCKED;
+                Messages successMessage = status.equals(VCStatus.OPEN) ? Messages.INTERACTION_STATUS_SUCCESS_OPEN : Messages.INTERACTION_STATUS_SUCCESS_LOCKED;
                 Color embedColor = status.equals(VCStatus.OPEN) ? new Color(239, 210, 95) : new Color(100, 160, 94);
                 e.replyEmbeds(new EmbedBuilder()
                                 .setDescription(Translations.string(successMessage, settings.getLanguage()))

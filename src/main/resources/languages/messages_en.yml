@@ -104,6 +104,10 @@ commands:
 
     pattern_input: "Write here the expression you want to add"
 
+    # These messages are shown when a filter is added/removed from a list
+    # The %s will be replaced by the data.filters.(basic|pattern)_name string
+    updated: "The %s list was updated."
+
   menu:
     description: "Sends the interface used to edit the channels in this channel"
     success: "Interface created!"

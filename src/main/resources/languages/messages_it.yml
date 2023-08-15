@@ -91,6 +91,10 @@ commands:
 
     pattern_input: "Scrivi qua l'espressione da aggiungere"
 
+    # These messages are shown when a filter is added/removed from a list
+    # The %s will be replaced by the data.filters.(basic|pattern)_name string
+    updated: "Aggiornata la lista dei %s."
+
   language:
     description: "Cambia la lingua dei messaggi del bot"
 

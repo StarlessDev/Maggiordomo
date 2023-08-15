@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
@@ -53,13 +52,17 @@ public abstract class FilterInteraction implements Interaction {
     public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         onInputReceived(settings, e);
 
-        if (e.isAcknowledged()) {
-            e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
-                    .setReplace(true)
+        e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
+                .setReplace(true)
+                .queue();
+
+        // If the event is acknowledged, an exception was thrown
+        // and an error message was already displayed
+        if(!e.isAcknowledged()) {
+            String listType = Translations.string(type.equals(FilterType.BASIC) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage()).toLowerCase();
+            e.reply(Translations.string(Messages.COMMAND_FILTERS_UPDATED, settings.getLanguage(), listType))
+                    .setEphemeral(true)
                     .queue();
-        } else {
-            e.getMessage().delete().queue();
-            e.reply(createMenu(settings, 0)).queue();
         }
 
         return null;
@@ -67,13 +70,22 @@ public abstract class FilterInteraction implements Interaction {
 
     @Override
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
-        e.getSelectedOptions().stream()
-                .map(SelectOption::getValue)
-                .forEach(selection -> settings.modifyFilters(type, set -> set.remove(selection)));
-        Bot.getInstance().getCore().getSettingsMapper().update(settings);
+        if (!e.getSelectedOptions().isEmpty()) {
+            String selection = e.getSelectedOptions().get(0).getValue();
+            settings.modifyFilters(type, set -> set.remove(selection));
 
-        e.getMessage().delete().queue();
-        e.reply(createMenu(settings, 0)).queue();
+            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+
+            e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
+                    .setReplace(true)
+                    .queue();
+
+            String listType = Translations.string(type.equals(FilterType.BASIC) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage()).toLowerCase();
+            e.reply(Translations.string(Messages.COMMAND_FILTERS_UPDATED, settings.getLanguage(), listType))
+                    .setEphemeral(true)
+                    .queue();
+        }
+
 
         return null;
     }
