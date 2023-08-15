@@ -14,7 +14,7 @@ public class RestUtils {
     }
 
     public Consumer<Throwable> throwableConsumer() {
-        return throwableConsumer("Si è verificato un errore! {EXCEPTION}");
+        return throwableConsumer("An error occurred! {EXCEPTION}");
     }
 
     public Consumer<Throwable> throwableConsumer(String message) {

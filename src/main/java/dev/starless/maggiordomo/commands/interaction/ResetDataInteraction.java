@@ -35,7 +35,7 @@ public class ResetDataInteraction implements Interaction {
     public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:confirmation");
         if (mapping == null) {
-            e.replyEmbeds(Embeds.errorEmbed())
+            e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         } else if (mapping.getAsString().equalsIgnoreCase(Translations.string(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {

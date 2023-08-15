@@ -37,7 +37,7 @@ public class BannedCommand implements Slash {
                     .setEphemeral(true)
                     .queue();
         } else {
-            e.replyEmbeds(Embeds.errorEmbed())
+            e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         }

@@ -32,7 +32,7 @@ public class TrustInteraction implements Interaction {
     public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("trust:id");
         if (mapping == null) {
-            e.replyEmbeds(Embeds.errorEmbed())
+            e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         } else {

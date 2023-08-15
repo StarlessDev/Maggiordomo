@@ -42,7 +42,7 @@ public class MenuCommand implements Slash {
                         .queue();
             }
         } else {
-            e.replyEmbeds(Embeds.errorEmbed())
+            e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         }
