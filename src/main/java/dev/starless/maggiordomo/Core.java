@@ -184,7 +184,7 @@ public class Core implements Module {
                 .interaction(new PatternFilterInteraction());
 
         commands.create(jda);
-
+        activityManager.start();
         jda.addEventListener(this);
     }
 

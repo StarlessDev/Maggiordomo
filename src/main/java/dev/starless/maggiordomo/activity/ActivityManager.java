@@ -2,6 +2,7 @@ package dev.starless.maggiordomo.activity;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.interfaces.Service;
+import dev.starless.maggiordomo.logging.BotLogger;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -19,10 +20,12 @@ public class ActivityManager implements Service {
     @Override
     public void start() {
         Bot.getInstance().getJda().getGuilds().forEach(guild -> startMonitor(guild.getId()));
+        BotLogger.info("Started activity monitoring service");
     }
 
     @Override
     public void stop() {
+        BotLogger.info("Shutting down activity monitoring service");
         activityService.shutdown();
     }
 
