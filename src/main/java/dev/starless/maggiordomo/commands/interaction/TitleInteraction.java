@@ -52,7 +52,8 @@ public class TitleInteraction implements Interaction {
                     .setEphemeral(true)
                     .queue();
         } else {
-            String newTitle = normalize(mapping.getAsString());
+            String input = mapping.getAsString();
+            String newTitle = normalize(input);
             for (FilterType type : FilterType.values()) {
                 IFilter filter = switch (type) {
                     case BASIC -> containsFilter;
@@ -70,11 +71,11 @@ public class TitleInteraction implements Interaction {
                 }
             }
 
-            vc.setTitle(newTitle);
+            vc.setTitle(input);
 
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) {
-                channel.getManager().setName(newTitle).queue();
+                channel.getManager().setName(input).queue();
             }
 
             e.replyEmbeds(new EmbedBuilder()

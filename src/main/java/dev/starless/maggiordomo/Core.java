@@ -153,9 +153,6 @@ public class Core implements Module {
                     });
                 });
             }
-
-            // Attiva il servizio di controllo di attività
-            //activityService.scheduleWithFixedDelay(new ActivityChecker(guildID), 0, 1, TimeUnit.HOURS);
         });
 
         commands = new CommandManager()
