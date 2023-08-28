@@ -58,49 +58,43 @@ public class TrustInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_BANNED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
+            } else if (settings.hasNoAccess(member)) {
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
+                        .setEphemeral(true)
+                        .queue();
+            } else if (settings.isBanned(member)) {
+                e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_TARGET_BANNED, settings.getLanguage())))
+                        .setEphemeral(true)
+                        .queue();
             } else {
-                List<String> memberRoles = member.getRoles().stream()
-                        .map(Role::getId)
-                        .toList();
+                VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
+                boolean isChannelCreated = channel != null;
+                vc.addRecordPlayer(RecordType.TRUST, member.getId());
 
-                if (!memberRoles.contains(settings.getPublicRole())) {
-                    e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
-                            .setEphemeral(true)
-                            .queue();
-                } else if (memberRoles.stream().anyMatch(role -> settings.getBannedRoles().contains(role))) {
-                    e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_TARGET_BANNED, settings.getLanguage())))
-                            .setEphemeral(true)
-                            .queue();
-                } else {
-                    VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
-                    boolean isChannelCreated = channel != null;
-                    vc.addRecordPlayer(RecordType.TRUST, member.getId());
+                // Rispondi alla richiesta
+                e.replyEmbeds(new EmbedBuilder()
+                                .setDescription(Translations.string(Messages.INTERACTION_TRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
+                                .setColor(new Color(100, 160, 94))
+                                .build())
+                        .setEphemeral(true)
+                        .queue();
 
-                    // Rispondi alla richiesta
-                    e.replyEmbeds(new EmbedBuilder()
-                                    .setDescription(Translations.string(Messages.INTERACTION_TRUST_SUCCESS, settings.getLanguage(), member.getEffectiveName()))
-                                    .setColor(new Color(100, 160, 94))
-                                    .build())
-                            .setEphemeral(true)
-                            .queue();
+                // Dai i permessi se possibile subito
+                if (isChannelCreated) Perms.trust(member, channel.getManager()).queue();
 
-                    // Dai i permessi se possibile subito
-                    if (isChannelCreated) Perms.trust(member, channel.getManager()).queue();
+                // Avvisa l'utente trustato in dm
+                member.getUser().openPrivateChannel()
+                        .queue(dm -> dm.sendMessageEmbeds(new EmbedBuilder()
+                                                .setTitle(Translations.string(Messages.INTERACTION_TRUST_NOTIFICATION_TITLE, settings.getLanguage(), member.getEffectiveName()))
+                                                .setColor(new Color(100, 160, 94))
+                                                .setDescription(Translations.stringFormatted(Messages.INTERACTION_TRUST_NOTIFICATION_DESC, settings.getLanguage(),
+                                                        "owner", e.getUser().getAsMention(),
+                                                        "target", vc.getTitle()))
+                                                .build())
+                                        .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer()),
+                                throwable -> RestUtils.emptyConsumer());
 
-                    // Avvisa l'utente trustato in dm
-                    member.getUser().openPrivateChannel()
-                            .queue(dm -> dm.sendMessageEmbeds(new EmbedBuilder()
-                                                    .setTitle(Translations.string(Messages.INTERACTION_TRUST_NOTIFICATION_TITLE, settings.getLanguage(), member.getEffectiveName()))
-                                                    .setColor(new Color(100, 160, 94))
-                                                    .setDescription(Translations.stringFormatted(Messages.INTERACTION_TRUST_NOTIFICATION_DESC, settings.getLanguage(),
-                                                            "owner", e.getUser().getAsMention(),
-                                                            "target", vc.getTitle()))
-                                                    .build())
-                                            .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer()),
-                                    throwable -> RestUtils.emptyConsumer());
-
-                    return vc;
-                }
+                return vc;
             }
         }
 

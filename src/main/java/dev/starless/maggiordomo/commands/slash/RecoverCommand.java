@@ -75,13 +75,13 @@ public class RecoverCommand implements Slash {
                         continue;
                     }
 
-                    boolean isTrusted = matches(new Permission[]{Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT}, perm.getAllowed());
+                    boolean isTrusted = matches(Perms.specialPerms, perm.getAllowed());
                     if (isTrusted) {
                         trusted.add(member.getId());
                         continue;
                     }
 
-                    boolean isBanned = matches(new Permission[]{Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT}, perm.getDenied());
+                    boolean isBanned = matches(Perms.specialPerms, perm.getDenied());
                     if (isBanned) {
                         banned.add(member.getId());
                     }
@@ -140,24 +140,15 @@ public class RecoverCommand implements Slash {
 
     @Override
     public Parameter[] getParameters(String lang) {
-
         return new Parameter[]{
                 new Parameter(OptionType.CHANNEL, "voice", Translations.string(Messages.COMMAND_RECOVER_PARAMETER_CHANNEL, lang), true),
                 new Parameter(OptionType.BOOLEAN, "pinned", Translations.string(Messages.COMMAND_RECOVER_PARAMETER_PINNED, lang), true)};
     }
 
-    private boolean matches(Permission[] data, EnumSet<Permission> toCheck) {
-        if (toCheck.size() != data.length) return false;
+    private boolean matches(List<Permission> data, EnumSet<Permission> toCheck) {
+        if (toCheck.size() != data.size()) return false;
 
-        Set<Permission> cache = new HashSet<>(toCheck);
-        cache.removeIf(perm -> {
-            for (Permission datum : data) {
-                if (datum.equals(perm)) return true;
-            }
-            return false;
-        });
-
-        return cache.isEmpty();
+        return new HashSet<>(data).containsAll(toCheck);
     }
 
     @Override

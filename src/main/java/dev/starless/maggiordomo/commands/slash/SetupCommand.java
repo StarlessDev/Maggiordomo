@@ -304,7 +304,7 @@ public class SetupCommand implements Slash, Interaction {
                     // Room generator voicechannel
                     ChannelAction<VoiceChannel> createGenerator = category.createVoiceChannel("create")
                             // Bot's permissions
-                            .addMemberPermissionOverride(selfID, Arrays.asList(Perms.voiceSelfPerms), Collections.emptyList())
+                            .addMemberPermissionOverride(selfID, Perms.voiceSelfPerms, Collections.emptyList())
                             // Users' permissions
                             .addRolePermissionOverride(usersRole.getIdLong(), Perms.createAllowedPerms, Perms.createDeniedPerms);
 

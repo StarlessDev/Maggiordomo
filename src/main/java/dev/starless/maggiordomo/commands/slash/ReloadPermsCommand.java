@@ -48,7 +48,7 @@ public class ReloadPermsCommand implements Slash {
                             Member owner = e.getGuild().getMemberById(vc.getUser());
                             if (owner != null) {
                                 manager = manager.putMemberPermissionOverride(owner.getIdLong(),
-                                        Arrays.asList(Perms.voiceOwnerPerms),
+                                        Perms.voiceOwnerPerms,
                                         Collections.emptyList());
                             } else {
                                 localMapper.scheduleForDeletion(vc, channel).complete();

@@ -156,10 +156,10 @@ public class LocalVCMapper implements IMapper<VC> {
                     .setName(vc.getTitle())
                     .setUserLimit(vc.getSize())
                     .putMemberPermissionOverride(category.getJDA().getSelfUser().getIdLong(),
-                            Arrays.asList(Perms.voiceSelfPerms),
+                            Perms.voiceSelfPerms,
                             Collections.emptyList())
                     .putMemberPermissionOverride(owner.getIdLong(),
-                            Arrays.asList(Perms.voiceOwnerPerms),
+                            Perms.voiceOwnerPerms,
                             Collections.emptyList());
 
             // Aggiungi i permessi per @everyone tenendo in conto

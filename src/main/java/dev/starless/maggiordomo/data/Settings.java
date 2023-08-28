@@ -183,6 +183,15 @@ public class Settings {
                 .anyMatch(bannedRoles::contains);
     }
 
+    public boolean hasNoAccess(Member member) {
+        Role everyone = member.getGuild().getPublicRole();
+        if (everyone.getId().equals(publicRole)) return false;
+
+        return member.getRoles().stream()
+                .map(Role::getId)
+                .noneMatch(id -> id.equals(publicRole));
+    }
+
     public boolean hasCategory() {
         return !categories.isEmpty();
     }

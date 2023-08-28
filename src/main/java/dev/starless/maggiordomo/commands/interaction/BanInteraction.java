@@ -57,7 +57,7 @@ public class BanInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (member.getRoles().stream().noneMatch(role -> settings.getPublicRole().equals(role.getId()))) {
+            } else if (settings.hasNoAccess(member)) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PUBLIC_ROLE, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();

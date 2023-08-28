@@ -22,16 +22,16 @@ import java.util.List;
 @UtilityClass
 public class Perms {
 
-    // Permessi per le vc degli utenti
-    public final Permission[] voiceSelfPerms = {
+    // Perms for the users' rooms
+    public final List<Permission> voiceSelfPerms = List.of(
             Permission.VIEW_CHANNEL,
             Permission.VOICE_CONNECT,
             Permission.VOICE_MOVE_OTHERS,
             Permission.MANAGE_PERMISSIONS,
             Permission.MANAGE_CHANNEL
-    };
+    );
 
-    public final Permission[] voiceOwnerPerms = {
+    public final List<Permission> voiceOwnerPerms = List.of(
             Permission.VIEW_CHANNEL,
             Permission.VOICE_CONNECT,
             Permission.VOICE_SPEAK,
@@ -45,9 +45,9 @@ public class Perms {
             Permission.MESSAGE_EXT_STICKER,
             Permission.MESSAGE_EXT_EMOJI,
             Permission.MESSAGE_MANAGE
-    };
+    );
 
-    private final List<Permission> voicePublicAllowedPerms = Arrays.asList(
+    private final List<Permission> voicePublicAllowedPerms = List.of(
             Permission.MESSAGE_SEND,
             Permission.VOICE_SPEAK,
             Permission.VOICE_USE_VAD,
@@ -63,29 +63,43 @@ public class Perms {
             Permission.CREATE_PUBLIC_THREADS,
             Permission.CREATE_PRIVATE_THREADS);
 
-    // Permessi per la dashboard
+    // Perms granted/denied to trusted/banned users
+    public final List<Permission> specialPerms = List.of(
+            Permission.VIEW_CHANNEL,
+            Permission.VOICE_SPEAK,
+            Permission.VOICE_CONNECT,
+            Permission.MESSAGE_SEND
+    );
+
+    // Perms for the dashboard channel
     public final List<Permission> dashboardAllowedPerms = Collections.singletonList(Permission.VIEW_CHANNEL);
 
-    public final List<Permission> dashboardDeniedPerms = List.of(Permission.MESSAGE_SEND,
+    public final List<Permission> dashboardDeniedPerms = List.of(
+            Permission.MESSAGE_SEND,
             Permission.MESSAGE_SEND_IN_THREADS,
             Permission.CREATE_PUBLIC_THREADS,
             Permission.CREATE_PRIVATE_THREADS,
             Permission.MESSAGE_SEND_IN_THREADS,
-            Permission.USE_APPLICATION_COMMANDS);
+            Permission.USE_APPLICATION_COMMANDS
+    );
 
-    // Permessi per il canale di creazione
-    public final List<Permission> createAllowedPerms = List.of(Permission.VIEW_CHANNEL,
+    // Perms for the voice channel generator
+    public final List<Permission> createAllowedPerms = List.of(
+            Permission.VIEW_CHANNEL,
             Permission.VOICE_CONNECT,
-            Permission.VOICE_MOVE_OTHERS);
+            Permission.VOICE_MOVE_OTHERS
+    );
 
-    public final List<Permission> createDeniedPerms = List.of(Permission.MESSAGE_SEND,
+    public final List<Permission> createDeniedPerms = List.of(
+            Permission.MESSAGE_SEND,
             Permission.MESSAGE_SEND_IN_THREADS,
             Permission.CREATE_PUBLIC_THREADS,
             Permission.CREATE_PRIVATE_THREADS,
             Permission.MESSAGE_SEND_IN_THREADS,
             Permission.VOICE_SPEAK,
             Permission.VOICE_STREAM,
-            Permission.USE_APPLICATION_COMMANDS);
+            Permission.USE_APPLICATION_COMMANDS
+    );
 
     public void updatePublicPerms(Guild guild, Settings settings, Role oldRole, Role newRole) {
         if (oldRole == null || newRole == null) return;
@@ -186,23 +200,13 @@ public class Perms {
     public VoiceChannelManager ban(Member member, VoiceChannelManager manager) {
         if (manager == null) return null;
 
-        return manager.putMemberPermissionOverride(member.getIdLong(),
-                Collections.emptyList(),
-                List.of(Permission.VIEW_CHANNEL,
-                        Permission.VOICE_SPEAK,
-                        Permission.VOICE_CONNECT,
-                        Permission.MESSAGE_SEND));
+        return manager.putMemberPermissionOverride(member.getIdLong(), Collections.emptyList(), specialPerms);
     }
 
     public VoiceChannelManager trust(Member member, VoiceChannelManager manager) {
         if (manager == null) return null;
 
-        return manager.putMemberPermissionOverride(member.getIdLong(),
-                List.of(Permission.VIEW_CHANNEL,
-                        Permission.VOICE_SPEAK,
-                        Permission.VOICE_CONNECT,
-                        Permission.MESSAGE_SEND),
-                Collections.emptyList());
+        return manager.putMemberPermissionOverride(member.getIdLong(), specialPerms, Collections.emptyList());
     }
 
 
