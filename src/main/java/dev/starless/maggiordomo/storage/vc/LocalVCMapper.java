@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -339,14 +340,18 @@ public class LocalVCMapper implements IMapper<VC> {
 
         scheduledForDeletion.add(id);
 
-        return channel.delete().onSuccess(success.andThen(nothing -> {
-            scheduledForDeletion.remove(id);
+        return channel.delete()
+                .onErrorMap(throwable -> {
+                    scheduledForDeletion.remove(id);
+                    return null;
+                }).onSuccess(success.andThen(nothing -> {
+                    scheduledForDeletion.remove(id);
 
-            vc.setChannel("-1");
-            gateway.update(vc);
+                    vc.setChannel("-1");
+                    gateway.update(vc);
 
-            removeFromCache(vc);
-        }));
+                    removeFromCache(vc);
+                }));
     }
 
     // Utility methods used in all the class
