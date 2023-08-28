@@ -23,6 +23,7 @@ public class MenuCommand implements Slash {
             MessageCreateData data = Bot.getInstance().getCore().createMenu(channel.getGuild().getId());
             if (data != null) {
                 channel.sendMessage(data).queue(message -> {
+                    settings.setChannelID(channel.getId());
                     settings.setMenuID(message.getId());
                     Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
