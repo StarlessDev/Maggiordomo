@@ -19,7 +19,7 @@ import java.time.Duration;
 
 public class Main {
 
-    @Getter private static final String version = "2.1.0";
+    @Getter private static final String version = "2.1.1";
 
     public static void main(String[] args) {
         BotLogger.info("Running Maggiordomo v%s by Starless", version);
