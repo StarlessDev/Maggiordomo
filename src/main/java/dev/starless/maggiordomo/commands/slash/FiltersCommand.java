@@ -13,8 +13,8 @@ public class FiltersCommand implements Slash {
     public void execute(Settings settings, SlashCommandInteractionEvent e) {
         e.reply(Translations.string(Messages.COMMAND_FILTERS_MESSAGE_CONTENT, settings.getLanguage()))
                 .addActionRow(
-                        Button.primary("contains", Translations.string(Messages.FILTER_BASIC, settings.getLanguage())),
-                        Button.secondary("pattern", Translations.string(Messages.FILTER_PATTERN, settings.getLanguage()))
+                        Button.primary("contains:0", Translations.string(Messages.FILTER_BASIC, settings.getLanguage())),
+                        Button.secondary("pattern:0", Translations.string(Messages.FILTER_PATTERN, settings.getLanguage()))
                 )
                 .queue();
     }

@@ -19,7 +19,13 @@ public class ContainsFilterInteraction extends FilterInteraction {
         ModalMapping mapping = e.getValue("input");
         if (mapping != null) {
             String[] words = mapping.getAsString().split("\n");
-            settings.modifyFilters(FilterType.BASIC, set -> set.addAll(Arrays.asList(words)));
+            for (String word : words) {
+                String trimmed = word.trim();
+                if (trimmed.isBlank()) continue;
+
+                settings.modifyFilters(FilterType.BASIC, set -> set.add(trimmed));
+            }
+
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
         }
     }

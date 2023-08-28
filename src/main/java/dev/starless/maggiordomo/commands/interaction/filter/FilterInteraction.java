@@ -9,6 +9,7 @@ import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -31,9 +32,7 @@ public abstract class FilterInteraction implements Interaction {
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
-        if (page != -1) {
-            e.reply(createMenu(settings, page)).queue();
-        } else {
+        if (page == -1) { // If the button is not a valid "go back" or "go forward" button
             TextInputStyle textStyle = type.equals(FilterType.BASIC) ? TextInputStyle.PARAGRAPH : TextInputStyle.SHORT;
             Messages modalValueMessage = type.equals(FilterType.BASIC) ? Messages.COMMAND_FILTERS_BASIC_INPUT : Messages.COMMAND_FILTERS_PATTERN_INPUT;
             e.replyModal(Modal.create(getName(), Translations.string(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
@@ -42,6 +41,11 @@ public abstract class FilterInteraction implements Interaction {
                                     .setRequiredRange(1, 256)
                                     .build())
                             .build())
+                    .queue();
+        } else {
+            e.deferReply().setEphemeral(true).queue(nothing -> e.getInteraction().getHook().deleteOriginal().queue());
+            e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, page)))
+                    .setReplace(true)
                     .queue();
         }
 
@@ -71,8 +75,7 @@ public abstract class FilterInteraction implements Interaction {
     @Override
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         if (!e.getSelectedOptions().isEmpty()) {
-            String selection = e.getSelectedOptions().get(0).getValue();
-            settings.modifyFilters(type, set -> set.remove(selection));
+            e.getSelectedOptions().forEach(option -> settings.modifyFilters(type, set -> set.remove(option.getValue())));
 
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
@@ -112,7 +115,7 @@ public abstract class FilterInteraction implements Interaction {
         MessageCreateBuilder builder = new MessageCreateBuilder().setContent(content);
 
         if (!words.isEmpty()) {
-            StringSelectMenu.Builder menu = StringSelectMenu.create(getName());
+            StringSelectMenu.Builder menu = StringSelectMenu.create(getName()).setRequiredRange(1, 10);
             words.stream()
                     .skip(10L * page)
                     .limit(10)
