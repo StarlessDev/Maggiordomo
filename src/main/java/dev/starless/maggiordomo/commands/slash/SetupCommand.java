@@ -89,10 +89,10 @@ public class SetupCommand implements Slash, Interaction {
                     rows.add(ActionRow.of(roleSelector));
                     rows.add(ActionRow.of(
                             Button.secondary("setup:embed", continueButton),
-                            Button.danger("setup:reset_embed", Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_RESET, settings.getLanguage()))
+                            Button.danger("setup:reset_role", Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_RESET, settings.getLanguage()))
                     ));
                 }
-                case "reset_embed" -> {
+                case "reset_role" -> {
                     updatePublicRole(e, settings, e.getGuild().getPublicRole());
                     return null;
                 }
@@ -123,7 +123,7 @@ public class SetupCommand implements Slash, Interaction {
                 case "embed_preview" -> {
                     String reply = Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_PREVIEW, settings.getLanguage()) +
                             "\n\n# " + settings.getTitle() +
-                            "\n\n" + settings.getDescription();
+                            "\n" + settings.getDescription();
 
                     e.reply(reply).setEphemeral(true).queue();
 
