@@ -2,6 +2,7 @@ package dev.starless.maggiordomo.utils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import dev.starless.mongo.adapters.DurationAdapter;
 import dev.starless.mongo.adapters.InstantAdapter;
 import dev.starless.mongo.adapters.OffsetDateTimeAdapter;
@@ -20,4 +21,8 @@ public class GsonUtil {
             .registerTypeAdapter(OffsetDateTime.class, new OffsetDateTimeAdapter())
             .serializeNulls()
             .create();
+
+    public JsonObject toJson(Object obj) {
+        return gson.toJsonTree(obj).getAsJsonObject();
+    }
 }

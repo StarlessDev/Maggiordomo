@@ -34,6 +34,11 @@ public class ResponseBuilder {
         return this;
     }
 
+    public ResponseBuilder json(JsonObject obj) {
+        this.output = obj;
+        return this;
+    }
+
     public void send(Context ctx) {
         Objects.requireNonNull(code);
 

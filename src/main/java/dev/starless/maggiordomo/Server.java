@@ -1,11 +1,13 @@
 package dev.starless.maggiordomo;
 
+import com.google.gson.JsonObject;
 import dev.starless.maggiordomo.api.ResponseBuilder;
 import dev.starless.maggiordomo.api.controllers.VCController;
 import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.interfaces.Service;
+import dev.starless.maggiordomo.utils.GsonUtil;
 import dev.starless.mongo.objects.QueryBuilder;
 import io.javalin.Javalin;
 import io.javalin.apibuilder.EndpointGroup;
@@ -13,6 +15,7 @@ import io.javalin.http.HandlerType;
 import io.javalin.http.HttpStatus;
 import io.javalin.http.util.NaiveRateLimit;
 import lombok.RequiredArgsConstructor;
+import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -98,20 +101,29 @@ public class Server implements Service {
 
                         path("{guild}", () -> {
                             get("/", ctx -> {
-                                Optional<Settings> op = Bot.getInstance().getCore()
-                                        .getSettingsMapper()
-                                        .search(QueryBuilder.init()
-                                                .add("guild", ctx.pathParam("guild"))
-                                                .create());
-                                if (op.isPresent()) {
-                                    ResponseBuilder.init()
-                                            .json(op.get())
-                                            .send(ctx);
-                                } else {
-                                    ResponseBuilder.init()
-                                            .code(HttpStatus.NOT_FOUND)
-                                            .send(ctx);
+                                Guild guild = Bot.getInstance().getJda().getGuildById(ctx.pathParam("guild"));
+                                if(guild != null) {
+                                    Optional<Settings> op = Bot.getInstance().getCore()
+                                            .getSettingsMapper()
+                                            .search(QueryBuilder.init()
+                                                    .add("guild", guild.getId())
+                                                    .create());
+                                    if (op.isPresent()) {
+                                        JsonObject json = GsonUtil.toJson(op.get());
+                                        json.addProperty("name", guild.getName());
+                                        json.addProperty("icon", guild.getIconUrl());
+
+                                        ResponseBuilder.init()
+                                                .json(json)
+                                                .send(ctx);
+
+                                        return;
+                                    }
                                 }
+
+                                ResponseBuilder.init()
+                                        .code(HttpStatus.NOT_FOUND)
+                                        .send(ctx);
                             });
 
                             path("vcs", () -> {
