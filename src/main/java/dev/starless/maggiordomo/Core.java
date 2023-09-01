@@ -54,11 +54,14 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
+import net.dv8tion.jda.api.requests.ErrorResponse;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -70,7 +73,6 @@ import java.util.List;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Core implements Module {
 
@@ -88,6 +90,9 @@ public class Core implements Module {
 
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
                 .registerSchema(new Schema(Settings.class)
+                        .entry("premiumRoles", new HashSet<>())
+                        .entry("bannedRoles", new HashSet<>())
+                        .entry("filterStrings", new HashMap<>())
                         .entry("categories", "categoryID", document -> {
                             // Trasferisce il vecchio id della categoria sul nuovo formato
                             List<String> categories = new ArrayList<>();
@@ -100,11 +105,11 @@ public class Core implements Module {
                         })
                         .entry("channelID", "-1")
                         .entry("voiceID", "-1")
+                        .entry("menuID", "-1")
                         .entry("publicRole", "-1")
                         .entry("language", "en")
                         .entry("maxInactivity", -1L)
                         .entry("title", Translations.string(Messages.SETTINGS_INTERFACE_TITLE, "en"))
-                        .entry("filterStrings", new HashMap<>())
                         .entry("descriptionRaw", Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, "en")));
     }
 
@@ -283,7 +288,7 @@ public class Core implements Module {
     public void onGuildVoiceUpdate(@NotNull GuildVoiceUpdateEvent e) {
         // Quando un utente si sposta tra una vc e l'altra
         // questo evento viene lanciato invece che gli altri due
-        handleQuit(e.getGuild(), e.getChannelLeft());
+        handleQuit(e.getGuild(), e.getChannelLeft(), e.getChannelJoined());
         handleJoin(e.getGuild(), e.getChannelJoined(), e.getMember());
     }
 
@@ -341,7 +346,7 @@ public class Core implements Module {
     }
 
     public boolean updateLanguage(Guild guild, Settings settings, String newLanguage) {
-        if(settings.getLanguage().equals(newLanguage)) return true;
+        if (settings.getLanguage().equals(newLanguage)) return true;
 
         if (Translations.getLanguageCodes().contains(newLanguage)) {
             // Change the title of the guide if it has not been changed
@@ -406,7 +411,7 @@ public class Core implements Module {
 
         // Add the image guide
         FileUpload guide = Translations.guide(settings.getLanguage());
-        if(guide != null) {
+        if (guide != null) {
             builder.addFiles(guide);
         }
 
@@ -438,109 +443,127 @@ public class Core implements Module {
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
         if (channel == null || localMapper.isBeingDeleted(channel.getId())) return;
 
-        String guildID = guild.getId();
-        AtomicBoolean isMemberBanned = new AtomicBoolean(false);
-        QueryBuilder builder = QueryBuilder.init().add("guild", guildID);
-        // Controlla se la gilda ha una categoria setuppata
-        settingsMapper.search(builder.create()).ifPresent(settings -> {
-            // Prendi gli oggetti utili
+        Optional<Settings> cachedSettings = settingsMapper.search(QueryBuilder.init().add("guild", guild.getId()).create());
+        if (cachedSettings.isEmpty()) return;
+
+        Settings settings = cachedSettings.get();
+        if (settings.isBanned(member)) {
+            guild.kickVoiceMember(member).queue(
+                    RestUtils.emptyConsumer(),
+                    RestUtils.throwableConsumer("Something went wrong when kicking: " + References.user(member.getUser()))
+            );
+            return;
+        }
+
+        Role publicRole = guild.getRoleById(settings.getPublicRole());
+        if (publicRole == null) return; // <-- This should never happen, @everyone should be the default value
+
+        VC vc = null;
+        // If the user has joined the generator channel
+        if (channel.getId().equals(settings.getVoiceID())) {
             Category category = settings.getAvailableCategory(guild);
-            Role publicRole = guild.getRoleById(settings.getPublicRole());
-            if (publicRole == null || category == null) return;
+            if (category == null) return; // <-- If this triggers something has gone VERY wrong
 
-            // Cerca una vc nel database che corrisponda all'utente
-            Optional<VC> cachedMemberVC = localMapper.search(builder.add("user", member.getId()).create());
-
-            // Se il canale è il canale di creazione della vc
-            if (channel.getId().equals(settings.getVoiceID())) {
-                // Controlla se l'utente è bannato e kickalo se è il caso
-                isMemberBanned.set(settings.isBanned(member));
-                if (isMemberBanned.get()) {
-                    guild.kickVoiceMember(member).queue();
-                    return;
-                }
-
-                // Se esistono dei dati salvati...
-                if (cachedMemberVC.isPresent()) {
-                    VC vc = cachedMemberVC.get(); // ...ottienili
-                    VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
-                    if (voiceChannel != null) { // Se la sua vc è già stata creata
-                        guild.moveVoiceMember(member, voiceChannel).complete(); // Sposta l'utente
-                    } else {
-                        localMapper.createVC(vc, publicRole, category); // Altrimenti creala
-                        return;
+            // Find the VC object associated with the user
+            Optional<VC> cachedVC = localMapper.search(QueryBuilder.init()
+                    .add("guild", guild.getId())
+                    .add("user", member.getId())
+                    .create());
+            if (cachedVC.isPresent()) {
+                // Use the preferences to create a new vc or move the user into the existing one
+                vc = cachedVC.get();
+                VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
+                if (voiceChannel != null) {
+                    try {
+                        guild.moveVoiceMember(member, voiceChannel).complete();
+                    } catch (ErrorResponseException ex) {
+                        if (ex.getErrorResponse().equals(ErrorResponse.UNKNOWN_CHANNEL)) {
+                            // Sometimes this happens...
+                            localMapper.createVC(vc, publicRole, category);
+                            return;
+                        }
                     }
                 } else {
-                    // ...oppure crea un nuovo oggetto VC e la stanza collegata
-                    VC vc = new VC(member, settings.getLanguage());
-                    localMapper.insert(vc);
                     localMapper.createVC(vc, publicRole, category);
                     return;
                 }
-            }
-
-            Optional<VC> cachedChannelVC = localMapper.searchByID(builder.add("channel", channel.getId()).create());
-            cachedChannelVC.flatMap(vc -> Optional.ofNullable(guild.getVoiceChannelById(vc.getChannel())))
-                    .ifPresent(voiceChannel -> { // Se questa vc esiste
-                        if (isMemberBanned.get()) { // Kicka l'utente se ha un ruolo bannato
-                            guild.kickVoiceMember(member).queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
-                            return;
-                        }
-
-                        // Se è il primo a entrare (cioè prima non c'era nessuno)
-                        if (voiceChannel.getMembers().size() == 1) {
-                            channel.upsertPermissionOverride(publicRole)
-                                    .grant(Permission.VIEW_CHANNEL)
-                                    .queue(RestUtils.emptyConsumer(),
-                                            RestUtils.throwableConsumer("Could not set the public role's permissions: {EXCEPTION}"));
-                        }
-                    });
-        });
-
-        // Check anti-move
-        // Controlla se questa è una vc
-        localMapper.searchByID(builder.add("channel", channel.getId()).create()).ifPresent(vc -> {
-            boolean isBanned = vc.getTotalRecords() // Prende tutti i record della vc
-                    .stream()
-                    .filter(record -> record.type().equals(RecordType.BAN)) // Prende solo quelli relativi ai ban
-                    .anyMatch(record -> record.user().equals(member.getId())); // Cerca una corrispondenza dell'id
-
-            if (isBanned) { // Se è bannato kickalo
-                guild.kickVoiceMember(member).complete();
+            } else {
+                // If a VC object does not exist, then create a new one for the user
+                vc = new VC(member, settings.getLanguage());
+                localMapper.insert(vc);
+                localMapper.createVC(vc, publicRole, category);
                 return;
             }
+        }
 
-            vc.setLastJoin(Instant.now());
-            localMapper.update(vc);
-        });
+        // This part of the code handles the visibility change of the channel
+        // when the first user joins a room
+
+        // If the previous code has not found an existing vc
+        if (vc == null) {
+            // Find a VC object using the channel id, aka try to see if the joined channel is a room
+            Optional<VC> cachedVC = localMapper.searchByID(QueryBuilder.init()
+                    .add("guild", guild.getId())
+                    .add("channel", channel.getId())
+                    .create());
+
+            if(cachedVC.isEmpty()) return;
+
+            vc = cachedVC.get();
+        }
+
+        // Kick the user if they are banned from the vc they are trying to join
+        // (This should not be needed, since banned users do not see the vc they are banned from)
+        if (vc.hasPlayerRecord(RecordType.BAN, member.getId())) {
+            guild.kickVoiceMember(member).queue(
+                    RestUtils.emptyConsumer(),
+                    RestUtils.throwableConsumer("Something went wrong when kicking: " + References.user(member.getUser()))
+            );
+            return;
+        } else if (channel.getMembers().size() == 1) { // If the user is the first to join the channel
+            channel.upsertPermissionOverride(publicRole)
+                    .grant(Permission.VIEW_CHANNEL)
+                    .queue(RestUtils.emptyConsumer(),
+                            RestUtils.throwableConsumer("Could not set the public role's permissions: {EXCEPTION}"));
+        }
+
+        vc.setLastJoin(Instant.now());
+        localMapper.update(vc);
     }
 
-    private void handleQuit(Guild guild, AudioChannel channel) {
+    private void handleQuit(Guild guild, AudioChannel channelLeft, AudioChannel channelJoined) {
         LocalVCMapper localMapper = channelMapper.getMapper(guild);
-        if (channel == null || localMapper.isBeingDeleted(channel.getId())) return;
+        if (channelLeft == null || localMapper.isBeingDeleted(channelLeft.getId())) return;
 
         QueryBuilder query = QueryBuilder.init().add("guild", guild.getId());
-        localMapper.searchByID(query.add("channel", channel.getId()).create())
+        localMapper.searchByID(query.add("channel", channelLeft.getId()).create())
                 .ifPresent(vc -> {
                     // Se il canale lasciato non è una vc oppure se il canale non è vuoto, ritorna
-                    if (!channel.getMembers().isEmpty()) return;
+                    if (!channelLeft.getMembers().isEmpty()) return;
 
-                    if (vc.isPinned()) {
-                        settingsMapper.search(query.create())
-                                .ifPresent(settings -> {
-                                    VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
-                                    if (voiceChannel == null) return;
+                    // We can use Optional#ifPresent because every guild should have a Settings object
+                    settingsMapper.search(query.create()).ifPresent(settings -> {
+                        if (vc.isPinned()) {
+                            VoiceChannel voiceChannel = guild.getVoiceChannelById(vc.getChannel());
+                            if (voiceChannel == null) return;
 
-                                    // Setta i permessi nuovi
-                                    Perms.setPublicPerms(voiceChannel.getManager(),
-                                                    vc.getStatus(),
-                                                    guild.getRoleById(settings.getPublicRole()),
-                                                    false)
-                                            .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
-                                });
-                    } else {
-                        localMapper.scheduleForDeletion(vc, channel).queue();
-                    }
+                            // Setta i permessi nuovi
+                            Perms.setPublicPerms(voiceChannel.getManager(),
+                                            vc.getStatus(),
+                                            guild.getRoleById(settings.getPublicRole()),
+                                            false)
+                                    .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
+                        } else {
+                            RestAction<Void> deletion = localMapper.scheduleForDeletion(vc, channelLeft);
+                            if (channelJoined != null && channelJoined.getId().equals(settings.getVoiceID())) {
+                                // We use RestAction#complete here because the room has to be
+                                // deleted for a new room to be created
+                                deletion.complete();
+                            } else {
+                                deletion.queue();
+                            }
+                        }
+                    });
                 });
     }
 

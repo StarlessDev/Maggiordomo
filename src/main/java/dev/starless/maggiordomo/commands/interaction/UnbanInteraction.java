@@ -95,7 +95,7 @@ public class UnbanInteraction implements Interaction {
                 return vc;
             }
 
-            vc.removeRecordPlayer(RecordType.BAN, member.getId());
+            vc.removePlayerRecord(RecordType.BAN, member.getId());
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()

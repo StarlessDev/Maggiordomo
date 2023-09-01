@@ -49,11 +49,11 @@ public class BanInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
+            } else if (vc.hasPlayerRecord(RecordType.BAN, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_ALREADY_BANNED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
+            } else if (vc.hasPlayerRecord(RecordType.TRUST, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
@@ -68,7 +68,7 @@ public class BanInteraction implements Interaction {
             } else {
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 boolean isChannelCreated = channel != null;
-                vc.addRecordPlayer(RecordType.BAN, member.getId());
+                vc.addPlayerRecord(RecordType.BAN, member.getId());
 
                 // Rispondi alla richiesta
                 e.replyEmbeds(new EmbedBuilder()

@@ -345,12 +345,11 @@ public class LocalVCMapper implements IMapper<VC> {
                     scheduledForDeletion.remove(id);
                     return null;
                 }).onSuccess(success.andThen(nothing -> {
-                    scheduledForDeletion.remove(id);
-
                     vc.setChannel("-1");
                     gateway.update(vc);
 
                     removeFromCache(vc);
+                    scheduledForDeletion.remove(id);
                 }));
     }
 

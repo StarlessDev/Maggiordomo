@@ -69,16 +69,16 @@ public class VC {
                 Translations.string(Messages.VC_NAME, language, member.getEffectiveName()));
     }
 
-    public void addRecordPlayer(RecordType type, String id) {
+    public void addPlayerRecord(RecordType type, String id) {
         UserRecord record = new UserRecord(type, guild, channel, id);
         consumeSet(type, set -> set.add(record));
     }
 
-    public void removeRecordPlayer(RecordType type, String id) {
+    public void removePlayerRecord(RecordType type, String id) {
         consumeSet(type, set -> set.removeIf(record -> record.type().equals(type) && record.user().equals(id)));
     }
 
-    public boolean hasRecordPlayer(RecordType type, String id) {
+    public boolean hasPlayerRecord(RecordType type, String id) {
         AtomicBoolean check = new AtomicBoolean(false);
         consumeSet(type, set -> check.set(set.stream().anyMatch(record -> record.user().equals(id))));
         return check.get();

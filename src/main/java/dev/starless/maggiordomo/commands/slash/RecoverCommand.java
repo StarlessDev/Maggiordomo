@@ -110,8 +110,8 @@ public class RecoverCommand implements Slash {
                         isLocked ? VCStatus.LOCKED : VCStatus.OPEN,
                         boolMapping.getAsBoolean());
 
-                trusted.forEach(string -> vc.addRecordPlayer(RecordType.TRUST, string));
-                banned.forEach(string -> vc.addRecordPlayer(RecordType.BAN, string));
+                trusted.forEach(string -> vc.addPlayerRecord(RecordType.TRUST, string));
+                banned.forEach(string -> vc.addPlayerRecord(RecordType.BAN, string));
 
                 localMapper.search(QueryBuilder.init()
                                 .add("guild", guild)
