@@ -52,6 +52,10 @@ public class Server implements Service {
             // Has to be used has a Bearer token.
             String apiKey = config.getString(ConfigEntry.API_KEY);
 
+            // Max requests per second
+            // (very low rn because this is still has no use case=
+            int maxRequests = config.getInt(ConfigEntry.API_RATE_LIMIT);
+
             server = server.updateConfig(config -> {
                         config.contextResolver.ip = context -> {
                             // Check for headers containing the ip of the user
@@ -97,7 +101,7 @@ public class Server implements Service {
                     })
                     .error(HttpStatus.NOT_FOUND, ctx -> ResponseBuilder.init().code(HttpStatus.NOT_FOUND).send(ctx))
                     .routes(() -> path("api", () -> {
-                        before(ctx -> NaiveRateLimit.requestPerTimeUnit(ctx, 10, TimeUnit.SECONDS));
+                        before(ctx -> NaiveRateLimit.requestPerTimeUnit(ctx, maxRequests, TimeUnit.SECONDS));
 
                         path("{guild}", () -> {
                             get("/", ctx -> {
