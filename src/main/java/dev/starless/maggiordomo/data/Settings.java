@@ -204,6 +204,14 @@ public class Settings {
         return !categories.isEmpty() && categories.get(0).equals(categoryID);
     }
 
+    public boolean hasNoMenuChannel() {
+        return channelID.equals("-1");
+    }
+
+    public boolean hasNoMenu() {
+        return menuID.equals("-1");
+    }
+
     public String getDescription() {
         return descriptionRaw.replace("{CHANNEL}", voiceID.equals("-1") ? "`???`" : "<#" + voiceID + ">");
     }

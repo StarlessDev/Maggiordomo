@@ -53,7 +53,8 @@ public class Server implements Service {
             String apiKey = config.getString(ConfigEntry.API_KEY);
 
             // Max requests per second
-            // (very low rn because this is still has no use case=
+            // set to a very low value rn because this has still no use case.
+            // Maybe a web gui coming soon?
             int maxRequests = config.getInt(ConfigEntry.API_RATE_LIMIT);
 
             server = server.updateConfig(config -> {

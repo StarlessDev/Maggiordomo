@@ -419,6 +419,8 @@ public class Core implements Module {
     }
 
     public void updateMenu(Guild guild, Settings settings) {
+        if(settings.hasNoMenuChannel() || settings.hasNoMenu()) return;
+
         TextChannel channel = guild.getTextChannelById(settings.getChannelID());
         if (channel != null) {
             channel.retrieveMessageById(settings.getMenuID()).queue(message -> {
@@ -433,9 +435,9 @@ public class Core implements Module {
                 } else {
                     BotLogger.warn("Could not update the menu of the guild (build failed): " + guild.getName());
                 }
-            }, throwable -> BotLogger.warn("Could not update the menu of the guild (no message): " + guild.getName()));
+            }, throwable -> BotLogger.warn("Could not update the menu of the guild (invalid message): " + guild.getName()));
         } else {
-            BotLogger.warn("Could not update the menu of the guild (no channel): " + guild.getName());
+            BotLogger.warn("Could not update the menu of the guild (invalid channel): " + guild.getName());
         }
     }
 
