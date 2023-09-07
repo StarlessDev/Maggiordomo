@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
-import dev.starless.mongo.objects.QueryBuilder;
+import dev.starless.mongo.api.QueryBuilder;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
 

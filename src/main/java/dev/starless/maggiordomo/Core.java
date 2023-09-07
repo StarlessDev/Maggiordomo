@@ -26,9 +26,11 @@ import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import dev.starless.mongo.MongoStorage;
-import dev.starless.mongo.objects.Query;
-import dev.starless.mongo.objects.QueryBuilder;
-import dev.starless.mongo.objects.Schema;
+import dev.starless.mongo.api.Query;
+import dev.starless.mongo.api.QueryBuilder;
+import dev.starless.mongo.schema.Schema;
+import dev.starless.mongo.schema.suppliers.FixedKeySupplier;
+import dev.starless.mongo.schema.suppliers.impl.SimpleSupplier;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -65,6 +67,7 @@ import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.FileUpload;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import org.bson.Document;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -93,18 +96,21 @@ public class Core implements Module {
                         .entry("premiumRoles", new HashSet<>())
                         .entry("bannedRoles", new HashSet<>())
                         .entry("filterStrings", new HashMap<>())
-                        .entry("categories", "categoryID", document -> {
-                            // Trasferisce il vecchio id della categoria sul nuovo formato
-                            List<String> categories = new ArrayList<>();
-                            String legacyID = document.getString("categoryID");
-                            if (legacyID != null) {
-                                categories.add(legacyID);
-                            }
+                        .entry("categories", new FixedKeySupplier("categoryID") {
+                            @Override
+                            public Object supply(Document document) {
+                                // Trasferisce il vecchio id della categoria sul nuovo formato
+                                List<String> categories = new ArrayList<>();
+                                String legacyID = document.getString(deprecatedKey());
+                                if (legacyID != null) {
+                                    categories.add(legacyID);
+                                }
 
-                            return categories;
+                                return categories;
+                            }
                         })
-                        .entry("channelID", "-1")
-                        .entry("voiceID", "-1")
+                        .entry("menuChannelID", new SimpleSupplier("channelID", "-1"))
+                        .entry("voiceGeneratorID", new SimpleSupplier("voiceID", "-1"))
                         .entry("menuID", "-1")
                         .entry("publicRole", "-1")
                         .entry("language", "en")
@@ -140,7 +146,7 @@ public class Core implements Module {
                 settings.forEachCategory(guild, category -> {
                     LocalVCMapper localMapper = channelMapper.getMapper(guild);
                     category.getVoiceChannels().forEach(voiceChannel -> {
-                        if (voiceChannel.getId().equals(settings.getVoiceID())) return;
+                        if (voiceChannel.getId().equals(settings.getVoiceGeneratorID())) return;
 
                         Optional<VC> optionalVC = localMapper.searchByID(QueryBuilder.init()
                                 .add("guild", guildID)
@@ -421,7 +427,7 @@ public class Core implements Module {
     public void updateMenu(Guild guild, Settings settings) {
         if(settings.hasNoMenuChannel() || settings.hasNoMenu()) return;
 
-        TextChannel channel = guild.getTextChannelById(settings.getChannelID());
+        TextChannel channel = guild.getTextChannelById(settings.getMenuChannelID());
         if (channel != null) {
             channel.retrieveMessageById(settings.getMenuID()).queue(message -> {
                 message.delete().queue();
@@ -462,7 +468,7 @@ public class Core implements Module {
 
         VC vc = null;
         // If the user has joined the generator channel
-        if (channel.getId().equals(settings.getVoiceID())) {
+        if (channel.getId().equals(settings.getVoiceGeneratorID())) {
             Category category = settings.getAvailableCategory(guild);
             if (category == null) return; // <-- If this triggers something has gone VERY wrong
 
@@ -557,7 +563,7 @@ public class Core implements Module {
                                     .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
                         } else {
                             RestAction<Void> deletion = localMapper.scheduleForDeletion(vc, channelLeft);
-                            if (channelJoined != null && channelJoined.getId().equals(settings.getVoiceID())) {
+                            if (channelJoined != null && channelJoined.getId().equals(settings.getVoiceGeneratorID())) {
                                 // We use RestAction#complete here because the room has to be
                                 // deleted for a new room to be created
                                 deletion.complete();

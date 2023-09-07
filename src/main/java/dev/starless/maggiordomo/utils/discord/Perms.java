@@ -114,7 +114,7 @@ public class Perms {
             if (category != null) {
                 // Setta nuovamente i permessi delle vocali
                 category.getVoiceChannels().forEach(voiceChannel -> {
-                    if (voiceChannel.getId().equals(settings.getVoiceID())) return;
+                    if (voiceChannel.getId().equals(settings.getVoiceGeneratorID())) return;
 
                     VoiceChannelManager manager = voiceChannel.getManager();
                     PermissionOverride oldPerms = voiceChannel.getPermissionOverride(oldRole);
@@ -139,7 +139,7 @@ public class Perms {
         });
 
         // Reimposta i permessi dei canali
-        TextChannel dashboardChannel = guild.getTextChannelById(settings.getChannelID());
+        TextChannel dashboardChannel = guild.getTextChannelById(settings.getMenuChannelID());
         if (dashboardChannel != null) {
             TextChannelManager manager = dashboardChannel.getManager()
                     .removePermissionOverride(oldRole)
@@ -154,7 +154,7 @@ public class Perms {
             manager.queue();
         }
 
-        VoiceChannel createChannel = guild.getVoiceChannelById(settings.getVoiceID());
+        VoiceChannel createChannel = guild.getVoiceChannelById(settings.getVoiceGeneratorID());
         if (createChannel != null) {
             VoiceChannelManager manager = createChannel.getManager()
                     .removePermissionOverride(oldRole)

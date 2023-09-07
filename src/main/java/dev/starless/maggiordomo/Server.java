@@ -8,7 +8,7 @@ import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.interfaces.Service;
 import dev.starless.maggiordomo.utils.GsonUtil;
-import dev.starless.mongo.objects.QueryBuilder;
+import dev.starless.mongo.api.QueryBuilder;
 import io.javalin.Javalin;
 import io.javalin.apibuilder.EndpointGroup;
 import io.javalin.http.HandlerType;

@@ -320,10 +320,10 @@ public class SetupCommand implements Slash, Interaction {
 
                     // Crea tutti i canali
                     createDashboard.queue(textChannel -> {
-                        settings.setChannelID(textChannel.getId());
+                        settings.setMenuChannelID(textChannel.getId());
 
                         createGenerator.queue(voiceChannel -> {
-                            settings.setVoiceID(voiceChannel.getId());
+                            settings.setVoiceGeneratorID(voiceChannel.getId());
 
                             // Aggiorna la cache e il documento nel db
                             Bot.getInstance().getCore().getSettingsMapper().update(settings);

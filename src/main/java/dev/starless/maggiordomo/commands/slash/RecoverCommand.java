@@ -12,7 +12,7 @@ import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.utils.discord.Perms;
-import dev.starless.mongo.objects.QueryBuilder;
+import dev.starless.mongo.api.QueryBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;

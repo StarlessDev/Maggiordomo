@@ -4,8 +4,8 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
-import dev.starless.mongo.annotations.MongoKey;
-import dev.starless.mongo.annotations.MongoObject;
+import dev.starless.mongo.api.annotations.MongoKey;
+import dev.starless.mongo.api.annotations.MongoObject;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import net.dv8tion.jda.api.Permission;
@@ -34,8 +34,8 @@ public class Settings {
     private final Map<FilterType, Set<String>> filterStrings;
     private List<String> categories;
 
-    private String channelID;
-    private String voiceID;
+    private String menuChannelID;
+    private String voiceGeneratorID;
     private String menuID;
     private String publicRole;
     private String language;
@@ -56,8 +56,8 @@ public class Settings {
         // dovrebbe essere accettabile come soluzione.
         this.categories = new CopyOnWriteArrayList<>();
 
-        this.channelID = "-1";
-        this.voiceID = "-1";
+        this.menuChannelID = "-1";
+        this.voiceGeneratorID = "-1";
         this.menuID = "-1";
         this.publicRole = everyone;
         this.language = "en";
@@ -205,7 +205,7 @@ public class Settings {
     }
 
     public boolean hasNoMenuChannel() {
-        return channelID.equals("-1");
+        return menuChannelID.equals("-1");
     }
 
     public boolean hasNoMenu() {
@@ -213,6 +213,6 @@ public class Settings {
     }
 
     public String getDescription() {
-        return descriptionRaw.replace("{CHANNEL}", voiceID.equals("-1") ? "`???`" : "<#" + voiceID + ">");
+        return descriptionRaw.replace("{CHANNEL}", voiceGeneratorID.equals("-1") ? "`???`" : "<#" + voiceGeneratorID + ">");
     }
 }

@@ -2,8 +2,8 @@ package dev.starless.maggiordomo.storage.settings;
 
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.mongo.MongoStorage;
-import dev.starless.mongo.objects.Query;
-import dev.starless.mongo.objects.gateway.GatewayImpl;
+import dev.starless.mongo.api.Query;
+import dev.starless.mongo.api.gateway.GatewayImpl;
 
 import java.util.List;
 import java.util.Optional;

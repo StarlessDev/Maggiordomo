@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.api.AController;
 import dev.starless.maggiordomo.api.ResponseBuilder;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
-import dev.starless.mongo.objects.QueryBuilder;
+import dev.starless.mongo.api.QueryBuilder;
 import io.javalin.http.Context;
 import io.javalin.http.HttpStatus;
 
