@@ -1,9 +1,11 @@
 package dev.starless.maggiordomo;
 
 import dev.starless.maggiordomo.logging.BotLogger;
+import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Console extends Thread {
 
@@ -26,8 +28,29 @@ public class Console extends Thread {
                 System.exit(0); // Ferma il programma
                 return;
             } else if (cmd.equals("stats")) {
-                int numberOfGuilds = Bot.getInstance().getJda().getGuilds().size();
-                BotLogger.info("The bot has joined %d guild(s).", numberOfGuilds);
+                int count = 0;
+                int guildSizes = 0;
+                int min = Integer.MAX_VALUE;
+                int max = Integer.MIN_VALUE;
+
+                for (Guild guild : Bot.getInstance().getJda().getGuilds()) {
+                    int memberCount = guild.getMemberCount();
+                    count++;
+                    guildSizes += memberCount;
+
+                    if(min >= memberCount) min = memberCount;
+                    if(max <= memberCount) max = memberCount;
+                }
+
+                double averageSize = (double) guildSizes / (double) count;
+                String message = """
+                        Maggiordomo's stats:
+                        The bot has joined %d guilds.
+                        The guilds have in average %.1f members.
+                        Smallest guild has %d members.
+                        Biggest guild has %d members.
+                        """.formatted(count, averageSize, min, max);
+                BotLogger.info(message);
             } else if (cmd.startsWith("guilds")) {
                 int page = 0;
                 String[] args = cmd.split(" ");

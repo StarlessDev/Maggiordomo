@@ -104,6 +104,8 @@ public class Server implements Service {
                     .routes(() -> path("api", () -> {
                         before(ctx -> NaiveRateLimit.requestPerTimeUnit(ctx, maxRequests, TimeUnit.SECONDS));
 
+                        get("stats", ctx -> ResponseBuilder.init().json(Statistics.getInstance().toJsonObject()).send(ctx));
+
                         path("{guild}", () -> {
                             get("/", ctx -> {
                                 Guild guild = Bot.getInstance().getJda().getGuildById(ctx.pathParam("guild"));

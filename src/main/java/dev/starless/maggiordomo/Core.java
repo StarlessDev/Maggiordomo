@@ -90,6 +90,8 @@ public class Core implements Module {
     public Core(Config config) {
         // Translations are already needed for the Settings schema
         Translations.init();
+        // Statistics for api purposes
+        Statistics.getInstance().load();
 
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
                 .registerSchema(new Schema(Settings.class)
@@ -201,6 +203,7 @@ public class Core implements Module {
         jda.removeEventListener(this);
 
         activityManager.stop();
+        Statistics.getInstance().save();
 
         int interrupted = 0;
         for (Guild guild : jda.getGuilds()) {
@@ -244,12 +247,16 @@ public class Core implements Module {
         // Start activity monitoring
         activityManager.startMonitor(e.getGuild().getId());
 
+        // Update statistics
+        Statistics.getInstance().updateGuild(true);
+
         BotLogger.info("The guild '%s' has just added the bot!", e.getGuild().getName());
     }
 
     @SubscribeEvent
     public void onGuildLeave(@NotNull GuildLeaveEvent e) {
         activityManager.stopMonitor(e.getGuild().getId()); // Stop monitoring the guilds' activity
+        Statistics.getInstance().updateGuild(false); // Update statistics
         BotLogger.info("The bot departed from the guild '%s'.", e.getGuild().getName());
     }
 
@@ -605,6 +612,9 @@ public class Core implements Module {
                     .ifPresentOrElse(
                             command -> {
                                 if (command.hasPermission(e.getMember(), settings)) {
+                                    // Update statistics
+                                    Statistics.getInstance().incrementCommands();
+
                                     BotLogger.info("%s just used the command '%s' (type: Slash) in guild '%s'",
                                             References.user(e.getUser()),
                                             command.getName(),
@@ -746,6 +756,9 @@ public class Core implements Module {
 
                 if (!isOnCooldown) {
                     commands.handleCooldown(interaction, memberID);
+
+                    // Update statistics
+                    Statistics.getInstance().incrementCommands();
 
                     BotLogger.info("%s just used the command '%s' (type: %s) in guild '%s'",
                             References.user(member.getUser()),
