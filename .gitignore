@@ -130,3 +130,4 @@ buildNumber.properties
 
 # Common working directory
 run/
+/guides/
