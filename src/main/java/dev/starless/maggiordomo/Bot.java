@@ -2,6 +2,7 @@ package dev.starless.maggiordomo;
 
 import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
+import dev.starless.maggiordomo.console.Console;
 import dev.starless.maggiordomo.interfaces.Service;
 import dev.starless.maggiordomo.logging.BotLogger;
 import lombok.Getter;
