@@ -12,9 +12,9 @@ public class Guilds implements ConsoleCommand {
     @Override
     public void execute(String[] args) {
         int page = 0;
-        if (args.length >= 2) {
+        if (args.length >= 1) {
             try {
-                page = Math.max(0, Integer.parseInt(args[1]) - 1);
+                page = Math.max(0, Integer.parseInt(args[0]) - 1);
             } catch (NumberFormatException ex) {
                 BotLogger.info("Please provide a valid page number.");
                 return;
