@@ -33,7 +33,7 @@ dependencies {
 
     implementation("com.vdurmont:semver4j:3.1.0") // Semantic versioning util
     implementation("ch.qos.logback:logback-classic:1.4.7") // Logger implementation
-    implementation("cz.jirutka.unidecode:unidecode:1.0.1") // Pearl's unidecode java port
+    implementation("com.anyascii:anyascii:0.3.2") // AnyAscii (finds the best ascii character match of unicode characters)
 }
 
 application {
