@@ -9,12 +9,9 @@ public enum ConfigEntry {
     CONFIG_VERSION("config_version", Main.getVersion()),
     TOKEN("token", "discord-bot-token"),
     MONGO("mongo", "mongodb://"),
-    SERVER_PORT("server.port", 8080),
-    API_ENABLED("server.api.enabled", true),
-    API_KEY("server.api.key", "defaultkey"),
-    API_RATE_LIMIT("server.api.ratelimit", 10),
-    UPTIME_ENABLED("server.uptimerobot.enabled", false),
-    UPTIME_ENDPOINT("server.uptimerobot.endpoint", "/endpoint");
+    UPTIME_ENABLED("uptimerobot.enabled", false),
+    UPTIME_PORT("uptimerobot.port", 8080),
+    UPTIME_ENDPOINT("uptimerobot.endpoint", "/endpoint");
 
     private final String path;
     private final Object defaultValue;

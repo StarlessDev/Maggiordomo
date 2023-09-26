@@ -29,7 +29,7 @@ public class Bot implements Service {
 
     private Core core;
     private JDA jda;
-    private Server server;
+    private UptimeServer server;
 
     private boolean ready;
 
@@ -46,7 +46,9 @@ public class Bot implements Service {
         }
 
         core = new Core(config);
-        server = new Server(config);
+        if (config.getBoolean(ConfigEntry.UPTIME_ENABLED)) {
+            server = new UptimeServer(config.getString(ConfigEntry.UPTIME_ENDPOINT), config.getInt(ConfigEntry.UPTIME_PORT));
+        }
 
         // Effettua il login
         jda = JDABuilder.createDefault(config.getString(ConfigEntry.TOKEN))

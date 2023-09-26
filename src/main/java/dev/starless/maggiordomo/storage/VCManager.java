@@ -3,7 +3,6 @@ package dev.starless.maggiordomo.storage;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.mongo.MongoStorage;
 import net.dv8tion.jda.api.entities.Guild;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,9 +27,5 @@ public class VCManager {
 
             return mapper;
         });
-    }
-
-    public @Nullable LocalVCMapper getNullableMapper(String id) {
-        return mappers.getOrDefault(id, null);
     }
 }
