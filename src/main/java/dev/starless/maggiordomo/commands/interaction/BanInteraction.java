@@ -6,7 +6,7 @@ import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
-import dev.starless.maggiordomo.utils.Matcher;
+import dev.starless.maggiordomo.utils.discord.Matcher;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;

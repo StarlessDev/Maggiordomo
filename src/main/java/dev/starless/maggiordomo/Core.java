@@ -95,8 +95,6 @@ public class Core implements Module {
 
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
                 .registerSchema(new Schema(Settings.class)
-                        .entry("premiumRoles", new HashSet<>())
-                        .entry("bannedRoles", new HashSet<>())
                         .entry("filterStrings", new HashMap<>())
                         .entry("categories", new FixedKeySupplier("categoryID") {
                             @Override
@@ -113,12 +111,7 @@ public class Core implements Module {
                         })
                         .entry("menuChannelID", new SimpleSupplier("channelID", "-1"))
                         .entry("voiceGeneratorID", new SimpleSupplier("voiceID", "-1"))
-                        .entry("menuID", "-1")
-                        .entry("publicRole", "-1")
-                        .entry("language", "en")
-                        .entry("maxInactivity", -1L)
-                        .entry("title", Translations.string(Messages.SETTINGS_INTERFACE_TITLE, "en"))
-                        .entry("descriptionRaw", Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, "en")));
+                        .entry("language", "en"));
     }
 
     @Override
