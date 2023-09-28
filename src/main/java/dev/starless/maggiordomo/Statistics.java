@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo;
 
-import com.google.gson.JsonObject;
 import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.utils.ConfigUtils;
 import lombok.Getter;
@@ -60,14 +59,6 @@ public class Statistics {
     public void updateGuild(boolean increment) {
         if(increment) joinedGuilds.incrementAndGet();
         else joinedGuilds.incrementAndGet();
-    }
-
-    public JsonObject toJsonObject() {
-        JsonObject json = new JsonObject();
-        json.addProperty("joined_guilds", joinedGuilds);
-        json.addProperty("channels_created", createdChannels);
-        json.addProperty("commands_executed", executedCommands);
-        return json;
     }
 
     private void consumeFile(Consumer<CommentedConfigurationNode> action, boolean save) {
