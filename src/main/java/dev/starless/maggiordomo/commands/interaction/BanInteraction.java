@@ -6,7 +6,7 @@ import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
-import dev.starless.maggiordomo.utils.Matcher;
+import dev.starless.maggiordomo.utils.discord.Matcher;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
@@ -49,11 +49,11 @@ public class BanInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
+            } else if (vc.hasPlayerRecord(RecordType.BAN, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_ALREADY_BANNED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
+            } else if (vc.hasPlayerRecord(RecordType.TRUST, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
@@ -68,7 +68,7 @@ public class BanInteraction implements Interaction {
             } else {
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 boolean isChannelCreated = channel != null;
-                vc.addRecordPlayer(RecordType.BAN, member.getId());
+                vc.addPlayerRecord(RecordType.BAN, member.getId());
 
                 // Rispondi alla richiesta
                 e.replyEmbeds(new EmbedBuilder()
@@ -95,7 +95,7 @@ public class BanInteraction implements Interaction {
                                                 .setColor(new Color(239, 210, 95))
                                                 .setDescription(Translations.stringFormatted(Messages.INTERACTION_BAN_NOTIFICATION_DESC, settings.getLanguage(),
                                                         "issuer", e.getUser().getAsMention(),
-                                                        "target", vc.getTitle()))
+                                                        "channel", vc.getTitle()))
                                                 .build())
                                         .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer()),
                                 throwable -> e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))

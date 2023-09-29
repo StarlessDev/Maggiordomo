@@ -6,13 +6,12 @@ import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
-import dev.starless.maggiordomo.utils.Matcher;
+import dev.starless.maggiordomo.utils.discord.Matcher;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -23,7 +22,6 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
-import java.util.List;
 import java.util.Optional;
 
 public class TrustInteraction implements Interaction {
@@ -50,11 +48,11 @@ public class TrustInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasRecordPlayer(RecordType.TRUST, member.getId())) {
+            } else if (vc.hasPlayerRecord(RecordType.TRUST, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_ALREADY_TRUSTED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasRecordPlayer(RecordType.BAN, member.getId())) {
+            } else if (vc.hasPlayerRecord(RecordType.BAN, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_TRUST_BANNED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
@@ -69,7 +67,7 @@ public class TrustInteraction implements Interaction {
             } else {
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 boolean isChannelCreated = channel != null;
-                vc.addRecordPlayer(RecordType.TRUST, member.getId());
+                vc.addPlayerRecord(RecordType.TRUST, member.getId());
 
                 // Rispondi alla richiesta
                 e.replyEmbeds(new EmbedBuilder()

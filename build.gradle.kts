@@ -25,15 +25,15 @@ repositories {
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion") // JDA
     implementation("io.javalin:javalin:5.6.1") // Javalin
-    implementation("org.mongodb:mongodb-driver-sync:4.9.1") // MongoDB driver
-    implementation("com.github.StarlessDev:MongoStorage:main-SNAPSHOT")
+    implementation("org.mongodb:mongodb-driver-sync:4.10.2") // MongoDB driver
+    implementation("com.github.StarlessDev:MongoStorage:1.0.6") // MongoDB (de)serialization library
 
     implementation("org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT") // Configurate
     implementation("com.google.code.gson:gson:2.10.1") // Gson
 
     implementation("com.vdurmont:semver4j:3.1.0") // Semantic versioning util
     implementation("ch.qos.logback:logback-classic:1.4.7") // Logger implementation
-    implementation("cz.jirutka.unidecode:unidecode:1.0.1") // Pearl's unidecode java port
+    implementation("com.anyascii:anyascii:0.3.2") // AnyAscii (finds the best ascii character match of unicode characters)
 }
 
 application {

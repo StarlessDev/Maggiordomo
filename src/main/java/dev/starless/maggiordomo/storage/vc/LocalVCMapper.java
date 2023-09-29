@@ -1,15 +1,16 @@
 package dev.starless.maggiordomo.storage.vc;
 
+import dev.starless.maggiordomo.Statistics;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.logging.BotLogger;
-import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.Perms;
+import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import dev.starless.mongo.MongoStorage;
-import dev.starless.mongo.objects.Query;
-import dev.starless.mongo.objects.mapper.IMapper;
+import dev.starless.mongo.api.Query;
+import dev.starless.mongo.api.mapper.IMapper;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
@@ -26,7 +27,6 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -216,6 +216,9 @@ public class LocalVCMapper implements IMapper<VC> {
                             }, errorHandler);
                 }
 
+                // Update statistics
+                Statistics.getInstance().incrementChannels();
+
                 BotLogger.info("%s just created his voice channel in guild '%s'!",
                         References.user(vc.getUser()),
                         category.getGuild().getName());
@@ -304,7 +307,7 @@ public class LocalVCMapper implements IMapper<VC> {
                     int channelIndex = channels.indexOf(channel);
                     int normalSize = normalChannels.size();
 
-                    int movement = channelIndex - normalSize;
+                    int movement = Math.max(0, channelIndex - normalSize);
                     if (movement == 0) return;
 
                     category.modifyVoiceChannelPositions()
@@ -345,12 +348,11 @@ public class LocalVCMapper implements IMapper<VC> {
                     scheduledForDeletion.remove(id);
                     return null;
                 }).onSuccess(success.andThen(nothing -> {
-                    scheduledForDeletion.remove(id);
-
                     vc.setChannel("-1");
                     gateway.update(vc);
 
                     removeFromCache(vc);
+                    scheduledForDeletion.remove(id);
                 }));
     }
 

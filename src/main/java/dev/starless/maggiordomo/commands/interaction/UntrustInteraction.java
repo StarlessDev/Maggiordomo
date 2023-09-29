@@ -87,7 +87,7 @@ public class UntrustInteraction implements Interaction {
             String memberId = e.getValues().get(0);
             Member member = e.getGuild().getMemberById(memberId);
             if (member == null) {
-                vc.removeRecordPlayer(RecordType.TRUST, member.getId());
+                vc.removePlayerRecord(RecordType.TRUST, member.getId());
 
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
@@ -96,7 +96,7 @@ public class UntrustInteraction implements Interaction {
                 return vc;
             }
 
-            vc.removeRecordPlayer(RecordType.TRUST, member.getId());
+            vc.removePlayerRecord(RecordType.TRUST, member.getId());
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()

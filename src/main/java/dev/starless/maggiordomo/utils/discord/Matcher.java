@@ -1,4 +1,4 @@
-package dev.starless.maggiordomo.utils;
+package dev.starless.maggiordomo.utils.discord;
 
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.entities.Guild;

@@ -2,9 +2,9 @@ package dev.starless.maggiordomo.storage.settings;
 
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.mongo.MongoStorage;
-import dev.starless.mongo.objects.Query;
-import dev.starless.mongo.objects.QueryBuilder;
-import dev.starless.mongo.objects.mapper.IMapper;
+import dev.starless.mongo.api.Query;
+import dev.starless.mongo.api.QueryBuilder;
+import dev.starless.mongo.api.mapper.IMapper;
 import lombok.Getter;
 
 import java.util.List;

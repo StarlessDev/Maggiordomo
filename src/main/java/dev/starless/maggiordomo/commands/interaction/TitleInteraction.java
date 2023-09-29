@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import cz.jirutka.unidecode.Unidecode;
+import com.anyascii.AnyAscii;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
@@ -9,8 +9,8 @@ import dev.starless.maggiordomo.data.filter.IFilter;
 import dev.starless.maggiordomo.data.filter.impl.ContainsFilter;
 import dev.starless.maggiordomo.data.filter.impl.PatternFilter;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -23,13 +23,17 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
 import java.awt.*;
-import java.text.Normalizer;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TitleInteraction implements Interaction {
 
-    private final Unidecode unidecode = Unidecode.toAscii();
+    private final Pattern emojiPattern = Pattern.compile(":\\w{1,32}:");
     private final Map<Character, Character> leetMap = Map.of(
             '1', 'i',
             '2', 'l',
@@ -105,15 +109,36 @@ public class TitleInteraction implements Interaction {
     }
 
     private String normalize(String input) {
-        if (!Normalizer.isNormalized(input, Normalizer.Form.NFKC)) {
-            input = Normalizer.normalize(input, Normalizer.Form.NFKC);
-        }
+        // Remove characters that could interfere with a MongoDB query
+        // and get the best translation to an ascii string of the input
+        String transliteration = AnyAscii.transliterate(input.trim().replaceAll("\\.|,|-|_|'|`|", ""));
 
-        String ascii = unidecode.decode(input.replaceAll("\\p{M}", "")).replaceAll("\\.|,|-|_|'|`|", "");
-        StringBuilder normalized = new StringBuilder();
-        for (int i = 0; i < ascii.length(); i++) {
-            char c = ascii.charAt(i);
-            normalized.append(Character.toLowerCase(leetMap.getOrDefault(c, c)));
+        // The emojis will get translated to something like this: :rofl:.
+        // Since there are emojis which represent letters, we try to remove the double quotes
+        // and keep only the letters to avoid bypasses
+        StringBuilder normalized = new StringBuilder(transliteration);
+        Matcher emojiMatches = emojiPattern.matcher(transliteration);
+
+        // It's important to filter from the start to the end of the string for the code to work
+        emojiMatches.results().forEachOrdered(new Consumer<>() {
+            int offset = 0;
+
+            @Override
+            public void accept(MatchResult match) {
+                // The offset accounts for previously deleted chars.
+                // I substracted 2 from match.end() since it's exclusive
+                // and to account for the char just deleted
+                normalized.deleteCharAt(match.start() - offset).deleteCharAt(match.end() - offset - 2);
+                offset += 2;
+            }
+        });
+
+        // Account for leet speak
+        for (int i = 0; i < normalized.length(); i++) {
+            char c = leetMap.getOrDefault(normalized.charAt(i), Character.MIN_VALUE);
+            if (c != Character.MIN_VALUE) {
+                normalized.setCharAt(i, Character.toLowerCase(c));
+            }
         }
 
         return normalized.toString();
