@@ -61,6 +61,14 @@ public class Statistics {
         else joinedGuilds.incrementAndGet();
     }
 
+    public int getChannelsCreated() {
+        return createdChannels.get();
+    }
+
+    public int getExecutedCommands() {
+        return executedCommands.get();
+    }
+
     private void consumeFile(Consumer<CommentedConfigurationNode> action, boolean save) {
         File configDirectory = new File("configuration");
         if (!configDirectory.isDirectory() && !configDirectory.mkdirs()) {

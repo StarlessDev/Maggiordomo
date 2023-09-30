@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.console.impl;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Statistics;
 import dev.starless.maggiordomo.console.ConsoleCommand;
 import dev.starless.maggiordomo.logging.BotLogger;
 import net.dv8tion.jda.api.entities.Guild;
@@ -27,13 +28,18 @@ public class Stats implements ConsoleCommand {
         }
 
         double averageSize = (double) guildSizes / (double) count;
+        Statistics stats = Statistics.getInstance();
+
         String message = """
                         Maggiordomo's stats:
                         The bot has joined %d guilds.
                         The guilds have in average %.1f members.
                         Smallest guild has %d members.
                         Biggest guild has %d members.
-                        """.formatted(count, averageSize, min, max);
+                        
+                        Commands executed: %d.
+                        Rooms served: %d.
+                        """.formatted(count, averageSize, min, max, stats.getExecutedCommands(), stats.getChannelsCreated());
         BotLogger.info(message);
     }
 
