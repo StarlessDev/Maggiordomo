@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion") // JDA
-    implementation("io.javalin:javalin:5.6.1") // Javalin
+    implementation("io.javalin:javalin:5.6.2") // Javalin
     implementation("org.mongodb:mongodb-driver-sync:4.10.2") // MongoDB driver
     implementation("com.github.StarlessDev:MongoStorage:main-SNAPSHOT") // MongoDB (de)serialization library
 
