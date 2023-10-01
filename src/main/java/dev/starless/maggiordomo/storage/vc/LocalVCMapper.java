@@ -10,6 +10,7 @@ import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.RestUtils;
 import dev.starless.mongo.MongoStorage;
 import dev.starless.mongo.api.Query;
+import dev.starless.mongo.api.QueryBuilder;
 import dev.starless.mongo.api.mapper.IMapper;
 import lombok.Getter;
 import net.dv8tion.jda.api.entities.Guild;
@@ -35,6 +36,7 @@ import java.util.stream.Stream;
 public class LocalVCMapper implements IMapper<VC> {
 
     private final VCGateway gateway;
+    private final String guildID;
 
     private final Set<VC> normalChannels;
     private final Set<VC> pinnedChannels;
@@ -44,8 +46,9 @@ public class LocalVCMapper implements IMapper<VC> {
 
     private final ExecutorService createService;
 
-    public LocalVCMapper(MongoStorage storage) {
+    public LocalVCMapper(MongoStorage storage, String guild) {
         gateway = new VCGateway(storage);
+        guildID = guild;
 
         normalChannels = Collections.synchronizedSet(new HashSet<>());
         pinnedChannels = Collections.synchronizedSet(new HashSet<>());
@@ -89,6 +92,12 @@ public class LocalVCMapper implements IMapper<VC> {
         }
 
         return removed;
+    }
+
+    public void purge() {
+        gateway.removeByGuild(QueryBuilder.init()
+                .add("guild", guildID)
+                .create());
     }
 
     @Override

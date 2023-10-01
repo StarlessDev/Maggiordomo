@@ -23,7 +23,7 @@ public class VCManager {
 
     public LocalVCMapper getMapper(String id) {
         return mappers.compute(id, (key, mapper) -> {
-            if(mapper == null) mapper = new LocalVCMapper(storage);
+            if(mapper == null) mapper = new LocalVCMapper(storage, id);
 
             return mapper;
         });

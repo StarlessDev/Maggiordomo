@@ -37,6 +37,13 @@ public class VCGateway extends GatewayImpl<VC> {
                 Filters.eq("channel", channel)));
     }
 
+    public void removeByGuild(Query query) {
+        String guild = query.get("guild");
+        if (guild == null) return;
+
+        storage().processRequest(VC.class, (collection, keys) -> collection.deleteMany(Filters.eq("guild", guild)));
+    }
+
     @Override
     public List<VC> lazyLoad(Query query) {
         // Tutte le VC verranno caricate

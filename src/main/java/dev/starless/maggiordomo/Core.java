@@ -28,7 +28,7 @@ import dev.starless.maggiordomo.utils.discord.RestUtils;
 import dev.starless.mongo.MongoStorage;
 import dev.starless.mongo.api.Query;
 import dev.starless.mongo.api.QueryBuilder;
-import dev.starless.mongo.schema.Schema;
+import dev.starless.mongo.schema.MigrationSchema;
 import dev.starless.mongo.schema.suppliers.FixedKeySupplier;
 import dev.starless.mongo.schema.suppliers.impl.SimpleSupplier;
 import lombok.Getter;
@@ -94,7 +94,7 @@ public class Core implements Module {
         Statistics.getInstance().load();
 
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
-                .registerSchema(new Schema(Settings.class)
+                .migrationSchema(new MigrationSchema(Settings.class)
                         .entry("filterStrings", new HashMap<>())
                         .entry("categories", new FixedKeySupplier("categoryID") {
                             @Override
@@ -122,15 +122,23 @@ public class Core implements Module {
         settingsMapper = new SettingsMapper(storage);
         activityManager = new ActivityManager(jda.getGuilds().size());
 
+        List<Settings> settingsList = settingsMapper.bulkSearch(QueryBuilder.empty());
         jda.getGuilds().forEach(guild -> {
-            String guildID = guild.getId();
-            Optional<Settings> cachedSettings = settingsMapper.search(QueryBuilder.init()
-                    .add("guild", guildID)
-                    .create());
+            final String guildID = guild.getId();
+            Settings settings = null;
 
-            Settings settings;
-            if (cachedSettings.isPresent()) {
-                settings = cachedSettings.get();
+            // Look for the correct Settings object
+            Iterator<Settings> it = settingsList.iterator();
+            while (it.hasNext()) {
+                Settings iterated = it.next();
+                if (iterated.getGuild().equals(guildID)) {
+                    settings = iterated;
+                    it.remove();
+                }
+            }
+
+            // Handle the case when the settings are not found
+            if (settings != null) {
                 settingsMapper.getSettings().put(guildID, settings);
             } else {
                 settings = new Settings(guild);
@@ -138,10 +146,11 @@ public class Core implements Module {
             }
 
             if (settings.hasCategory()) {
+                final String voiceGeneratorID = settings.getVoiceGeneratorID();
                 settings.forEachCategory(guild, category -> {
                     LocalVCMapper localMapper = channelMapper.getMapper(guild);
                     category.getVoiceChannels().forEach(voiceChannel -> {
-                        if (voiceChannel.getId().equals(settings.getVoiceGeneratorID())) return;
+                        if (voiceChannel.getId().equals(voiceGeneratorID)) return;
 
                         Optional<VC> optionalVC = localMapper.searchByID(QueryBuilder.init()
                                 .add("guild", guildID)
@@ -150,8 +159,7 @@ public class Core implements Module {
 
                         if (optionalVC.isPresent()) {
                             VC vc = optionalVC.get();
-                            // Se non è lockata e non ci sono persone dentro,
-                            // elimina la stanza
+                            // If the room is not pinned and nobody is using it we delete it
                             if (!vc.isPinned() && voiceChannel.getMembers().isEmpty()) {
                                 localMapper.scheduleForDeletion(vc, voiceChannel).queue();
                             }
@@ -159,6 +167,13 @@ public class Core implements Module {
                     });
                 });
             }
+        });
+
+        // Delete the settings object that are not used anymore
+        BotLogger.info("Found %d unused Settings objects.", settingsList.size());
+        settingsList.forEach(settings -> {
+            channelMapper.getMapper(settings.getGuild()).purge();
+            settingsMapper.delete(settings);
         });
 
         commands = new CommandManager()
@@ -248,7 +263,17 @@ public class Core implements Module {
 
     @SubscribeEvent
     public void onGuildLeave(@NotNull GuildLeaveEvent e) {
-        activityManager.stopMonitor(e.getGuild().getId()); // Stop monitoring the guilds' activity
+        String guildID = e.getGuild().getId();
+        // Delete the guilds' data alongside all the vc data
+        settingsMapper.search(QueryBuilder.init()
+                        .add("guild", guildID)
+                        .create())
+                .ifPresent(settings -> {
+                    channelMapper.getMapper(guildID).purge();
+                    settingsMapper.delete(settings);
+                });
+
+        activityManager.stopMonitor(guildID); // Stop monitoring the guilds' activity
         Statistics.getInstance().updateGuild(false); // Update statistics
         BotLogger.info("The bot departed from the guild '%s'.", e.getGuild().getName());
     }
@@ -425,7 +450,7 @@ public class Core implements Module {
     }
 
     public void updateMenu(Guild guild, Settings settings) {
-        if(settings.hasNoMenuChannel() || settings.hasNoMenu()) return;
+        if (settings.hasNoMenuChannel() || settings.hasNoMenu()) return;
 
         TextChannel channel = guild.getTextChannelById(settings.getMenuChannelID());
         if (channel != null) {
@@ -515,7 +540,7 @@ public class Core implements Module {
                     .add("channel", channel.getId())
                     .create());
 
-            if(cachedVC.isEmpty()) return;
+            if (cachedVC.isEmpty()) return;
 
             vc = cachedVC.get();
         }
