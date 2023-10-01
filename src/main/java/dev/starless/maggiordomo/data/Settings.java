@@ -28,7 +28,6 @@ public class Settings {
     @MongoKey
     @EqualsAndHashCode.Include
     private final String guild;
-    private boolean joined;
 
     private final Set<String> premiumRoles;
     private final Set<String> bannedRoles;
@@ -47,7 +46,6 @@ public class Settings {
 
     public Settings(String guild, String everyone) {
         this.guild = guild;
-        this.joined = true;
 
         this.premiumRoles = new HashSet<>();
         this.bannedRoles = new HashSet<>();
