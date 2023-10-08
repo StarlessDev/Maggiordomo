@@ -33,6 +33,7 @@ import dev.starless.mongo.api.QueryBuilder;
 import dev.starless.mongo.schema.MigrationSchema;
 import dev.starless.mongo.schema.suppliers.FixedKeySupplier;
 import dev.starless.mongo.schema.suppliers.impl.SimpleSupplier;
+import lombok.AccessLevel;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -79,15 +80,16 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Getter
 public class Core implements Module {
 
-    private final MongoStorage storage;
+    @Getter(AccessLevel.NONE) private final MongoStorage storage;
 
-    @Getter private VCManager channelMapper;
-    @Getter private SettingsMapper settingsMapper;
+    private VCManager channelMapper;
+    private SettingsMapper settingsMapper;
 
     private ActivityManager activityManager;
-    @Getter private CommandManager commands;
+    private CommandManager commands;
 
     public Core(Config config) {
         // Translations are already needed for the Settings schema
@@ -122,7 +124,7 @@ public class Core implements Module {
 
         channelMapper = new VCManager(storage);
         settingsMapper = new SettingsMapper(storage);
-        activityManager = new ActivityManager(jda.getGuilds().size());
+        activityManager = new ActivityManager(jda);
 
         List<Settings> settingsList = settingsMapper.bulkSearch(QueryBuilder.empty());
         jda.getGuilds().forEach(guild -> {
@@ -258,9 +260,6 @@ public class Core implements Module {
         // Update commands of the guild
         commands.update(e.getGuild());
 
-        // Start activity monitoring
-        activityManager.startMonitor(e.getGuild().getId());
-
         // Update statistics
         Statistics.getInstance().updateGuild(true);
 
@@ -279,7 +278,6 @@ public class Core implements Module {
                     settingsMapper.delete(settings);
                 });
 
-        activityManager.stopMonitor(guildID); // Stop monitoring the guilds' activity
         Statistics.getInstance().updateGuild(false); // Update statistics
         BotLogger.info("The bot departed from the guild '%s'.", e.getGuild().getName());
     }

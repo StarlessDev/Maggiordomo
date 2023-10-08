@@ -358,7 +358,7 @@ public class SetupCommand implements Slash, Interaction {
         } else {
             // Se arriviamo qua significa che deve essere aggiornata solo la maxInactivity
             // quindi facciamo partire un check forzato per rendere effettivi i cambiamenti da subito
-            new Thread(new ActivityChecker(guild.getId())).start();
+            Bot.getInstance().getCore().getActivityManager().forceCheck(guild);
 
             hook.sendMessage(">>> " + Translations.string(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
