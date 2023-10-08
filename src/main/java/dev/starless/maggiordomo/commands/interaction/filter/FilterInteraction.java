@@ -5,11 +5,10 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
@@ -62,7 +61,7 @@ public abstract class FilterInteraction implements Interaction {
 
         // If the event is acknowledged, an exception was thrown
         // and an error message was already displayed
-        if(!e.isAcknowledged()) {
+        if (!e.isAcknowledged()) {
             String listType = Translations.string(type.equals(FilterType.BASIC) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage()).toLowerCase();
             e.reply(Translations.string(Messages.COMMAND_FILTERS_UPDATED, settings.getLanguage(), listType))
                     .setEphemeral(true)
@@ -123,9 +122,9 @@ public abstract class FilterInteraction implements Interaction {
             builder.addActionRow(menu.build());
         }
 
-        return builder.addActionRow(
-                        PageUtils.getBackButton(getName(), page, settings.getLanguage()),
-                        Button.secondary(getName() + ":add", Translations.string(Messages.COMMAND_FILTERS_ADD_BUTTON, settings.getLanguage())),
+        return builder.addActionRow(PageUtils.getShortBackButton("filters", settings.getLanguage()),
+                        Button.secondary(getName() + ":add", Translations.string(Messages.COMMAND_FILTERS_ADD_BUTTON, settings.getLanguage())))
+                .addActionRow(PageUtils.getBackButton(getName(), page, settings.getLanguage()),
                         PageUtils.getNextButton(getName(), maxPages, page, settings.getLanguage()))
                 .build();
     }

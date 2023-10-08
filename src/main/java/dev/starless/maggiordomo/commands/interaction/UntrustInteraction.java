@@ -50,8 +50,8 @@ public class UntrustInteraction implements Interaction {
 
             records.stream()
                     .filter(record -> record.type().equals(RecordType.TRUST))
-                    .skip(10L * page)
-                    .limit(10)
+                    .skip((long) PageUtils.DROPDOWN_MAX_ENTRIES * page)
+                    .limit(PageUtils.DROPDOWN_MAX_ENTRIES)
                     .forEach(record -> {
                         Member member = e.getGuild().getMemberById(record.user());
                         if (member == null) return;

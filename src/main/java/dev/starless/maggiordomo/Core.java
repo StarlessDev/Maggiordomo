@@ -5,6 +5,8 @@ import dev.starless.maggiordomo.commands.CommandManager;
 import dev.starless.maggiordomo.commands.interaction.*;
 import dev.starless.maggiordomo.commands.interaction.filter.ContainsFilterInteraction;
 import dev.starless.maggiordomo.commands.interaction.filter.PatternFilterInteraction;
+import dev.starless.maggiordomo.commands.interaction.management.FiltersManager;
+import dev.starless.maggiordomo.commands.interaction.management.ListManager;
 import dev.starless.maggiordomo.commands.slash.*;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.config.Config;
@@ -178,14 +180,20 @@ public class Core implements Module {
 
         commands = new CommandManager()
                 .name("maggiordomo")
+                // Slash commands (only for admins)
                 .both(new SetupCommand())
-                .command(new BannedCommand())
+                .both(new ManagementCommand())
                 .command(new MenuCommand())
-                .command(new PremiumCommand())
                 .command(new RecoverCommand())
                 .command(new ReloadPermsCommand())
-                .command(new FiltersCommand())
                 .command(new LanguageCommand())
+                // Interactions for admins
+                .interaction(new ListManager("premium", "## Ruoli Premium 💎", Settings::getPremiumRoles))
+                .interaction(new ListManager("blacklist", "## Ruoli Bannati ❌", Settings::getBannedRoles))
+                .interaction(new FiltersManager())
+                .interaction(new ContainsFilterInteraction())
+                .interaction(new PatternFilterInteraction())
+                // Interaction for users
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
@@ -197,9 +205,7 @@ public class Core implements Module {
                 .interaction(new KickInteraction())
                 .interaction(new ListInteraction())
                 .interaction(new ResetDataInteraction())
-                .interaction(new DeleteInteraction())
-                .interaction(new ContainsFilterInteraction())
-                .interaction(new PatternFilterInteraction());
+                .interaction(new DeleteInteraction());
 
         commands.create(jda);
         activityManager.start();

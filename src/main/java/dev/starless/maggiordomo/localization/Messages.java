@@ -35,6 +35,7 @@ public enum Messages {
     ON_COOLDOWN("interactions.on_cooldown"),
 
     // Translations of the commands
+    //TODO: remove and replace
     COMMAND_BAN_ROLE_DESCRIPTION("commands.ban_role.description"),
     COMMAND_BAN_ROLE_PARAMETER_ROLE("commands.ban_role.parameters.role"),
     COMMAND_BAN_ROLE_SUCCESS_ADDED("commands.ban_role.success_added"),
@@ -57,6 +58,7 @@ public enum Messages {
     COMMAND_MENU_SUCCESS("commands.menu.success"),
     COMMAND_MENU_FAIL("commands.menu.fail"),
 
+    //TODO: remove and replace
     COMMAND_PREMIUM_ROLE_DESCRIPTION("commands.premium_role.description"),
     COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE("commands.premium_role.parameters.role"),
     COMMAND_PREMIUM_ROLE_SUCCESS_ADDED("commands.premium_role.success_added"),

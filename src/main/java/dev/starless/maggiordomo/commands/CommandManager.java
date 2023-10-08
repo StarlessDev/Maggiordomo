@@ -156,6 +156,6 @@ public class CommandManager {
 
     private boolean isTheSame(Command command, Command otherCommand) {
         return command.getClass() == otherCommand.getClass() &&
-                command.getName().equalsIgnoreCase(command.getName());
+                command.getName().equalsIgnoreCase(otherCommand.getName());
     }
 }

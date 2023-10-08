@@ -51,7 +51,7 @@ public class UnbanInteraction implements Interaction {
 
             records.stream()
                     .filter(record -> record.type().equals(RecordType.BAN))
-                    .skip(10L * page)
+                    .skip((long) PageUtils.DROPDOWN_MAX_ENTRIES * page)
                     .limit(10)
                     .forEach(record -> {
                         Member member = e.getGuild().getMemberById(record.user());
@@ -65,7 +65,7 @@ public class UnbanInteraction implements Interaction {
             if (menuBuilder.getOptions().isEmpty()) {
                 builder.setContent(Translations.string(Messages.INTERACTION_UNBAN_EMPTY, settings.getLanguage()));
             } else {
-                int maxPages = (int) Math.ceil(recordsNumber / 10D);
+                int maxPages = (int) Math.ceil(recordsNumber / (double) PageUtils.DROPDOWN_MAX_ENTRIES);
                 Button backButton = PageUtils.getBackButton(getName(), page, settings.getLanguage());
                 Button nextButton = PageUtils.getNextButton(getName(), maxPages, page, settings.getLanguage());
 

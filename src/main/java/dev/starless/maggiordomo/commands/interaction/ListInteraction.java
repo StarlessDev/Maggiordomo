@@ -7,6 +7,7 @@ import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.utils.PageUtils;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
@@ -71,11 +72,11 @@ public class ListInteraction implements Interaction {
             // Filtra i record e forma il messaggio
             Set<UserRecord> records = vc.getTotalRecords();
             int elementsNumber = records.size();
-            long skippedElements = 25L * page;
+            long skippedElements = (long) PageUtils.DROPDOWN_MAX_ENTRIES * page;
             records.stream()
                     .filter(record -> record.type().equals(type)) // Limitati solo ai record del tipo corretto
                     .skip(skippedElements) // Skippa alcuni elementi delle pagine precedenti
-                    .limit(25) // Limita gli elementi a 25
+                    .limit(PageUtils.DROPDOWN_MAX_ENTRIES) // Limita gli elementi a 25
                     .forEach(record -> {
                         integer.incrementAndGet();
 
@@ -96,23 +97,11 @@ public class ListInteraction implements Interaction {
             } else {
                 sb.setLength(sb.length() - 2);
 
-                List<Button> buttons = new ArrayList<>(2);
-                // Se non è la prima pagina
-                if (page != 0) {
-                    buttons.add(Button.of(ButtonStyle.SECONDARY,
-                            getName() + ":" + (page - 1),
-                            Emoji.fromUnicode("⏪")));
-                }
-
-                // Se non sono stati mostrati tutti gli elementi
-                if (skippedElements + streamCount != elementsNumber) {
-                    buttons.add(Button.of(ButtonStyle.PRIMARY,
-                            getName() + ":" + (page + 1),
-                            Emoji.fromUnicode("⏩")));
-                }
-
-                if (!buttons.isEmpty())
-                    builder.addComponents(ActionRow.of(buttons)); // Aggiungi i bottoni al messaggio
+                int maxPages = (int) Math.ceil(elementsNumber / (double) PageUtils.DROPDOWN_MAX_ENTRIES);
+                builder.addActionRow(
+                        PageUtils.getBackButton(getName(), page, settings.getLanguage()),
+                        PageUtils.getNextButton(getName(), maxPages, page, settings.getLanguage())
+                );
             }
 
             // Manda il tutto
