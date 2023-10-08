@@ -16,10 +16,13 @@ public abstract class AManagementInteraction implements Interaction {
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String[] parts = id.split(":");
-        e.getMessage().editMessage(handle(e, settings, parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0]))
-                .setAllowedMentions(Collections.emptyList())
-                .setReplace(true)
-                .queue();
+        MessageEditData edit = handle(e, settings, parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0]);
+        if (edit != null) {
+            e.getMessage().editMessage(edit)
+                    .setAllowedMentions(Collections.emptyList())
+                    .setReplace(true)
+                    .queue();
+        }
 
         if (!e.getInteraction().isAcknowledged()) {
             e.deferReply().queue(hook -> hook.deleteOriginal().queue());
