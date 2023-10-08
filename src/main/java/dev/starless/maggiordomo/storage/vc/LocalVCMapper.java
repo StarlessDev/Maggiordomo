@@ -314,9 +314,12 @@ public class LocalVCMapper implements IMapper<VC> {
                     List<VoiceChannel> channels = getVoiceChannelsInCategory(category, settings.isMainCategory(category.getId()));
 
                     int channelIndex = channels.indexOf(channel);
-                    int normalSize = normalChannels.size();
+                    int normalSize;
+                    synchronized (normalChannels) {
+                        normalSize = normalChannels.size();
+                    }
 
-                    int movement = Math.max(0, channelIndex - normalSize);
+                    int movement = channelIndex - normalSize;
                     if (movement == 0) return;
 
                     category.modifyVoiceChannelPositions()
