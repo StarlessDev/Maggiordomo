@@ -73,4 +73,9 @@ public class ManagementCommand implements Slash, Interaction {
     public boolean hasPermission(Member member, Settings settings) {
         return Perms.isAdmin(member);
     }
+
+    @Override
+    public boolean needsVC() {
+        return false;
+    }
 }

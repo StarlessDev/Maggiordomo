@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Member;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -82,6 +83,10 @@ public class VC {
         AtomicBoolean check = new AtomicBoolean(false);
         consumeSet(type, set -> check.set(set.stream().anyMatch(record -> record.user().equals(id))));
         return check.get();
+    }
+
+    public boolean hasChannel() {
+        return !channel.equals("-1");
     }
 
     public void consumeSet(RecordType type, Consumer<Set<UserRecord>> consumer) {

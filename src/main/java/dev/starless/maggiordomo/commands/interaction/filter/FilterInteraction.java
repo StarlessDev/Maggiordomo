@@ -60,7 +60,7 @@ public abstract class FilterInteraction implements Interaction {
                 .queue();
 
         // If the event is acknowledged, an exception was thrown
-        // and an error message was already displayed
+        // and an error data was already displayed
         if (!e.isAcknowledged()) {
             String listType = Translations.string(type.equals(FilterType.BASIC) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage()).toLowerCase();
             e.reply(Translations.string(Messages.COMMAND_FILTERS_UPDATED, settings.getLanguage(), listType))

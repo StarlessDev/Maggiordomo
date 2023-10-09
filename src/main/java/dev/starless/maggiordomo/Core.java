@@ -5,9 +5,7 @@ import dev.starless.maggiordomo.commands.CommandManager;
 import dev.starless.maggiordomo.commands.interaction.*;
 import dev.starless.maggiordomo.commands.interaction.filter.ContainsFilterInteraction;
 import dev.starless.maggiordomo.commands.interaction.filter.PatternFilterInteraction;
-import dev.starless.maggiordomo.commands.interaction.management.FiltersManager;
-import dev.starless.maggiordomo.commands.interaction.management.ListManager;
-import dev.starless.maggiordomo.commands.interaction.management.RefreshPerms;
+import dev.starless.maggiordomo.commands.interaction.management.*;
 import dev.starless.maggiordomo.commands.slash.*;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.config.Config;
@@ -91,6 +89,7 @@ public class Core implements Module {
 
     private ActivityManager activityManager;
     private CommandManager commands;
+    private Filters filters;
 
     public Core(Config config) {
         // Translations are already needed for the Settings schema
@@ -117,6 +116,7 @@ public class Core implements Module {
                         .entry("menuChannelID", new SimpleSupplier("channelID", "-1"))
                         .entry("voiceGeneratorID", new SimpleSupplier("voiceID", "-1"))
                         .entry("language", "en"));
+        filters = new Filters();
     }
 
     @Override
@@ -196,6 +196,8 @@ public class Core implements Module {
                 .interaction(new ContainsFilterInteraction())
                 .interaction(new PatternFilterInteraction())
                 .interaction(new RefreshPerms())
+                .interaction(new RoomsManager())
+                .interaction(new RoomInspector())
                 // Interaction for users
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
@@ -471,7 +473,7 @@ public class Core implements Module {
                 } else {
                     BotLogger.warn("Could not update the menu of the guild (build failed): " + guild.getName());
                 }
-            }, throwable -> BotLogger.warn("Could not update the menu of the guild (invalid message): " + guild.getName()));
+            }, throwable -> BotLogger.warn("Could not update the menu of the guild (invalid data): " + guild.getName()));
         } else {
             BotLogger.warn("Could not update the menu of the guild (invalid channel): " + guild.getName());
         }

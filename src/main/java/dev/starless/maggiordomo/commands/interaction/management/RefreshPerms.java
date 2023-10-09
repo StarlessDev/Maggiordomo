@@ -1,32 +1,31 @@
-package dev.starless.maggiordomo.commands.slash;
+package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
-import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.RecordType;
 import dev.starless.maggiordomo.data.user.UserRecord;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.mongo.api.QueryBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
+import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ReloadPermsCommand implements Slash {
+public class RefreshPerms extends AManagementInteraction {
 
     @Override
-    public void execute(Settings settings, SlashCommandInteractionEvent e) {
+    protected MessageEditData handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
         AtomicInteger count = new AtomicInteger(0);
 
         LocalVCMapper localMapper = Bot.getInstance().getCore()
@@ -80,15 +79,12 @@ public class ReloadPermsCommand implements Slash {
 
                             manager.queueAfter(count.incrementAndGet() * 250L, TimeUnit.MILLISECONDS);
                         }));
+
+        return null;
     }
 
     @Override
     public String getName() {
         return "refreshperms";
-    }
-
-    @Override
-    public String getDescription(String lang) {
-        return Translations.string(Messages.COMMAND_RELOAD_PERMS_DESCRIPTION, lang);
     }
 }

@@ -331,6 +331,14 @@ public class LocalVCMapper implements IMapper<VC> {
         }
     }
 
+    public List<VC> getCreatedVCs() {
+        List<VC> vcs = new ArrayList<>();
+        operateOnNormal(vcs::addAll);
+        operateOnPinned(vcs::addAll);
+
+        return vcs.stream().filter(VC::hasChannel).toList();
+    }
+
     private List<VoiceChannel> getVoiceChannelsInCategory(Category category, boolean skip) {
         Stream<VoiceChannel> channelStream = category.getVoiceChannels().stream();
         if (skip) {
