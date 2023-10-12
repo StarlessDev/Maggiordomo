@@ -89,7 +89,7 @@ public class Core implements Module {
 
     private ActivityManager activityManager;
     private CommandManager commands;
-    private Filters filters;
+    private final Filters filters;
 
     public Core(Config config) {
         // Translations are already needed for the Settings schema
@@ -116,6 +116,7 @@ public class Core implements Module {
                         .entry("menuChannelID", new SimpleSupplier("channelID", "-1"))
                         .entry("voiceGeneratorID", new SimpleSupplier("voiceID", "-1"))
                         .entry("language", "en"));
+
         filters = new Filters();
     }
 
@@ -733,13 +734,25 @@ public class Core implements Module {
 
         if (op.isPresent()) {
             Interaction interaction = op.get();
-            VC vc = localMapper.search(QueryBuilder.init()
-                            .add("guild", event.getGuild().getId())
-                            .add("user", memberID)
-                            .create())
-                    .orElse(null);
+            VC vc = null;
 
-            if (interaction.needsVC() && vc == null) return false;
+            if (interaction.needsVC()) {
+                Optional<VC> storedVC = localMapper.search(QueryBuilder.init()
+                                .add("guild", event.getGuild().getId())
+                                .add("user", memberID)
+                                .create());
+
+                if (storedVC.isEmpty()) {
+                    // TODO: translate
+                    event.reply("Devi creare una stanza prima di usare questo comando.")
+                            .setEphemeral(true)
+                            .queue();
+
+                    return false;
+                }
+
+                vc = storedVC.get();
+            }
 
             // Se ha il permesso
             if (interaction.hasPermission(event.getMember(), settings)) {

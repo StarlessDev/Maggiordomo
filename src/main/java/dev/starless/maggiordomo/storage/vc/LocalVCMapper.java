@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -61,26 +62,17 @@ public class LocalVCMapper implements IMapper<VC> {
 
     @Override
     public boolean insert(VC value) {
-        boolean result = gateway.insert(value);
-        if (result) {
-            addToCache(value);
-        }
-
-        return result;
+        return gateway.insert(value);
     }
 
     @Override
     public void update(VC value) {
-        // Ricerca l'oggetto nella cache
-        // Il supplier passato è Optional.empty() per evitare di cercare anche nel database
-        Optional<VC> cachedVC = searchImpl(vc -> vc.equals(value), Optional::empty);
-        if (cachedVC.isEmpty()) return; // dovrebbe essere usato insert in questo caso
+        // Update the cache if present
+        if (removeFromCache(value)) {
+            addToCache(value);
+        }
 
-        // Aggiorna i set
-        removeFromCache(cachedVC.get());
-        addToCache(value);
-
-        // Aggiorna il database
+        // Update the value in the database
         gateway.update(value);
     }
 
@@ -131,8 +123,6 @@ public class LocalVCMapper implements IMapper<VC> {
             cache = channelsSupplier.get().stream().filter(searchCondition).findFirst();
             if (cache.isEmpty()) {
                 cache = database.get();
-
-                cache.ifPresent(this::addToCache);
             }
         }
 
@@ -232,7 +222,9 @@ public class LocalVCMapper implements IMapper<VC> {
                         References.user(vc.getUser()),
                         category.getGuild().getName());
 
-                update(vc); // Aggiorna i dati
+                // Add vc to cache and update the object to the database
+                addToCache(vc);
+                update(vc);
             }, throwable -> removeFromCreationSchedule(hashcode));
         });
     }
@@ -386,12 +378,15 @@ public class LocalVCMapper implements IMapper<VC> {
         }
     }
 
-    public void removeFromCache(VC vc) {
+    public boolean removeFromCache(VC vc) {
+        AtomicBoolean removed = new AtomicBoolean(false);
         if (vc.isPinned()) {
-            operateOnPinned(pinned -> pinned.remove(vc));
+            operateOnPinned(pinned -> removed.set(pinned.remove(vc)));
         } else {
-            operateOnNormal(normal -> normal.remove(vc));
+            operateOnNormal(normal -> removed.set(normal.remove(vc)));
         }
+
+        return removed.get();
     }
 
     private void operateOnNormal(Consumer<Set<VC>> action) {
