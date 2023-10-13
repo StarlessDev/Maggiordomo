@@ -136,7 +136,7 @@ public class LocalVCMapper implements IMapper<VC> {
 
     // Il codice qua sotto gestisce il processo di creazione delle vc
 
-    public void createVC(VC vc, Role publicRole, Category category) {
+    public void createVC(VC vc, Role publicRole, Set<String> bannedRoles, Category category) {
         int hashcode = vc.hashCode();
         synchronized (scheduledForCreation) {
             scheduledForCreation.add(hashcode);
@@ -164,6 +164,14 @@ public class LocalVCMapper implements IMapper<VC> {
             // Aggiungi i permessi per @everyone tenendo in conto
             // dello status della stanza
             manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
+
+            // Aggiungi i ruoli bannati
+            for (String bannedRole : bannedRoles) {
+                Role role = newChannel.getGuild().getRoleById(bannedRole);
+                if (role == null) continue;
+
+                manager = Perms.ban(role, manager);
+            }
 
             // Trusta gli utenti
             for (UserRecord record : vc.getTrusted()) {

@@ -4,10 +4,7 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.VCStatus;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.PermissionOverride;
-import net.dv8tion.jda.api.entities.Role;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -197,23 +194,23 @@ public class Perms {
         return manager.putRolePermissionOverride(publicRole.getIdLong(), allowed, denied);
     }
 
-    public VoiceChannelManager ban(Member member, VoiceChannelManager manager) {
+    public VoiceChannelManager ban(IPermissionHolder holder, VoiceChannelManager manager) {
         if (manager == null) return null;
 
-        return manager.putMemberPermissionOverride(member.getIdLong(), Collections.emptyList(), specialPerms);
+        return manager.putPermissionOverride(holder, Collections.emptyList(), specialPerms);
     }
 
-    public VoiceChannelManager trust(Member member, VoiceChannelManager manager) {
+    public VoiceChannelManager trust(IPermissionHolder holder, VoiceChannelManager manager) {
         if (manager == null) return null;
 
-        return manager.putMemberPermissionOverride(member.getIdLong(), specialPerms, Collections.emptyList());
+        return manager.putPermissionOverride(holder, specialPerms, Collections.emptyList());
     }
 
 
-    public void reset(Member member, VoiceChannelManager manager) {
+    public void reset(IPermissionHolder holder, VoiceChannelManager manager) {
         if (manager == null) return;
 
-        manager.removePermissionOverride(member).queue();
+       manager.removePermissionOverride(holder).queue();
     }
 
     public boolean isAdmin(Member member) {
