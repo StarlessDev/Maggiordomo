@@ -18,11 +18,10 @@ import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -31,6 +30,14 @@ public class ListManager extends AManagementInteraction {
     private final String name;
     private final String title;
     private final SetSupplier supplier;
+    private final SuccessAction successAction;
+
+    public ListManager(String name, String title, SetSupplier supplier) {
+        this.name = name;
+        this.title = title;
+        this.supplier = supplier;
+        this.successAction = null;
+    }
 
     @Override
     protected MessageEditData handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
@@ -60,6 +67,10 @@ public class ListManager extends AManagementInteraction {
                             .setReplace(true)
                             .build())
                     .queue(success -> e.reply("I ruoli selezionati sono stati aggiunti!").setEphemeral(true).queue());
+
+            if (successAction != null) {
+                successAction.accept(roles, false);
+            }
         }
 
         return null;
@@ -79,6 +90,12 @@ public class ListManager extends AManagementInteraction {
                             .setReplace(true)
                             .build())
                     .queue(success -> e.reply("I ruoli selezionati sono stati rimossi!").setEphemeral(true).queue());
+
+            if (successAction != null) {
+                successAction.accept(ids.stream().map(e.getGuild()::getRoleById)
+                        .filter(Objects::nonNull)
+                        .toList(), true);
+            }
         }
 
         return null;
@@ -154,5 +171,10 @@ public class ListManager extends AManagementInteraction {
     public interface SetSupplier {
 
         Set<String> get(Settings settings);
+    }
+
+    public interface SuccessAction {
+
+        void accept(List<Role> roles, boolean removed);
     }
 }

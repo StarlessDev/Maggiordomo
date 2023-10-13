@@ -82,7 +82,8 @@ import java.util.concurrent.TimeUnit;
 @Getter
 public class Core implements Module {
 
-    @Getter(AccessLevel.NONE) private final MongoStorage storage;
+    @Getter(AccessLevel.NONE)
+    private final MongoStorage storage;
 
     private VCManager channelMapper;
     private SettingsMapper settingsMapper;
@@ -192,7 +193,25 @@ public class Core implements Module {
                 .command(new LanguageCommand())
                 // Interactions for admins
                 .interaction(new ListManager("premium", "## Ruoli Premium 💎", Settings::getPremiumRoles))
-                .interaction(new ListManager("blacklist", "## Ruoli Bannati ❌", Settings::getBannedRoles))
+                .interaction(new ListManager("blacklist", "## Ruoli Bannati ❌", Settings::getBannedRoles, (roles, removed) -> {
+                    if (roles.isEmpty()) return;
+
+                    Guild guild = roles.get(0).getGuild();
+                    settingsMapper.search(QueryBuilder.init()
+                                    .add("guild", guild.getId())
+                                    .create())
+                            .ifPresent(settings -> settings.forEachCategory(guild,
+                                    category -> category.getVoiceChannels().forEach(channel -> {
+                                        for (Role role : roles) {
+                                            if (removed) {
+                                                Perms.reset(role, channel.getManager());
+                                            } else {
+                                                Perms.ban(role, channel.getManager()).queue();
+                                            }
+                                        }
+                                    })
+                            ));
+                }))
                 .interaction(new FiltersManager())
                 .interaction(new ContainsFilterInteraction())
                 .interaction(new PatternFilterInteraction())
@@ -738,9 +757,9 @@ public class Core implements Module {
 
             if (interaction.needsVC()) {
                 Optional<VC> storedVC = localMapper.search(QueryBuilder.init()
-                                .add("guild", event.getGuild().getId())
-                                .add("user", memberID)
-                                .create());
+                        .add("guild", event.getGuild().getId())
+                        .add("user", memberID)
+                        .create());
 
                 if (storedVC.isEmpty()) {
                     // TODO: translate
