@@ -219,6 +219,10 @@ interactions:
   # (This should never happen unless something is very wrong)
   not_found: "Comando non trovato 😵"
 
+  # Used when a user tries to perform an interaction which needs
+  # the user's room to be executed and the user has never created one
+  need_vc: "Devi creare una stanza prima di usare questo comando!"
+
   # A generic error message used when a command does not execute correctly
   # and no specific error message is provided
   generic_error: "Qualcosa è andato storto. Riprova! :x:"

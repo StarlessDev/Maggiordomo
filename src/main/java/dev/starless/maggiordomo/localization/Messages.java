@@ -31,6 +31,7 @@ public enum Messages {
     NO_PERMISSION("interactions.no_permission"),
     NO_PERMISSION_BANNED("interactions.no_permission_banned"),
     COMMAND_NOT_FOUND("interactions.not_found"),
+    NEED_VC("interactions.need_vc"),
     GENERIC_ERROR("interactions.generic_error"),
     ON_COOLDOWN("interactions.on_cooldown"),
 
@@ -72,8 +73,6 @@ public enum Messages {
     COMMAND_RECOVER_NOT_CORRUPTED("commands.recover.not_corrupted"),
     COMMAND_RECOVER_NOT_A_VC("commands.recover.not_a_voice_channel"),
 
-    // TODO: remove only the first
-    COMMAND_RELOAD_PERMS_DESCRIPTION("commands.reload_perms.description"),
     COMMAND_RELOAD_PERMS_WAITING("commands.reload_perms.waiting"),
 
     COMMAND_SETUP_DESCRIPTION("commands.setup.description"),
