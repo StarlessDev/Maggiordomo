@@ -512,19 +512,19 @@ public class Core implements Module {
                     } catch (ErrorResponseException ex) {
                         if (ex.getErrorResponse().equals(ErrorResponse.UNKNOWN_CHANNEL)) {
                             // Sometimes this happens...
-                            localMapper.createVC(vc, publicRole, category);
+                            localMapper.createVC(vc, publicRole, settings.getBannedRoles(), category);
                             return;
                         }
                     }
                 } else {
-                    localMapper.createVC(vc, publicRole, category);
+                    localMapper.createVC(vc, publicRole, settings.getBannedRoles(), category);
                     return;
                 }
             } else {
                 // If a VC object does not exist, then create a new one for the user
                 vc = new VC(member, settings.getLanguage());
                 localMapper.insert(vc);
-                localMapper.createVC(vc, publicRole, category);
+                localMapper.createVC(vc, publicRole, settings.getBannedRoles(), category);
                 return;
             }
         }
