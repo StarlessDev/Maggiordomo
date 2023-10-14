@@ -74,4 +74,9 @@ public class ManagementCommand implements Slash, Interaction {
     public boolean needsVC() {
         return false;
     }
+
+    @Override
+    public boolean inMenu() {
+        return false;
+    }
 }
