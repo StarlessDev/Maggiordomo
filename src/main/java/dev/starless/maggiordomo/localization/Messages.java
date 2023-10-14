@@ -53,10 +53,10 @@ public enum Messages {
     COMMAND_MANAGEMENT_DESCRIPTION("commands.management.description"),
     COMMAND_MANAGEMENT_MENU_CONTENT("commands.management.menu.content"),
     COMMAND_MANAGEMENT_MENU_PREMIUM_ROLES_BUTTON("commands.management.menu.buttons.premium_roles"),
-    COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON("commands.management.menu.button.banned_roles"),
-    COMMAND_MANAGEMENT_MENU_FILTERS_BUTTON("commands.management.menu.button.filters"),
-    COMMAND_MANAGEMENT_MENU_REFRESH_PERMS_BUTTON("commands.management.menu.button.refresh_perms"),
-    COMMAND_MANAGEMENT_MENU_MANAGE_ROOMS_BUTTON("commands.management.menu.button.room_manager"),
+    COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON("commands.management.menu.buttons.banned_roles"),
+    COMMAND_MANAGEMENT_MENU_FILTERS_BUTTON("commands.management.menu.buttons.filters"),
+    COMMAND_MANAGEMENT_MENU_REFRESH_PERMS_BUTTON("commands.management.menu.buttons.refresh_perms"),
+    COMMAND_MANAGEMENT_MENU_MANAGE_ROOMS_BUTTON("commands.management.menu.buttons.room_manager"),
 
     // Sections of the management command
     COMMAND_MANAGEMENT_LISTS_ADD_SELECTION_PLACEHOLDER("commands.management.sections.lists.add_selection_placeholder"),
@@ -82,8 +82,8 @@ public enum Messages {
     COMMAND_MANAGEMENT_ROOMS_OWNED_BY("commands.management.sections.rooms_manager.owned_by"),
     COMMAND_MANAGEMENT_ROOMS_AKA("commands.management.sections.rooms_manager.aka"),
     COMMAND_MANAGEMENT_ROOMS_NOT_AVAILABLE("commands.management.sections.rooms_manager.not_available"),
-    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_PIN("commands.management.sections.rooms_manager.feedback.pin"),
-    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_UNPIN("commands.management.sections.rooms_manager.feedback.unpin"),
+    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_PIN("commands.management.sections.rooms_manager.feedback.pinned"),
+    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_UNPIN("commands.management.sections.rooms_manager.feedback.temporary"),
     COMMAND_MANAGEMENT_ROOMS_FEEDBACK_DELETE("commands.management.sections.rooms_manager.feedback.delete"),
 
     COMMAND_MENU_DESCRIPTION("commands.menu.description"),

@@ -37,7 +37,7 @@ public class ManagementCommand implements Slash, Interaction {
     }
 
     private MessageCreateData getMenu(Guild guild, Settings settings) {
-        String content = Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_MENU_CONTENT,
+        String content = Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_MENU_CONTENT, settings.getLanguage(),
                 "publicRole", References.role(guild, settings.getPublicRole()),
                 "days", settings.getMaxInactivity() == -1 ? "∞" : settings.getMaxInactivity());
         return new MessageCreateBuilder()

@@ -120,12 +120,12 @@ commands:
         
         Your current setup settings are:
         - Public role: {PUBLICROLE}
-        - Inactivity: maximum of {days} day(s) for pinned rooms
+        - Inactivity: maximum of {DAYS} day(s) for pinned rooms
 
       # Labels of the buttons
       buttons:
         premium_roles: "💎 Premium Roles"
-        blacklisted_roles: "❌ Banned roles"
+        banned_roles: "❌ Banned roles"
         filters: "📜 Filters"
         refresh_perms: "🔁 Refresh permissions"
         room_manager: "💼 Manage rooms"
@@ -161,7 +161,7 @@ commands:
           
           **Properties**:
           - Name: `{NAME}`
-          - Owner: <@{USER}>
+          - Owner: <@{OWNER}>
           - Type: {TYPE}
           - Trusted users: `{TRUSTED}`
           - Banned users: `{BANNED}`
@@ -196,7 +196,7 @@ commands:
 
         # Messages shown when an action is executed
         feedback:
-          pin: "The room is now pinned! 📌"
+          pinned: "The room is now pinned! 📌"
           temporary: "The room is now temporary! ⏳"
           delete: "The room was deleted successfully! 🗑"
 

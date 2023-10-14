@@ -119,13 +119,13 @@ commands:
         Gestisci tutto da una singola interfaccia.
         
         Impostazioni di setup:
-        - Public role: {publicRole}
-        - Inattività: al massimo {days} giorno/i per le stanze fissate
+        - Public role: {PUBLICROLE}
+        - Inattività: al massimo {DAYS} giorno/i per le stanze fissate
 
       # Labels of the buttons
       buttons:
         premium_roles: "💎 Ruoli premium"
-        blacklisted_roles: "❌ Ruoli bannati"
+        banned_roles: "❌ Ruoli bannati"
         filters: "📜 Filtri"
         refresh_perms: "🔁 Aggiorna i permessi"
         room_manager: "💼 Gestisci le stanze"
@@ -160,7 +160,7 @@ commands:
           
           **Proprietà**:
           - Nome: `{NAME}`
-          - Proprietario: <@{USER}>
+          - Proprietario: <@{OWNER}>
           - Tipologia: {TYPE}
           - Utenti trustati: `{TRUSTED}`
           - Utenti bannati: `{BANNED}`
@@ -195,7 +195,7 @@ commands:
 
         # Actions available to admins
         feedback:
-          pin: "La stanza ora è fissata! 📌"
+          pinned: "La stanza ora è fissata! 📌"
           temporary: "La stanza ora è temporanea! ⏳"
           delete: "La stanza è stata cancellata con successo! 🗑"
 
