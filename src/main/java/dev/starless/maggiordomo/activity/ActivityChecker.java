@@ -3,7 +3,6 @@ package dev.starless.maggiordomo.activity;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.mongo.api.QueryBuilder;
 import lombok.RequiredArgsConstructor;
@@ -16,22 +15,17 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ActivityChecker implements Runnable {
 
-    private final String guildID;
+    private final Guild guild;
 
     @Override
     public void run() {
+        String guildID = guild.getId();
         Settings settings = Bot.getInstance().getCore().getSettingsMapper()
                 .getSettings()
                 .get(guildID);
 
         long maxInactivity = settings.getMaxInactivity();
         if (maxInactivity == -1) return;
-
-        Guild guild = Bot.getInstance().getJda().getGuildById(guildID);
-        if (guild == null) {
-            BotLogger.info("ActivityChecker could not retrieve the guild with ID: " + guildID);
-            return;
-        }
 
         Instant now = Instant.now();
 

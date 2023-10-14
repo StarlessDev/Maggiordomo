@@ -212,4 +212,8 @@ public class Perms {
 
        manager.removePermissionOverride(holder).queue();
     }
+
+    public boolean isAdmin(Member member) {
+        return member.hasPermission(Permission.MANAGE_SERVER);
+    }
 }

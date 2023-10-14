@@ -118,7 +118,9 @@ public class RecoverCommand implements Slash {
                                 .add("user", user)
                                 .create())
                         .ifPresent(localMapper::delete);
+
                 localMapper.insert(vc);
+                localMapper.addToCache(vc);
 
                 e.replyEmbeds(new EmbedBuilder()
                                 .setDescription(Translations.string(Messages.COMMAND_RECOVER_SUCCESS, settings.getLanguage(), vc.getTitle()))

@@ -31,15 +31,11 @@ public enum Messages {
     NO_PERMISSION("interactions.no_permission"),
     NO_PERMISSION_BANNED("interactions.no_permission_banned"),
     COMMAND_NOT_FOUND("interactions.not_found"),
+    NEED_VC("interactions.need_vc"),
     GENERIC_ERROR("interactions.generic_error"),
     ON_COOLDOWN("interactions.on_cooldown"),
 
     // Translations of the commands
-    COMMAND_BAN_ROLE_DESCRIPTION("commands.ban_role.description"),
-    COMMAND_BAN_ROLE_PARAMETER_ROLE("commands.ban_role.parameters.role"),
-    COMMAND_BAN_ROLE_SUCCESS_ADDED("commands.ban_role.success_added"),
-    COMMAND_BAN_ROLE_SUCCESS_REMOVED("commands.ban_role.success_removed"),
-
     COMMAND_FILTERS_DESCRIPTION("commands.filters.description"),
     COMMAND_FILTERS_MESSAGE_CONTENT("commands.filters.message_content"),
     COMMAND_FILTERS_EXPLANATION("commands.filters.explanation"),
@@ -53,14 +49,46 @@ public enum Messages {
     COMMAND_LANGUAGE_SUCCESS("commands.language.success"),
     COMMAND_LANGUAGE_FAIL("commands.language.unsupported"),
 
+    // Management command
+    COMMAND_MANAGEMENT_DESCRIPTION("commands.management.description"),
+    COMMAND_MANAGEMENT_MENU_CONTENT("commands.management.menu.content"),
+    COMMAND_MANAGEMENT_MENU_PREMIUM_ROLES_BUTTON("commands.management.menu.buttons.premium_roles"),
+    COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON("commands.management.menu.buttons.banned_roles"),
+    COMMAND_MANAGEMENT_MENU_FILTERS_BUTTON("commands.management.menu.buttons.filters"),
+    COMMAND_MANAGEMENT_MENU_REFRESH_PERMS_BUTTON("commands.management.menu.buttons.refresh_perms"),
+    COMMAND_MANAGEMENT_MENU_MANAGE_ROOMS_BUTTON("commands.management.menu.buttons.room_manager"),
+
+    // Sections of the management command
+    COMMAND_MANAGEMENT_LISTS_ADD_SELECTION_PLACEHOLDER("commands.management.sections.lists.add_selection_placeholder"),
+    COMMAND_MANAGEMENT_LISTS_ADD_BUTTON_LABEL("commands.management.sections.lists.add_button_label"),
+    COMMAND_MANAGEMENT_LISTS_REMOVE_PLACEHOLDER("commands.management.sections.lists.remove_selection_placeholder"),
+    COMMAND_MANAGEMENT_LISTS_REMOVE_BUTTON_LABEL("commands.management.sections.lists.remove_button_label"),
+    COMMAND_MANAGEMENT_LISTS_ROLE_ADDED("commands.management.sections.lists.role_added"),
+    COMMAND_MANAGEMENT_LISTS_ROLE_REMOVED("commands.management.sections.lists.role_removed"),
+    COMMAND_MANAGEMENT_LISTS_USER_REMOVED("commands.management.sections.lists.user_removed"),
+    COMMAND_MANAGEMENT_LISTS_NO_ROLES("commands.management.sections.lists.no_roles"),
+    COMMAND_MANAGEMENT_LISTS_ROLES_LIST("commands.management.sections.lists.roles_list"),
+
+    COMMAND_MANAGEMENT_ROOMS_MAIN_MENU("commands.management.sections.rooms_manager.main_content"),
+    COMMAND_MANAGEMENT_ROOMS_INSPECTION_MENU("commands.management.sections.rooms_manager.inspection_content"),
+    COMMAND_MANAGEMENT_ROOMS_BUTTONS_PIN_LABEL("commands.management.sections.rooms_manager.buttons.pin_label"),
+    COMMAND_MANAGEMENT_ROOMS_BUTTONS_UNPIN_LABEL("commands.management.sections.rooms_manager.buttons.unpin_label"),
+    COMMAND_MANAGEMENT_ROOMS_BUTTONS_TITLE_LABEL("commands.management.sections.rooms_manager.buttons.title_label"),
+    COMMAND_MANAGEMENT_ROOMS_BUTTONS_DELETE_LABEL("commands.management.sections.rooms_manager.buttons.delete_label"),
+    COMMAND_MANAGEMENT_ROOMS_DROPDOWNS_TRUSTED_PLACEHOLDER("commands.management.sections.rooms_manager.placeholders.trusted"),
+    COMMAND_MANAGEMENT_ROOMS_DROPDOWNS_BANNED_PLACEHOLDER("commands.management.sections.rooms_manager.placeholders.banned"),
+    COMMAND_MANAGEMENT_ROOMS_DEFAULT_NICKNAME("commands.management.default_nickname"),
+    COMMAND_MANAGEMENT_ROOMS_DEFAULT_USERNAME("commands.management.default_username"),
+    COMMAND_MANAGEMENT_ROOMS_OWNED_BY("commands.management.sections.rooms_manager.owned_by"),
+    COMMAND_MANAGEMENT_ROOMS_AKA("commands.management.sections.rooms_manager.aka"),
+    COMMAND_MANAGEMENT_ROOMS_NOT_AVAILABLE("commands.management.sections.rooms_manager.not_available"),
+    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_PIN("commands.management.sections.rooms_manager.feedback.pinned"),
+    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_UNPIN("commands.management.sections.rooms_manager.feedback.temporary"),
+    COMMAND_MANAGEMENT_ROOMS_FEEDBACK_DELETE("commands.management.sections.rooms_manager.feedback.delete"),
+
     COMMAND_MENU_DESCRIPTION("commands.menu.description"),
     COMMAND_MENU_SUCCESS("commands.menu.success"),
     COMMAND_MENU_FAIL("commands.menu.fail"),
-
-    COMMAND_PREMIUM_ROLE_DESCRIPTION("commands.premium_role.description"),
-    COMMAND_PREMIUM_ROLE_PARAMETERS_ROLE("commands.premium_role.parameters.role"),
-    COMMAND_PREMIUM_ROLE_SUCCESS_ADDED("commands.premium_role.success_added"),
-    COMMAND_PREMIUM_ROLE_SUCCESS_REMOVED("commands.premium_role.success_removed"),
 
     COMMAND_RECOVER_DESCRIPTION("commands.recover.description"),
     COMMAND_RECOVER_PARAMETER_CHANNEL("commands.recover.parameters.channel"),
@@ -70,7 +98,6 @@ public enum Messages {
     COMMAND_RECOVER_NOT_CORRUPTED("commands.recover.not_corrupted"),
     COMMAND_RECOVER_NOT_A_VC("commands.recover.not_a_voice_channel"),
 
-    COMMAND_RELOAD_PERMS_DESCRIPTION("commands.reload_perms.description"),
     COMMAND_RELOAD_PERMS_WAITING("commands.reload_perms.waiting"),
 
     COMMAND_SETUP_DESCRIPTION("commands.setup.description"),

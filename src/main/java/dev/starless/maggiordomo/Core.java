@@ -5,6 +5,7 @@ import dev.starless.maggiordomo.commands.CommandManager;
 import dev.starless.maggiordomo.commands.interaction.*;
 import dev.starless.maggiordomo.commands.interaction.filter.ContainsFilterInteraction;
 import dev.starless.maggiordomo.commands.interaction.filter.PatternFilterInteraction;
+import dev.starless.maggiordomo.commands.interaction.management.*;
 import dev.starless.maggiordomo.commands.slash.*;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.config.Config;
@@ -31,6 +32,7 @@ import dev.starless.mongo.api.QueryBuilder;
 import dev.starless.mongo.schema.MigrationSchema;
 import dev.starless.mongo.schema.suppliers.FixedKeySupplier;
 import dev.starless.mongo.schema.suppliers.impl.SimpleSupplier;
+import lombok.AccessLevel;
 import lombok.Getter;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -77,15 +79,18 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@Getter
 public class Core implements Module {
 
+    @Getter(AccessLevel.NONE)
     private final MongoStorage storage;
 
-    @Getter private VCManager channelMapper;
-    @Getter private SettingsMapper settingsMapper;
+    private VCManager channelMapper;
+    private SettingsMapper settingsMapper;
 
     private ActivityManager activityManager;
-    @Getter private CommandManager commands;
+    private CommandManager commands;
+    private final Filters filters;
 
     public Core(Config config) {
         // Translations are already needed for the Settings schema
@@ -112,6 +117,8 @@ public class Core implements Module {
                         .entry("menuChannelID", new SimpleSupplier("channelID", "-1"))
                         .entry("voiceGeneratorID", new SimpleSupplier("voiceID", "-1"))
                         .entry("language", "en"));
+
+        filters = new Filters();
     }
 
     @Override
@@ -120,7 +127,7 @@ public class Core implements Module {
 
         channelMapper = new VCManager(storage);
         settingsMapper = new SettingsMapper(storage);
-        activityManager = new ActivityManager(jda.getGuilds().size());
+        activityManager = new ActivityManager(jda);
 
         List<Settings> settingsList = settingsMapper.bulkSearch(QueryBuilder.empty());
         jda.getGuilds().forEach(guild -> {
@@ -162,6 +169,8 @@ public class Core implements Module {
                             // If the room is not pinned and nobody is using it we delete it
                             if (!vc.isPinned() && voiceChannel.getMembers().isEmpty()) {
                                 localMapper.scheduleForDeletion(vc, voiceChannel).queue();
+                            } else {
+                                localMapper.addToCache(vc);
                             }
                         }
                     });
@@ -178,14 +187,40 @@ public class Core implements Module {
 
         commands = new CommandManager()
                 .name("maggiordomo")
+                // Slash commands (only for admins)
                 .both(new SetupCommand())
-                .command(new BannedCommand())
+                .both(new ManagementCommand())
                 .command(new MenuCommand())
-                .command(new PremiumCommand())
                 .command(new RecoverCommand())
-                .command(new ReloadPermsCommand())
-                .command(new FiltersCommand())
                 .command(new LanguageCommand())
+                // Interactions for admins
+                .interaction(new ListManager("premium", "## Ruoli Premium 💎", Settings::getPremiumRoles))
+                .interaction(new ListManager("blacklist", "## Ruoli Bannati ❌", Settings::getBannedRoles, (roles, removed) -> {
+                    if (roles.isEmpty()) return;
+
+                    Guild guild = roles.get(0).getGuild();
+                    settingsMapper.search(QueryBuilder.init()
+                                    .add("guild", guild.getId())
+                                    .create())
+                            .ifPresent(settings -> settings.forEachCategory(guild,
+                                    category -> category.getVoiceChannels().forEach(channel -> {
+                                        for (Role role : roles) {
+                                            if (removed) {
+                                                Perms.reset(role, channel.getManager());
+                                            } else {
+                                                Perms.ban(role, channel.getManager()).queue();
+                                            }
+                                        }
+                                    })
+                            ));
+                }))
+                .interaction(new FiltersManager())
+                .interaction(new ContainsFilterInteraction())
+                .interaction(new PatternFilterInteraction())
+                .interaction(new RefreshPerms())
+                .interaction(new RoomsManager())
+                .interaction(new RoomInspector())
+                // Interaction for users
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
                 .interaction(new TrustInteraction())
@@ -197,9 +232,7 @@ public class Core implements Module {
                 .interaction(new KickInteraction())
                 .interaction(new ListInteraction())
                 .interaction(new ResetDataInteraction())
-                .interaction(new DeleteInteraction())
-                .interaction(new ContainsFilterInteraction())
-                .interaction(new PatternFilterInteraction());
+                .interaction(new DeleteInteraction());
 
         commands.create(jda);
         activityManager.start();
@@ -252,9 +285,6 @@ public class Core implements Module {
         // Update commands of the guild
         commands.update(e.getGuild());
 
-        // Start activity monitoring
-        activityManager.startMonitor(e.getGuild().getId());
-
         // Update statistics
         Statistics.getInstance().updateGuild(true);
 
@@ -273,7 +303,6 @@ public class Core implements Module {
                     settingsMapper.delete(settings);
                 });
 
-        activityManager.stopMonitor(guildID); // Stop monitoring the guilds' activity
         Statistics.getInstance().updateGuild(false); // Update statistics
         BotLogger.info("The bot departed from the guild '%s'.", e.getGuild().getName());
     }
@@ -466,7 +495,7 @@ public class Core implements Module {
                 } else {
                     BotLogger.warn("Could not update the menu of the guild (build failed): " + guild.getName());
                 }
-            }, throwable -> BotLogger.warn("Could not update the menu of the guild (invalid message): " + guild.getName()));
+            }, throwable -> BotLogger.warn("Could not update the menu of the guild (invalid data): " + guild.getName()));
         } else {
             BotLogger.warn("Could not update the menu of the guild (invalid channel): " + guild.getName());
         }
@@ -726,13 +755,25 @@ public class Core implements Module {
 
         if (op.isPresent()) {
             Interaction interaction = op.get();
-            VC vc = localMapper.search(QueryBuilder.init()
-                            .add("guild", event.getGuild().getId())
-                            .add("user", memberID)
-                            .create())
-                    .orElse(null);
+            VC vc = null;
 
-            if (interaction.needsVC() && vc == null) return false;
+            if (interaction.needsVC()) {
+                Optional<VC> storedVC = localMapper.search(QueryBuilder.init()
+                        .add("guild", event.getGuild().getId())
+                        .add("user", memberID)
+                        .create());
+
+                if (storedVC.isEmpty()) {
+                    // TODO: translate
+                    event.reply("Devi creare una stanza prima di usare questo comando.")
+                            .setEphemeral(true)
+                            .queue();
+
+                    return false;
+                }
+
+                vc = storedVC.get();
+            }
 
             // Se ha il permesso
             if (interaction.hasPermission(event.getMember(), settings)) {

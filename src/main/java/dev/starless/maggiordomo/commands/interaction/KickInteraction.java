@@ -41,9 +41,10 @@ public class KickInteraction implements Interaction {
 
                     return null;
                 }
+
                 StringSelectMenu.Builder builder = StringSelectMenu.create(getName());
-                final int offset = page * 25;
-                final int limit = Math.min(offset + 25, joinedMembers.size());
+                final int offset = page * PageUtils.DROPDOWN_MAX_ENTRIES;
+                final int limit = Math.min(offset + PageUtils.DROPDOWN_MAX_ENTRIES, joinedMembers.size());
                 for (int i = offset; i < limit; i++) {
                     Member member = joinedMembers.get(i);
                     if (member == null) continue;
@@ -55,7 +56,7 @@ public class KickInteraction implements Interaction {
                     builder = builder.addOption(trimmedUsername, member.getId());
                 }
 
-                int maxPages = (int) Math.ceil(joinedMembers.size() / 25D);
+                int maxPages = (int) Math.ceil(joinedMembers.size() / (double) PageUtils.DROPDOWN_MAX_ENTRIES);
                 String content = Translations.stringFormatted(Messages.INTERACTION_KICK_MESSAGE_CONTENT, settings.getLanguage(),
                         "current", page + 1,
                         "total", maxPages);
