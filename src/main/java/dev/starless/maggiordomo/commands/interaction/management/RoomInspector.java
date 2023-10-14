@@ -171,7 +171,7 @@ public class RoomInspector extends AManagementInteraction {
                 return null;
             }
 
-            VoiceChannel targetVoiceChannel = e.getGuild().getVoiceChannelById(vc.getChannel());
+            VoiceChannel targetVoiceChannel = e.getGuild().getVoiceChannelById(targetVC.getChannel());
             if (targetVoiceChannel != null) {
                 targetVoiceChannel.getManager().setName(result.data()).queue();
             }

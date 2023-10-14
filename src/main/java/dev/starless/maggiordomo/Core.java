@@ -169,6 +169,8 @@ public class Core implements Module {
                             // If the room is not pinned and nobody is using it we delete it
                             if (!vc.isPinned() && voiceChannel.getMembers().isEmpty()) {
                                 localMapper.scheduleForDeletion(vc, voiceChannel).queue();
+                            } else {
+                                localMapper.addToCache(vc);
                             }
                         }
                     });

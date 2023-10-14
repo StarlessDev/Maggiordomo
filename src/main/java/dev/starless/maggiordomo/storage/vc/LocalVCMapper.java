@@ -196,6 +196,7 @@ public class LocalVCMapper implements IMapper<VC> {
             manager.queue(nothing -> {
                 // Aggiorna id della stanza e il database
                 vc.setChannel(newChannel.getId());
+                vc.setCategory(category.getId());
 
                 if (vc.isPinned()) {
                     removeFromCreationSchedule(hashcode);
@@ -231,8 +232,8 @@ public class LocalVCMapper implements IMapper<VC> {
                         category.getGuild().getName());
 
                 // Add vc to cache and update the object to the database
-                addToCache(vc);
                 update(vc);
+                addToCache(vc);
             }, throwable -> removeFromCreationSchedule(hashcode));
         });
     }
