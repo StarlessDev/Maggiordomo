@@ -4,6 +4,8 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.entities.Guild;
@@ -35,25 +37,19 @@ public class ManagementCommand implements Slash, Interaction {
     }
 
     private MessageCreateData getMenu(Guild guild, Settings settings) {
+        String content = Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_MENU_CONTENT,
+                "publicRole", References.role(guild, settings.getPublicRole()),
+                "days", settings.getMaxInactivity() == -1 ? "∞" : settings.getMaxInactivity());
         return new MessageCreateBuilder()
-                .setContent("""
-                        # Admin Dashboard 🛠
-                        Manage everything easily from a single place.
-                        
-                        Your current setup settings are:
-                        - Public role: %s
-                        - Inactivity: maximum of %s day(s) for pinned rooms"""
-                        .formatted(References.role(guild, settings.getPublicRole()),
-                                settings.getMaxInactivity() == -1 ? "∞" : settings.getMaxInactivity()
-                        ))
+                .setContent(content)
                 .addActionRow(
-                        Button.primary("premium", "💎 Ruoli Premium"),
-                        Button.primary("blacklist", "❌ Ruoli Bannati"),
-                        Button.primary("filters", "📜 Filtri")
+                        Button.primary("premium", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_PREMIUM_ROLES_BUTTON, settings.getLanguage())),
+                        Button.primary("blacklist", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON, settings.getLanguage())),
+                        Button.primary("filters", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_FILTERS_BUTTON, settings.getLanguage()))
                 )
                 .addActionRow(
-                        Button.danger("refreshperms", "🔁 Aggiorna i permessi"),
-                        Button.secondary("manage", "💼 Gestisci le stanze")
+                        Button.danger("refreshperms", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_REFRESH_PERMS_BUTTON, settings.getLanguage())),
+                        Button.secondary("manage", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_MANAGE_ROOMS_BUTTON, settings.getLanguage()))
                 )
                 .setAllowedMentions(Collections.emptyList())
                 .build();
@@ -66,7 +62,7 @@ public class ManagementCommand implements Slash, Interaction {
 
     @Override
     public String getDescription(String lang) {
-        return "All your server's settings in one place";
+        return Translations.string(Messages.COMMAND_MANAGEMENT_DESCRIPTION, lang);
     }
 
     @Override

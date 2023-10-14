@@ -3,6 +3,8 @@ package dev.starless.maggiordomo.commands.interaction.management;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.utils.PageUtils;
 import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
@@ -33,7 +35,7 @@ public class RoomsManager extends AManagementInteraction {
         for (VC vc : vcs.subList(page, to)) {
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
             if (channel != null) {
-                dropdown.addOption(vc.getTitle(), vc.getChannel(), "owned by " + References.user(vc.getUser()));
+                dropdown.addOption(vc.getTitle(), vc.getChannel(), Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_OWNED_BY, settings.getLanguage()) + " " + References.user(vc.getUser()));
 
                 if (!channel.getMembers().isEmpty()) active++;
             }
@@ -50,11 +52,9 @@ public class RoomsManager extends AManagementInteraction {
         );
 
         return new MessageEditBuilder()
-                .setContent("""
-                        # Gestore stanze 💼
-                        Sono al momento presenti nelle categorie %d stanze di cui %d attive.
-                        Clicca su una stanza per avere maggior informazioni su di essa."""
-                        .formatted(totalVCs, active))
+                .setContent(Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_ROOMS_MAIN_MENU, settings.getLanguage(),
+                        "total", totalVCs,
+                        "active", active))
                 .setComponents(rows)
                 .build();
     }

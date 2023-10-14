@@ -14,7 +14,6 @@ import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.mongo.api.QueryBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -49,7 +48,7 @@ public class RoomInspector extends AManagementInteraction {
                 .create());
         if (op.isEmpty()) {
             return new MessageEditBuilder()
-                    .setContent(">>> Questa stanza non è più disponibile.\nProva a sceglierne un' altra.")
+                    .setContent(Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_NOT_AVAILABLE, settings.getLanguage()))
                     .setActionRow(PageUtils.getShortBackButton("manage", settings.getLanguage()))
                     .build();
         }
@@ -68,7 +67,9 @@ public class RoomInspector extends AManagementInteraction {
                             .queue();
             case "togglepin" -> {
                 mapper.togglePinStatus(e.getGuild(), settings, vc);
-                e.reply("La stanza ora è " + (vc.isPinned() ? "fissata" : "temporanea"))
+
+                Messages message = vc.isPinned() ? Messages.COMMAND_MANAGEMENT_ROOMS_FEEDBACK_PIN : Messages.COMMAND_MANAGEMENT_ROOMS_FEEDBACK_UNPIN;
+                e.reply(Translations.string(message, settings.getLanguage()))
                         .setEphemeral(true)
                         .queue();
             }
@@ -76,7 +77,7 @@ public class RoomInspector extends AManagementInteraction {
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 if (channel != null) {
                     mapper.scheduleForDeletion(vc, channel).queue(success -> mapper.delete(vc));
-                    e.reply("La stanza è stata cancellata con successo.")
+                    e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_FEEDBACK_DELETE, settings.getLanguage()))
                             .setEphemeral(true)
                             .queue();
                 }
@@ -126,7 +127,7 @@ public class RoomInspector extends AManagementInteraction {
                                 .setReplace(true)
                                 .queue();
 
-                        e.reply("The user is now neutral towards that room.")
+                        e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_USER_REMOVED, settings.getLanguage()))
                                 .setEphemeral(true)
                                 .queue();
                     }
@@ -207,41 +208,36 @@ public class RoomInspector extends AManagementInteraction {
         String content;
         if (op.isPresent()) {
             VC vc = op.get();
-            String type = vc.isPinned() ? "📌" : "⏳";
-            content = """
-                    # Inspection 🔎
-                    Usa i pulsanti per cambiare le caratteristiche della stanza.
-                    Seleziona gli utenti trustati o bannati da rimuovere usando i dropdown.
-                    **Attenzione**: cancellando una stanza tutti i dati della stanza andranno persi!
-                                        
-                    **Proprietà**:
-                    - Nome della stanza: `%s`
-                    - Proprietario: <@%s>
-                    - Tipologia: %s
-                    - Utenti trustati: `%d`
-                    - Utenti bannati: `%d`
-                    - Ultimo join in data: %s"""
-                    .formatted(vc.getTitle(), vc.getUser(), type,
-                            vc.getTrusted().size(), vc.getBanned().size(), TimeFormat.fromStyle("D").atInstant(vc.getLastJoin()));
+            content = Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_ROOMS_INSPECTION_MENU, language,
+                    "name", vc.getTitle(),
+                    "owner", vc.getUser(),
+                    "type", vc.isPinned() ? "📌" : "⏳",
+                    "trusted", vc.getTrusted().size(),
+                    "banned", vc.getBanned().size(),
+                    "lastJoin", TimeFormat.fromStyle("D").atInstant(vc.getLastJoin()));
 
             rows.add(ActionRow.of(PageUtils.getShortBackButton("manage", language)));
 
-            String bttLabel = vc.isPinned() ? "Rendi Temporanea" : "Rendi Fissata";
+            String bttLabel = Translations.string(vc.isPinned() ? Messages.COMMAND_MANAGEMENT_ROOMS_BUTTONS_UNPIN_LABEL : Messages.COMMAND_MANAGEMENT_ROOMS_BUTTONS_PIN_LABEL, language);
             Button togglePinButton = Button.secondary("inspector:" + vc.getChannel() + ":togglepin", bttLabel);
             rows.add(ActionRow.of(
-                    Button.primary("inspector:" + vc.getChannel() + ":title", "Cambia titolo 📝"),
+                    Button.primary("inspector:" + vc.getChannel() + ":title", Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_BUTTONS_TITLE_LABEL, language)),
                     togglePinButton,
-                    Button.danger("inspector:" + vc.getChannel() + ":delete", "Cancella 🗑")
+                    Button.danger("inspector:" + vc.getChannel() + ":delete", Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_BUTTONS_DELETE_LABEL, language))
             ));
 
             List<ItemComponent> lastRow = new ArrayList<>();
             Set<UserRecord> trusted = vc.getTrusted();
             Set<UserRecord> banned = vc.getBanned();
             if (!trusted.isEmpty()) {
-                lastRow.add(createUserMenu("trust", vc.getChannel(), "Utenti trustati", guild, trusted));
+                lastRow.add(createUserMenu("trust", vc.getChannel(),
+                        Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DROPDOWNS_TRUSTED_PLACEHOLDER, language),
+                        language, guild, trusted));
             }
             if (!banned.isEmpty()) {
-                lastRow.add(createUserMenu("ban", vc.getChannel(), "Utenti bannati", guild, banned));
+                lastRow.add(createUserMenu("ban", vc.getChannel(),
+                        Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DROPDOWNS_BANNED_PLACEHOLDER, language),
+                        language, guild, banned));
             }
 
             if (!lastRow.isEmpty()) {
@@ -249,7 +245,7 @@ public class RoomInspector extends AManagementInteraction {
             }
 
         } else {
-            content = ">>> Questa stanza non è più disponibile.\nProva a sceglierne un' altra.";
+            content = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_NOT_AVAILABLE, language);
             rows.add(ActionRow.of(PageUtils.getShortBackButton("manage", language)));
         }
 
@@ -258,12 +254,12 @@ public class RoomInspector extends AManagementInteraction {
                 .build();
     }
 
-    private StringSelectMenu createUserMenu(String name, String id, String placeholder, Guild
-            guild, Set<UserRecord> records) {
+    private StringSelectMenu createUserMenu(String name, String id, String placeholder, String language,
+                                            Guild guild, Set<UserRecord> records) {
         StringSelectMenu.Builder builder = StringSelectMenu.create("inspector:" + id + ":" + name);
         records.forEach(record -> {
-            String nickname = "Somebody";
-            String username = "@unknown";
+            String nickname = null;
+            String username = null;
 
             Member member = guild.getMemberById(record.user());
             if (member != null) {
@@ -271,7 +267,12 @@ public class RoomInspector extends AManagementInteraction {
                 nickname = Objects.requireNonNullElse(member.getNickname(), username);
             }
 
-            builder.addOption(nickname, record.user(), "aka @" + username);
+            if (nickname != null) {
+                nickname = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_NICKNAME, language);
+                username = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_USERNAME, language);
+            }
+
+            builder.addOption(nickname, record.user(), Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_AKA, language) + " @" + username);
         });
 
         return builder.setPlaceholder(placeholder).build();

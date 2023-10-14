@@ -108,6 +108,97 @@ commands:
     # the user tried to set
     unsupported: "La lingua `%s` non è supportata (o non è stata trovata)."
 
+  management:
+    description: "Gestisci il tuo server in un solo posto"
+
+    # Strings which compose the admin dashboard
+    menu:
+      # Message content
+      content: |-
+        # Admin Dashboard 🛠
+        Gestisci tutto da una singola interfaccia.
+        
+        Impostazioni di setup:
+        - Public role: {publicRole}
+        - Inattività: al massimo {days} giorno/i per le stanze fissate
+
+      # Labels of the buttons
+      buttons:
+        premium_roles: "💎 Ruoli premium"
+        blacklisted_roles: "❌ Ruoli bannati"
+        filters: "📜 Filtri"
+        refresh_perms: "🔁 Aggiorna i permessi"
+        room_manager: "💼 Gestisci le stanze"
+
+    sections:
+      # Strings used in the banned (and trusted) roles manager
+      lists:
+        add_selection_placeholder: "Scegli un ruolo da aggiungere"
+        add_button_label: "Aggiungi"
+        remove_selection_placeholder: "Scegli un ruolo da rimuovere"
+        remove_button_label: "Rimuovi"
+
+        role_added: "I ruoli selezionati sono stati aggiunti!"
+        role_removed: "I ruoli selezionati sono stati rimossi!"
+        user_removed: "L'utente è stato rimosso dalla lista!"
+
+        no_roles: "Non c'è nessun ruolo qui!"
+        roles_list: "Ruoli attualmente inseriti:"
+
+      rooms_manager:
+        # Message content of the main menu
+        main_content: |-
+          # Gestore stanze 💼
+          Sono al momento presenti nelle categorie {TOTAL} stanze di cui {ACTIVE} attive.
+          Clicca su una stanza per avere maggior informazioni su di essa.
+
+        inspection_content: |-
+          # Inspection 🔎
+          Usa i pulsanti per cambiare le caratteristiche della stanza.
+          Seleziona gli utenti trustati o bannati da rimuovere usando i dropdown.
+          **Attenzione**: cancellando una stanza tutti i dati della stanza andranno persi!
+          
+          **Proprietà**:
+          - Nome: `{NAME}`
+          - Proprietario: <@{USER}>
+          - Tipologia: {TYPE}
+          - Utenti trustati: `{TRUSTED}`
+          - Utenti bannati: `{BANNED}`
+          - Ultimo join in data: {LASTJOIN}
+
+        # Labels of the buttons
+        buttons:
+          pin_label: "Rendi Fissata"
+          unpin_label: "Rendi Temporanea"
+          title_label: "Cambia titolo 📝"
+          delete_label: "Cancella 🗑"
+
+        # Placeholders used in the trusted/banned users dropdowns
+        placeholders:
+          trusted: "Utenti trustati"
+          banned: "Utenti bannati"
+
+        # If a trusted/banned user is not found by the bot,
+        # in the dropdown menus these default values will be shown
+        default_nickname: "Qualcuno"
+        default_username: "@sconosciuto"
+
+        # Just some direct translations
+        owned_by: "creata da"
+        aka: "aka"
+
+        # Message used when a room is not available anymore
+        # (due to being deleted by a user or an admin)
+        not_available: |-
+          >>> Questa stanza non è più disponibile.
+          Prova a sceglierne un' altra.
+
+        # Actions available to admins
+        feedback:
+          pin: "La stanza ora è fissata! 📌"
+          temporary: "La stanza ora è temporanea! ⏳"
+          delete: "La stanza è stata cancellata con successo! 🗑"
+
   menu:
     description: "Manda il menu per controllare le proprie stanze"
     success: "Menu creato!"

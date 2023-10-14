@@ -3,6 +3,8 @@ package dev.starless.maggiordomo.commands.interaction.management;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.entities.Guild;
@@ -18,10 +20,8 @@ import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -45,7 +45,7 @@ public class ListManager extends AManagementInteraction {
         MessageEditBuilder edit;
 
         switch (id) {
-            case "add" -> edit = getAddMenu();
+            case "add" -> edit = getAddMenu(settings.getLanguage());
             case "remove" -> edit = getRemoveMenu(e.getGuild(), settings, parts);
             default -> edit = getMainMenu(settings);
         }
@@ -57,7 +57,7 @@ public class ListManager extends AManagementInteraction {
     public VC onEntitySelected(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
         List<Role> roles = e.getMentions().getRoles();
         if (roles.isEmpty()) {
-            e.reply("Non hai selezionato nessun ruolo!").setEphemeral(true).queue();
+            e.reply(Translations.string(Messages.NO_SELECTION, settings.getLanguage())).setEphemeral(true).queue();
         } else {
             supplier.get(settings).addAll(roles.stream().map(Role::getId).toList());
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
@@ -66,7 +66,7 @@ public class ListManager extends AManagementInteraction {
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())
-                    .queue(success -> e.reply("I ruoli selezionati sono stati aggiunti!").setEphemeral(true).queue());
+                    .queue(success -> e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ROLE_ADDED, settings.getLanguage())).setEphemeral(true).queue());
 
             if (successAction != null) {
                 successAction.accept(roles, false);
@@ -80,7 +80,7 @@ public class ListManager extends AManagementInteraction {
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         List<String> ids = e.getValues();
         if (ids.isEmpty()) {
-            e.reply("Non hai selezionato nessun ruolo!").setEphemeral(true).queue();
+            e.reply(Translations.string(Messages.NO_SELECTION, settings.getLanguage())).setEphemeral(true).queue();
         } else {
             ids.forEach(supplier.get(settings)::remove);
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
@@ -89,7 +89,7 @@ public class ListManager extends AManagementInteraction {
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())
-                    .queue(success -> e.reply("I ruoli selezionati sono stati rimossi!").setEphemeral(true).queue());
+                    .queue(success -> e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ROLE_REMOVED, settings.getLanguage())).setEphemeral(true).queue());
 
             if (successAction != null) {
                 successAction.accept(ids.stream().map(e.getGuild()::getRoleById)
@@ -110,24 +110,24 @@ public class ListManager extends AManagementInteraction {
         Set<String> ids = supplier.get(settings);
         String content = title + "\n";
         if (ids.isEmpty()) {
-            content += "Non c'è nessun ruolo qui!.";
+            content += Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_NO_ROLES, settings.getLanguage());
         } else {
             String list = ids.stream().map(str -> "- <@&" + str + ">").collect(Collectors.joining("\n"));
-            content += "Ruoli attualmente inseriti:\n" + list;
+            content += Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ROLES_LIST, settings.getLanguage()) + "\n" + list;
         }
 
         return new MessageEditBuilder()
                 .setContent(content)
                 .setComponents(ActionRow.of(
                         PageUtils.getShortBackButton("admin", settings.getLanguage()),
-                        Button.primary(getName() + ":add", "Aggiungi"),
-                        Button.danger(getName() + ":remove:0", "Rimuovi")
+                        Button.primary(getName() + ":add", Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ADD_BUTTON_LABEL, settings.getLanguage())),
+                        Button.danger(getName() + ":remove:0", Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_REMOVE_BUTTON_LABEL, settings.getLanguage()))
                 ));
     }
 
-    private MessageEditBuilder getAddMenu() {
+    private MessageEditBuilder getAddMenu(String lang) {
         return new MessageEditBuilder()
-                .setContent("Scegli un ruolo da aggiungere")
+                .setContent(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ADD_SELECTION_PLACEHOLDER, lang))
                 .setActionRow(EntitySelectMenu.create(getName(), EntitySelectMenu.SelectTarget.ROLE)
                         .setRequiredRange(1, 10)
                         .build());
@@ -156,7 +156,7 @@ public class ListManager extends AManagementInteraction {
         });
 
         int maxPages = (int) Math.ceil(supplier.get(settings).size() / (double) PageUtils.DROPDOWN_MAX_ENTRIES);
-        edit = edit.setContent("Scegli un ruolo da rimuovere")
+        edit = edit.setContent(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_REMOVE_PLACEHOLDER, settings.getLanguage()))
                 .setComponents(List.of(
                         ActionRow.of(builder.build()),
                         ActionRow.of(

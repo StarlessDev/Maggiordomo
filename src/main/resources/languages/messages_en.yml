@@ -108,6 +108,98 @@ commands:
     # The %s will be replaced by the data.filters.(basic|pattern)_name string
     updated: "The %s list was updated."
 
+  management:
+    description: "Manage your server all at once"
+
+    # These strings are used in the main menu of the dashboard
+    menu:
+      # Message content
+      content: |-
+        # Admin Dashboard 🛠
+        Manage everything easily from a single place.
+        
+        Your current setup settings are:
+        - Public role: {PUBLICROLE}
+        - Inactivity: maximum of {days} day(s) for pinned rooms
+
+      # Labels of the buttons
+      buttons:
+        premium_roles: "💎 Premium Roles"
+        blacklisted_roles: "❌ Banned roles"
+        filters: "📜 Filters"
+        refresh_perms: "🔁 Refresh permissions"
+        room_manager: "💼 Manage rooms"
+
+    sections:
+      # Strings used in the banned (and trusted) roles manager
+      lists:
+        add_selection_placeholder: "Choose a role to add"
+        add_button_label: "Add"
+        remove_selection_placeholder: "Choose a role to remove"
+        remove_button_label: "Remove"
+
+        role_added: "The selected roles were added!"
+        role_removed: "The selected roles were removed!"
+        user_removed: "The user was removed from the list!"
+
+        no_roles: "There are no roles here!"
+        roles_list: "Roles added to the list:"
+
+      rooms_manager:
+        # Message content of the main menu
+        # '%d' will be replaced with the number of active rooms
+        main_content: |-
+          # Room manager 💼
+          At the moment the categories host {TOTAL} rooms of which {ACTIVE} are active.
+          Click on a room to have for information on a single room.
+
+        inspection_content: |-
+          # Inspection 🔎
+          Use the buttons to change the properties of the room.
+          Select the trusted/banned users to remove them from the list using the dropdowns.
+          **Warning**: when you delete a room, all of its data is lost!
+          
+          **Properties**:
+          - Name: `{NAME}`
+          - Owner: <@{USER}>
+          - Type: {TYPE}
+          - Trusted users: `{TRUSTED}`
+          - Banned users: `{BANNED}`
+          - Last joined date: {LASTJOIN}
+
+        # Labels of the buttons
+        buttons:
+          pin_label: "Set as pinned"
+          unpin_label: "Set as temporary"
+          title_label: "Change title 📝"
+          delete_label: "Delete 🗑"
+
+        # Placeholders used in the trusted/banned users dropdowns
+        placeholders:
+          trusted: "Trusted users"
+          banned: "Banned users"
+
+        # If a trusted/banned user is not found by the bot,
+        # in the dropdown menus these default values will be shown
+        default_nickname: "Somebody"
+        default_username: "@unknown"
+
+        # Just some direct translations
+        owned_by: "owned by"
+        aka: "aka"
+
+        # Message used when a room is not available anymore
+        # (due to being deleted by a user or an admin)
+        not_available: |-
+          >>> This room is not available anymore!
+          Try to choose another one.
+
+        # Messages shown when an action is executed
+        feedback:
+          pin: "The room is now pinned! 📌"
+          temporary: "The room is now temporary! ⏳"
+          delete: "The room was deleted successfully! 🗑"
+
   menu:
     description: "Sends the interface used to edit the channels in this channel"
     success: "Interface created!"
