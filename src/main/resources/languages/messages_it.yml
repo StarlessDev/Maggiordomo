@@ -477,6 +477,7 @@ interactions:
 common:
   # Buttons used to go forward or back in menus
   prev_button: "⏪ Pagina precedente"
+  prev_button_short: "⏪ Indietro"
   next_button: "Prossima pagina ⏩"
 
   # This is the text that the user will input to confirm

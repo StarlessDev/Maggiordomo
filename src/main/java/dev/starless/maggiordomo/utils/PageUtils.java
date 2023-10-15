@@ -39,7 +39,7 @@ public class PageUtils {
     }
 
     public Button getShortBackButton(String name, String language) {
-        return Button.secondary(name, "⏪ Indietro");
+        return Button.secondary(name, Translations.string(Messages.SHORT_PREV_BUTTON, language));
     }
 
     public Button getNextButton(String name, int maxPages, int page, String language) {
