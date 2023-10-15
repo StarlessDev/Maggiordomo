@@ -3,6 +3,7 @@ package dev.starless.maggiordomo.commands.types;
 import dev.starless.maggiordomo.commands.Command;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.data.Settings;
+import dev.starless.maggiordomo.utils.discord.Perms;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -22,6 +23,6 @@ public interface Slash extends Command {
 
     @Override
     default boolean hasPermission(Member member, Settings settings) {
-        return member.hasPermission(Permission.ADMINISTRATOR);
+        return Perms.isAdmin(member);
     }
 }
