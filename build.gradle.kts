@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "dev.starless.maggiordomo"
-version = "2.1.1"
+version = "2.1.2"
 
 var jdaVersion = "5.0.0-beta.15"
 
