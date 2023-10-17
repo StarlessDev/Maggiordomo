@@ -111,8 +111,8 @@ public class RoomInspector extends AManagementInteraction {
                         String memberTargetID = values.get(0);
                         boolean modifyTrusted = action.equals("trust");
 
-                        vc.removePlayerRecord(modifyTrusted ? RecordType.TRUST : RecordType.BAN, memberTargetID);
-                        if (vc.hasChannel()) {
+                        targetVC.removePlayerRecord(modifyTrusted ? RecordType.TRUST : RecordType.BAN, memberTargetID);
+                        if (targetVC.hasChannel()) {
                             Member targetMember = e.getGuild().getMemberById(memberTargetID);
                             if (targetMember != null) {
                                 VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(vc.getChannel());
