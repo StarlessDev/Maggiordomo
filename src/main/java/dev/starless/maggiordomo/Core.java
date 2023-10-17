@@ -194,8 +194,8 @@ public class Core implements Module {
                 .command(new RecoverCommand())
                 .command(new LanguageCommand())
                 // Interactions for admins
-                .interaction(new ListManager("premium", "## Ruoli Premium 💎", Settings::getPremiumRoles))
-                .interaction(new ListManager("blacklist", "## Ruoli Bannati ❌", Settings::getBannedRoles, (roles, removed) -> {
+                .interaction(new ListManager("premium", lang -> Translations.string(Messages.COMMAND_MANAGEMENT_MENU_PREMIUM_ROLES_BUTTON, lang), Settings::getPremiumRoles))
+                .interaction(new ListManager("blacklist", lang -> Translations.string(Messages.COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON, lang), Settings::getBannedRoles, (roles, removed) -> {
                     if (roles.isEmpty()) return;
 
                     Guild guild = roles.get(0).getGuild();

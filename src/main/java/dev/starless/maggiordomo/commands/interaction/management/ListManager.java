@@ -22,20 +22,21 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class ListManager extends AManagementInteraction {
 
     private final String name;
-    private final String title;
+    private final Function<String, String> titleSupplier;
     private final SetSupplier supplier;
     private final SuccessAction successAction;
 
-    public ListManager(String name, String title, SetSupplier supplier) {
+    public ListManager(String name, Function<String, String> titleSupplier, SetSupplier setSupplier) {
         this.name = name;
-        this.title = title;
-        this.supplier = supplier;
+        this.titleSupplier = titleSupplier;
+        this.supplier = setSupplier;
         this.successAction = null;
     }
 
@@ -108,7 +109,7 @@ public class ListManager extends AManagementInteraction {
 
     private MessageEditBuilder getMainMenu(Settings settings) {
         Set<String> ids = supplier.get(settings);
-        String content = title + "\n";
+        String content = "## " + titleSupplier.apply(settings.getLanguage()) + "\n";
         if (ids.isEmpty()) {
             content += Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_NO_ROLES, settings.getLanguage());
         } else {
