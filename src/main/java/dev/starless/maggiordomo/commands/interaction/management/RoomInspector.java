@@ -14,6 +14,7 @@ import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.mongo.api.QueryBuilder;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -134,6 +135,7 @@ public class RoomInspector extends AManagementInteraction {
                 }
             } else {
                 e.getMessage().editMessage(getInspectMenu(e.getGuild(), values.get(0), settings.getLanguage()))
+                        .setAllowedMentions(Collections.emptyList())
                         .setReplace(true)
                         .queue();
             }
@@ -178,8 +180,10 @@ public class RoomInspector extends AManagementInteraction {
             targetVC.setTitle(result.data());
 
             e.getMessage().editMessage(getInspectMenu(e.getGuild(), targetVC.getChannel(), settings.getLanguage()))
+                    .setAllowedMentions(Collections.emptyList())
                     .setReplace(true)
                     .queue();
+
             e.reply(Translations.string(Messages.INTERACTION_TITLE_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
@@ -258,18 +262,22 @@ public class RoomInspector extends AManagementInteraction {
                                             Guild guild, Set<UserRecord> records) {
         StringSelectMenu.Builder builder = StringSelectMenu.create("inspector:" + id + ":" + name);
         records.forEach(record -> {
-            String nickname = null;
-            String username = null;
+            User user = guild.getJDA().getUserById(record.user());
+            String username;
+            String nickname;
 
-            Member member = guild.getMemberById(record.user());
-            if (member != null) {
-                username = member.getUser().getName();
-                nickname = Objects.requireNonNullElse(member.getNickname(), username);
-            }
+            if (user != null) {
+                username = user.getName();
 
-            if (nickname != null) {
-                nickname = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_NICKNAME, language);
+                Member member = guild.getMember(user);
+                if (member != null) {
+                    nickname = member.getEffectiveName();
+                } else {
+                    nickname = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_NICKNAME, language);
+                }
+            } else {
                 username = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_USERNAME, language);
+                nickname = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_NICKNAME, language);
             }
 
             builder.addOption(nickname, record.user(), Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_AKA, language) + " @" + username);
