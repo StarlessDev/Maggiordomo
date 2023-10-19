@@ -357,7 +357,7 @@ interactions:
       # {ISSUER} will be sostituted with the mention of the owner of the room
       # {CHANNEL} will be replaced by the room's name
       description: |-
-        {ISSUER} banned you from the room `{CHANNEL}`.
+        {ISSUER} banned you from the room `{TARGET}`.
         
         **You cannot join nor see the voice channel anymore.**
 

@@ -353,8 +353,7 @@ interactions:
       # Placeholders:
       # {ISSUER} will be sostitued
       description: |-
-        {ISSUER}, il proprietario della stanza `{TARGET}`,
-        ti ha bannato da essa!
+        {ISSUER} ti ha bannato dalla sua stanza `{TARGET}`!
         
         **Non potrai più rientrare, nè vedere la stanza vocale!**
 
