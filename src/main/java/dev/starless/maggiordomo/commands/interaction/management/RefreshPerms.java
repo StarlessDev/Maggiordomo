@@ -41,7 +41,7 @@ public class RefreshPerms extends AManagementInteraction {
                         .create())
                 .forEach(vc -> Optional.ofNullable(e.getGuild().getVoiceChannelById(vc.getChannel()))
                         .ifPresent(channel -> {
-                            VoiceChannelManager manager = channel.getManager();
+                            VoiceChannelManager manager = channel.getManager().reset();
 
                             // Owner
                             Member owner = e.getGuild().getMemberById(vc.getUser());
@@ -60,13 +60,9 @@ public class RefreshPerms extends AManagementInteraction {
                                 Member targetRecord = e.getGuild().getMemberById(record.user());
                                 if (targetRecord != null) {
                                     if (record.type().equals(RecordType.TRUST)) {
-                                        manager = manager.putMemberPermissionOverride(targetRecord.getIdLong(),
-                                                List.of(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT),
-                                                channel.upsertPermissionOverride(targetRecord).getDeniedPermissions());
+                                        manager = Perms.trust(targetRecord, manager);
                                     } else {
-                                        manager = manager.putMemberPermissionOverride(targetRecord.getIdLong(),
-                                                channel.upsertPermissionOverride(targetRecord).getAllowedPermissions(),
-                                                List.of(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT));
+                                        manager = Perms.ban(targetRecord, manager);
                                     }
                                 }
                             }

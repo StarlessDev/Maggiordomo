@@ -65,6 +65,7 @@ public class Perms {
             Permission.VIEW_CHANNEL,
             Permission.VOICE_SPEAK,
             Permission.VOICE_CONNECT,
+            Permission.VOICE_STREAM,
             Permission.MESSAGE_SEND
     );
 
