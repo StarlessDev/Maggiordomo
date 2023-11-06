@@ -5,8 +5,11 @@
 
 A bot created to manage and customize temporary rooms (and more) in your server discord completely for free, with ease and without any useless features.
 
+## Invite
+If you are not able to host the bot on your own, there is a public instance of Maggiordomo you can invite <a href="https://maggiordomo.starless.dev/invite" target="_blank">here</a>.
+
 ## Features
-- Support for **temporary** and **pinned** rooms
+- Support for **temporary** and **pinned** (aka *permanent*) rooms
 - Room customization:
   - Name
   - Capacity
@@ -14,7 +17,8 @@ A bot created to manage and customize temporary rooms (and more) in your server 
   - Kick users
 - Support for multiple categories
 - Filters: do not let users use offensive names for their rooms
-- Fully translatable: now supports English and Italiano
+- Manage all the rooms easily in a single dashboard
+- Fully translatable: currently only available in English and Italian
 - and more...
 
 ## Documentation
