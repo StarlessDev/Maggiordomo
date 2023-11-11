@@ -19,8 +19,10 @@ import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.VoiceChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import net.dv8tion.jda.api.requests.RestAction;
 import org.jetbrains.annotations.NotNull;
 
@@ -193,48 +195,68 @@ public class LocalVCMapper implements IMapper<VC> {
             };
 
             // Manda l'aggiornamento a discord
-            manager.queue(nothing -> {
-                // Aggiorna id della stanza e il database
-                vc.setChannel(newChannel.getId());
-                vc.setCategory(category.getId());
+            try {
+                manager.queue(nothing -> {
+                    // Aggiorna id della stanza e il database
+                    vc.setChannel(newChannel.getId());
+                    vc.setCategory(category.getId());
 
-                if (vc.isPinned()) {
-                    removeFromCreationSchedule(hashcode);
+                    if (vc.isPinned()) {
+                        removeFromCreationSchedule(hashcode);
 
-                    if (owner.getVoiceState() != null && owner.getVoiceState().inAudioChannel()) {
-                        newChannel.getGuild().moveVoiceMember(owner, newChannel)
-                                .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
+                        if (owner.getVoiceState() != null && owner.getVoiceState().inAudioChannel()) {
+                            newChannel.getGuild().moveVoiceMember(owner, newChannel)
+                                    .queue(RestUtils.emptyConsumer(), RestUtils.throwableConsumer("An error occurred while moving the user! {EXCEPTION}"));
+                        }
+                    } else {
+                        int movement = pinnedChannels.size();
+
+                        // Movva la stanza sopra alle non pinnate
+                        category.modifyVoiceChannelPositions()
+                                .selectPosition(newChannel)
+                                .moveUp(movement)
+                                .queue(nothing2 -> {
+                                    removeFromCreationSchedule(hashcode);
+
+                                    // Movva l'utente nella stanza
+                                    try {
+                                        newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(RestUtils.emptyConsumer(), errorHandler);
+                                    } catch (IllegalStateException | InsufficientPermissionException ex) {
+                                        errorHandler.accept(ex);
+                                    }
+                                }, errorHandler);
                     }
-                } else {
-                    int movement = pinnedChannels.size();
 
-                    // Movva la stanza sopra alle non pinnate
-                    category.modifyVoiceChannelPositions()
-                            .selectPosition(newChannel)
-                            .moveUp(movement)
-                            .queue(nothing2 -> {
-                                removeFromCreationSchedule(hashcode);
+                    // Update statistics
+                    Statistics.getInstance().incrementChannels();
 
-                                // Movva l'utente nella stanza
-                                try {
-                                    newChannel.getGuild().moveVoiceMember(owner, newChannel).queue(RestUtils.emptyConsumer(), errorHandler);
-                                } catch (IllegalStateException | InsufficientPermissionException ex) {
-                                    errorHandler.accept(ex);
-                                }
-                            }, errorHandler);
+                    BotLogger.info("%s just created his voice channel in guild '%s'!",
+                            References.user(vc.getUser()),
+                            category.getGuild().getName());
+
+                    // Add vc to cache and update the object to the database
+                    update(vc);
+                    addToCache(vc);
+                }, throwable -> removeFromCreationSchedule(hashcode));
+            } catch (ErrorResponseException ex) {
+                removeFromCreationSchedule(hashcode);
+
+                if (ex.getErrorResponse().equals(ErrorResponse.INVALID_FORM_BODY)) {
+                    // Someone might have a nickname containing bad words
+                    // which are not allowed in servers in the discovery page.
+                    boolean hasDisallowedName = ex.getSchemaErrors().stream()
+                            .map(schemaError -> schemaError.getErrors()
+                                    .stream()
+                                    .map(ErrorResponseException.ErrorCode::getCode)
+                                    .toList())
+                            .anyMatch(errors -> errors.contains("INVALID_COMMUNITY_PROPERTY_NAME"));
+                    if (hasDisallowedName) { // If that's the case we censor the name
+                        vc.setTitle("*".repeat(5));
+
+                        createVC(vc, publicRole, bannedRoles, category); // and create the vc again
+                    }
                 }
-
-                // Update statistics
-                Statistics.getInstance().incrementChannels();
-
-                BotLogger.info("%s just created his voice channel in guild '%s'!",
-                        References.user(vc.getUser()),
-                        category.getGuild().getName());
-
-                // Add vc to cache and update the object to the database
-                update(vc);
-                addToCache(vc);
-            }, throwable -> removeFromCreationSchedule(hashcode));
+            }
         });
     }
 
