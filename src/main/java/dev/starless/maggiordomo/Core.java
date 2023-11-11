@@ -399,7 +399,11 @@ public class Core implements Module {
                 boolean notOwner = !vc.getUser().equals(memberID);
 
                 if (notJoined && notTrusted && notOwner) {
-                    event.getMessage().delete().queue();
+                    try {
+                        event.getMessage().delete().queue();
+                    } catch (ErrorResponseException ex) {
+                        BotLogger.warn("Could not delete a message in a private room due to: " + ex.getErrorResponse());
+                    }
                 }
             });
         }

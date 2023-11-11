@@ -125,7 +125,8 @@ public class Settings {
             newCategory = guild.createCategory(categoryName)
                     // Bot permissions (not actually needed if bot has admin, which needs to be removed in the future)
                     .addMemberPermissionOverride(Bot.getInstance().getJda().getSelfUser().getIdLong(),
-                            List.of(Permission.MANAGE_CHANNEL,
+                            List.of(Permission.VIEW_CHANNEL,
+                                    Permission.MANAGE_CHANNEL,
                                     Permission.MESSAGE_MANAGE,
                                     Permission.MANAGE_ROLES,
                                     Permission.MANAGE_PERMISSIONS,
