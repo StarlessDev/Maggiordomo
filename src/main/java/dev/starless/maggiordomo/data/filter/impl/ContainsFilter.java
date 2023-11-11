@@ -14,10 +14,11 @@ public class ContainsFilter implements IFilter {
         boolean normalFlag = input.toLowerCase().contains(value.toLowerCase());
         if (normalFlag) {
             return new FilterResult(true, Translations.string(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage(), value));
-        } else {
-            String message = Translations.string(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage(), value) + " (leet speak)";
-            return input.contains(value.toLowerCase()) ? new FilterResult(true, message) : new FilterResult();
+        } else if (input.contains(value.toLowerCase())){
+            return new FilterResult(true, Translations.string(Messages.FILTER_FLAG_CONTAINS, settings.getLanguage(), value) + " (leet speak)");
         }
+
+        return new FilterResult();
     }
 
     @Override
