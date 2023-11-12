@@ -144,58 +144,57 @@ public class LocalVCMapper implements IMapper<VC> {
             scheduledForCreation.add(hashcode);
         }
 
-        category.createVoiceChannel(vc.getTitle()).queue(newChannel -> {
-            Member owner = newChannel.getGuild().getMemberById(vc.getUser());
-            if (owner == null) { // Non dovrebbe mai accadere
-                removeFromCreationSchedule(hashcode);
-                return;
-            }
+        try {
+            category.createVoiceChannel(vc.getTitle()).queue(newChannel -> {
+                Member owner = newChannel.getGuild().getMemberById(vc.getUser());
+                if (owner == null) { // Non dovrebbe mai accadere
+                    removeFromCreationSchedule(hashcode);
+                    return;
+                }
 
-            // Permessi per l'owner come prima cosa, per il bot stesso
-            // e le preferenze dell'utente, dettate dall'oggetto VC
-            VoiceChannelManager manager = newChannel.getManager()
-                    .setName(vc.getTitle())
-                    .setUserLimit(vc.getSize())
-                    .putMemberPermissionOverride(category.getJDA().getSelfUser().getIdLong(),
-                            Perms.voiceSelfPerms,
-                            Collections.emptyList())
-                    .putMemberPermissionOverride(owner.getIdLong(),
-                            Perms.voiceOwnerPerms,
-                            Collections.emptyList());
+                // Permessi per l'owner come prima cosa, per il bot stesso
+                // e le preferenze dell'utente, dettate dall'oggetto VC
+                VoiceChannelManager manager = newChannel.getManager()
+                        .setUserLimit(vc.getSize())
+                        .putMemberPermissionOverride(category.getJDA().getSelfUser().getIdLong(),
+                                Perms.voiceSelfPerms,
+                                Collections.emptyList())
+                        .putMemberPermissionOverride(owner.getIdLong(),
+                                Perms.voiceOwnerPerms,
+                                Collections.emptyList());
 
-            // Aggiungi i permessi per @everyone tenendo in conto
-            // dello status della stanza
-            manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
+                // Aggiungi i permessi per @everyone tenendo in conto
+                // dello status della stanza
+                manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
 
-            // Aggiungi i ruoli bannati
-            for (String bannedRole : bannedRoles) {
-                Role role = newChannel.getGuild().getRoleById(bannedRole);
-                if (role == null) continue;
+                // Aggiungi i ruoli bannati
+                for (String bannedRole : bannedRoles) {
+                    Role role = newChannel.getGuild().getRoleById(bannedRole);
+                    if (role == null) continue;
 
-                manager = Perms.ban(role, manager);
-            }
+                    manager = Perms.ban(role, manager);
+                }
 
-            // Trusta gli utenti
-            for (UserRecord record : vc.getTrusted()) {
-                Member member = category.getGuild().getMemberById(record.user());
-                if (member != null) manager = Perms.trust(member, manager);
-            }
+                // Trusta gli utenti
+                for (UserRecord record : vc.getTrusted()) {
+                    Member member = category.getGuild().getMemberById(record.user());
+                    if (member != null) manager = Perms.trust(member, manager);
+                }
 
-            // Banna gli utenti
-            for (UserRecord record : vc.getBanned()) {
-                Member member = category.getGuild().getMemberById(record.user());
-                if (member != null) manager = Perms.ban(member, manager);
-            }
+                // Banna gli utenti
+                for (UserRecord record : vc.getBanned()) {
+                    Member member = category.getGuild().getMemberById(record.user());
+                    if (member != null) manager = Perms.ban(member, manager);
+                }
 
-            Consumer<? super Throwable> errorHandler = throwable -> {
-                // Se la stanza non riesce ad essere spostata
-                // allora cancellala e fai riprovare all'utente
-                removeFromCreationSchedule(hashcode);
-                scheduleForDeletion(vc, newChannel).queue();
-            };
+                Consumer<? super Throwable> errorHandler = throwable -> {
+                    // Se la stanza non riesce ad essere spostata
+                    // allora cancellala e fai riprovare all'utente
+                    removeFromCreationSchedule(hashcode);
+                    scheduleForDeletion(vc, newChannel).queue();
+                };
 
-            // Manda l'aggiornamento a discord
-            try {
+                // Manda l'aggiornamento a discord
                 manager.queue(nothing -> {
                     // Aggiorna id della stanza e il database
                     vc.setChannel(newChannel.getId());
@@ -238,26 +237,26 @@ public class LocalVCMapper implements IMapper<VC> {
                     update(vc);
                     addToCache(vc);
                 }, throwable -> removeFromCreationSchedule(hashcode));
-            } catch (ErrorResponseException ex) {
-                removeFromCreationSchedule(hashcode);
+            });
+        } catch (ErrorResponseException ex) {
+            removeFromCreationSchedule(hashcode);
 
-                if (ex.getErrorResponse().equals(ErrorResponse.INVALID_FORM_BODY)) {
-                    // Someone might have a nickname containing bad words
-                    // which are not allowed in servers in the discovery page.
-                    boolean hasDisallowedName = ex.getSchemaErrors().stream()
-                            .map(schemaError -> schemaError.getErrors()
-                                    .stream()
-                                    .map(ErrorResponseException.ErrorCode::getCode)
-                                    .toList())
-                            .anyMatch(errors -> errors.contains("INVALID_COMMUNITY_PROPERTY_NAME"));
-                    if (hasDisallowedName) { // If that's the case we censor the name
-                        vc.setTitle("*".repeat(5));
+            if (ex.getErrorResponse().equals(ErrorResponse.INVALID_FORM_BODY)) {
+                // Someone might have a nickname containing bad words
+                // which are not allowed in servers in the discovery page.
+                boolean hasDisallowedName = ex.getSchemaErrors().stream()
+                        .map(schemaError -> schemaError.getErrors()
+                                .stream()
+                                .map(ErrorResponseException.ErrorCode::getCode)
+                                .toList())
+                        .anyMatch(errors -> errors.contains("INVALID_COMMUNITY_PROPERTY_NAME"));
+                if (hasDisallowedName) { // If that's the case we censor the name
+                    vc.setTitle("*".repeat(5));
 
-                        createVC(vc, publicRole, bannedRoles, category); // and create the vc again
-                    }
+                    createVC(vc, publicRole, bannedRoles, category); // and create the vc again
                 }
             }
-        });
+        }
     }
 
     private synchronized void removeFromCreationSchedule(int hashcode) {
