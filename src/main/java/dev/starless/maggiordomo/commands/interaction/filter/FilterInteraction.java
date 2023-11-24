@@ -63,7 +63,7 @@ public abstract class FilterInteraction implements Interaction {
                     .queue();
         }
 
-        // If the event is acknowledged, an exception was thrown
+        // If the function returned false, then an exception was thrown
         // and an error message was already displayed, so this
         // interaction is already acknowledged
 

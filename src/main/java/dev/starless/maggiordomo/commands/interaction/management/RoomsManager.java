@@ -12,7 +12,6 @@ import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,7 @@ import java.util.List;
 public class RoomsManager extends AManagementInteraction {
 
     @Override
-    protected MessageEditData handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
         List<VC> vcs = Bot.getInstance().getCore().getChannelMapper()
                 .getMapper(e.getGuild())
                 .getCreatedVCs();
@@ -55,8 +54,7 @@ public class RoomsManager extends AManagementInteraction {
                 .setContent(Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_ROOMS_MAIN_MENU, settings.getLanguage(),
                         "total", totalVCs,
                         "active", active))
-                .setComponents(rows)
-                .build();
+                .setComponents(rows);
     }
 
     @Override
