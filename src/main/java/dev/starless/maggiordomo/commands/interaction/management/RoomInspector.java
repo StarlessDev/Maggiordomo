@@ -112,7 +112,7 @@ public class RoomInspector extends AManagementInteraction {
                         if (targetVC.hasChannel()) {
                             Member targetMember = e.getGuild().getMemberById(memberTargetID);
                             if (targetMember != null) {
-                                VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(vc.getChannel());
+                                VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(targetVC.getChannel());
                                 if (voiceChannel != null) {
                                     Perms.reset(targetMember, voiceChannel.getManager());
                                 }

@@ -85,7 +85,7 @@ public class ListManager extends AManagementInteraction {
             ids.forEach(supplier.get(settings)::remove);
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-            e.editMessage(getMainMenu(settings)
+            e.getMessage().editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())
