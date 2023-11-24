@@ -42,8 +42,7 @@ public abstract class FilterInteraction implements Interaction {
                             .build())
                     .queue();
         } else {
-            e.deferReply().setEphemeral(true).queue(nothing -> e.getInteraction().getHook().deleteOriginal().queue());
-            e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, page)))
+            e.editMessage(MessageEditData.fromCreateData(createMenu(settings, page)))
                     .setReplace(true)
                     .queue();
         }
@@ -53,20 +52,20 @@ public abstract class FilterInteraction implements Interaction {
 
     @Override
     public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
-        onInputReceived(settings, e);
+        if (onInputReceived(settings, e)) {
+            e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
+                    .setReplace(true)
+                    .queue();
 
-        e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
-                .setReplace(true)
-                .queue();
-
-        // If the event is acknowledged, an exception was thrown
-        // and an error data was already displayed
-        if (!e.isAcknowledged()) {
             String listType = Translations.string(type.equals(FilterType.BASIC) ? Messages.FILTER_BASIC : Messages.FILTER_PATTERN, settings.getLanguage()).toLowerCase();
             e.reply(Translations.string(Messages.COMMAND_FILTERS_UPDATED, settings.getLanguage(), listType))
                     .setEphemeral(true)
                     .queue();
         }
+
+        // If the function returned false, then an exception was thrown
+        // and an error message was already displayed, so this
+        // interaction is already acknowledged
 
         return null;
     }
@@ -102,7 +101,7 @@ public abstract class FilterInteraction implements Interaction {
         return false;
     }
 
-    protected abstract void onInputReceived(Settings settings, ModalInteractionEvent e);
+    protected abstract boolean onInputReceived(Settings settings, ModalInteractionEvent e);
 
     protected MessageCreateData createMenu(Settings settings, int page) {
         Set<String> words = settings.getFilterWords(type);

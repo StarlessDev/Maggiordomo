@@ -33,8 +33,8 @@ public class Filters {
     private final PatternFilter patternFilter = new PatternFilter();
 
     public FilterResult check(Settings settings, String input) {
-        String newTitle = input.trim().replaceAll("\\.|,|-|_|'|`|", "");
-        String normalized = normalize(newTitle);
+        String trimmed = input.trim();
+        String normalized = normalize(trimmed);
         for (FilterType type : FilterType.values()) {
             IFilter filter = switch (type) {
                 case BASIC -> containsFilter;
@@ -49,7 +49,7 @@ public class Filters {
             }
         }
 
-        return new FilterResult(false, newTitle);
+        return new FilterResult(false, trimmed);
     }
 
     private String normalize(String input) {

@@ -768,8 +768,7 @@ public class Core implements Module {
                         .create());
 
                 if (storedVC.isEmpty()) {
-                    // TODO: translate
-                    event.reply("Devi creare una stanza prima di usare questo comando.")
+                    event.reply(Translations.string(Messages.NEED_VC, settings.getLanguage()))
                             .setEphemeral(true)
                             .queue();
 

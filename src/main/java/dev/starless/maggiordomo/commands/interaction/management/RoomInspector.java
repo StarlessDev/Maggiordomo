@@ -36,7 +36,7 @@ import java.util.*;
 public class RoomInspector extends AManagementInteraction {
 
     @Override
-    protected MessageEditData handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
         if (parts.length < 2) return null;
 
         String id = parts[0];
@@ -50,8 +50,7 @@ public class RoomInspector extends AManagementInteraction {
         if (op.isEmpty()) {
             return new MessageEditBuilder()
                     .setContent(Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_NOT_AVAILABLE, settings.getLanguage()))
-                    .setActionRow(PageUtils.getShortBackButton("manage", settings.getLanguage()))
-                    .build();
+                    .setActionRow(PageUtils.getShortBackButton("manage", settings.getLanguage()));
         }
 
         VC vc = op.get();
@@ -90,8 +89,6 @@ public class RoomInspector extends AManagementInteraction {
 
     @Override
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
-        e.deferReply().queue(hook -> hook.deleteOriginal().queue());
-
         List<String> values = e.getValues();
         if (!values.isEmpty()) {
             if (id.contains(":")) {
@@ -115,7 +112,7 @@ public class RoomInspector extends AManagementInteraction {
                         if (targetVC.hasChannel()) {
                             Member targetMember = e.getGuild().getMemberById(memberTargetID);
                             if (targetMember != null) {
-                                VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(vc.getChannel());
+                                VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(targetVC.getChannel());
                                 if (voiceChannel != null) {
                                     Perms.reset(targetMember, voiceChannel.getManager());
                                 }
@@ -123,7 +120,7 @@ public class RoomInspector extends AManagementInteraction {
                         }
                         mapper.update(targetVC);
 
-                        e.getMessage().editMessage(getInspectMenu(e.getGuild(), targetVC.getChannel(), settings.getLanguage()))
+                        e.getMessage().editMessage(getInspectMenu(e.getGuild(), targetVC.getChannel(), settings.getLanguage()).build())
                                 .setAllowedMentions(Collections.emptyList())
                                 .setReplace(true)
                                 .queue();
@@ -131,15 +128,17 @@ public class RoomInspector extends AManagementInteraction {
                         e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_USER_REMOVED, settings.getLanguage()))
                                 .setEphemeral(true)
                                 .queue();
+
+                        return null;
                     }
                 }
-            } else {
-                e.getMessage().editMessage(getInspectMenu(e.getGuild(), values.get(0), settings.getLanguage()))
-                        .setAllowedMentions(Collections.emptyList())
-                        .setReplace(true)
-                        .queue();
             }
         }
+
+        e.editMessage(getInspectMenu(e.getGuild(), values.get(0), settings.getLanguage()).build())
+                .setAllowedMentions(Collections.emptyList())
+                .setReplace(true)
+                .queue();
 
         return null;
     }
@@ -179,7 +178,7 @@ public class RoomInspector extends AManagementInteraction {
             }
             targetVC.setTitle(result.data());
 
-            e.getMessage().editMessage(getInspectMenu(e.getGuild(), targetVC.getChannel(), settings.getLanguage()))
+            e.getMessage().editMessage(getInspectMenu(e.getGuild(), targetVC.getChannel(), settings.getLanguage()).build())
                     .setAllowedMentions(Collections.emptyList())
                     .setReplace(true)
                     .queue();
@@ -199,7 +198,7 @@ public class RoomInspector extends AManagementInteraction {
         return "inspect";
     }
 
-    private MessageEditData getInspectMenu(Guild guild, String channel, String language) {
+    private MessageEditBuilder getInspectMenu(Guild guild, String channel, String language) {
         MessageEditBuilder edit = new MessageEditBuilder();
         Optional<VC> op = Bot.getInstance().getCore().getChannelMapper()
                 .getMapper(guild.getId())
@@ -253,9 +252,7 @@ public class RoomInspector extends AManagementInteraction {
             rows.add(ActionRow.of(PageUtils.getShortBackButton("manage", language)));
         }
 
-        return edit.setComponents(rows)
-                .setContent(content)
-                .build();
+        return edit.setComponents(rows).setContent(content);
     }
 
     private StringSelectMenu createUserMenu(String name, String id, String placeholder, String language,

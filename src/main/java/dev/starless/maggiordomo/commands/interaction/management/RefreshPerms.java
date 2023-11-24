@@ -9,15 +9,13 @@ import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.mongo.api.QueryBuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.managers.channel.concrete.VoiceChannelManager;
-import net.dv8tion.jda.api.utils.messages.MessageEditData;
+import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RefreshPerms extends AManagementInteraction {
 
     @Override
-    protected MessageEditData handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
         AtomicInteger count = new AtomicInteger(0);
 
         LocalVCMapper localMapper = Bot.getInstance().getCore()

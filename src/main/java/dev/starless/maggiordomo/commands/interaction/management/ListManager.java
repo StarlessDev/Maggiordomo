@@ -19,7 +19,6 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
-import net.dv8tion.jda.api.utils.messages.MessageEditData;
 
 import java.util.*;
 import java.util.function.Function;
@@ -41,7 +40,7 @@ public class ListManager extends AManagementInteraction {
     }
 
     @Override
-    protected MessageEditData handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
         String id = parts.length > 0 ? parts[0] : "";
         MessageEditBuilder edit;
 
@@ -51,7 +50,7 @@ public class ListManager extends AManagementInteraction {
             default -> edit = getMainMenu(settings);
         }
 
-        return edit.build();
+        return edit;
     }
 
     @Override
@@ -63,7 +62,7 @@ public class ListManager extends AManagementInteraction {
             supplier.get(settings).addAll(roles.stream().map(Role::getId).toList());
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-            e.getMessage().editMessage(getMainMenu(settings)
+            e.editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())

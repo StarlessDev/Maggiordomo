@@ -15,7 +15,7 @@ public class ContainsFilterInteraction extends FilterInteraction {
     }
 
     @Override
-    protected void onInputReceived(Settings settings, ModalInteractionEvent e) {
+    protected boolean onInputReceived(Settings settings, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("input");
         if (mapping != null) {
             String[] words = mapping.getAsString().split("\n");
@@ -27,7 +27,11 @@ public class ContainsFilterInteraction extends FilterInteraction {
             }
 
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
+
+            return true;
         }
+
+        return false;
     }
 
     @Override
