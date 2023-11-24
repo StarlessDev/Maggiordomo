@@ -28,11 +28,10 @@ public class ManagementCommand implements Slash, Interaction {
 
     @Override
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        e.getMessage().editMessage(MessageEditData.fromCreateData(getMenu(e.getGuild(), settings)))
+        e.editMessage(MessageEditData.fromCreateData(getMenu(e.getGuild(), settings)))
                 .setReplace(true)
                 .queue();
 
-        e.deferReply().queue(hook -> hook.deleteOriginal().queue());
         return null;
     }
 

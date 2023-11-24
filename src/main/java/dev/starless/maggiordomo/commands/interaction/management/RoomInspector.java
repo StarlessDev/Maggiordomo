@@ -90,8 +90,6 @@ public class RoomInspector extends AManagementInteraction {
 
     @Override
     public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
-        e.deferReply().queue(hook -> hook.deleteOriginal().queue());
-
         List<String> values = e.getValues();
         if (!values.isEmpty()) {
             if (id.contains(":")) {
@@ -131,15 +129,17 @@ public class RoomInspector extends AManagementInteraction {
                         e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_USER_REMOVED, settings.getLanguage()))
                                 .setEphemeral(true)
                                 .queue();
+
+                        return null;
                     }
                 }
-            } else {
-                e.getMessage().editMessage(getInspectMenu(e.getGuild(), values.get(0), settings.getLanguage()))
-                        .setAllowedMentions(Collections.emptyList())
-                        .setReplace(true)
-                        .queue();
             }
         }
+
+        e.editMessage(getInspectMenu(e.getGuild(), values.get(0), settings.getLanguage()))
+                .setAllowedMentions(Collections.emptyList())
+                .setReplace(true)
+                .queue();
 
         return null;
     }

@@ -63,7 +63,7 @@ public class ListManager extends AManagementInteraction {
             supplier.get(settings).addAll(roles.stream().map(Role::getId).toList());
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-            e.getMessage().editMessage(getMainMenu(settings)
+            e.editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())
@@ -86,7 +86,7 @@ public class ListManager extends AManagementInteraction {
             ids.forEach(supplier.get(settings)::remove);
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-            e.getMessage().editMessage(getMainMenu(settings)
+            e.editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())

@@ -18,14 +18,10 @@ public abstract class AManagementInteraction implements Interaction {
         String[] parts = id.split(":");
         MessageEditData edit = handle(e, settings, parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0]);
         if (edit != null) {
-            e.getMessage().editMessage(edit)
+            e.editMessage(edit)
                     .setAllowedMentions(Collections.emptyList())
                     .setReplace(true)
                     .queue();
-        }
-
-        if (!e.getInteraction().isAcknowledged()) {
-            e.deferReply().queue(hook -> hook.deleteOriginal().queue());
         }
 
         return null;

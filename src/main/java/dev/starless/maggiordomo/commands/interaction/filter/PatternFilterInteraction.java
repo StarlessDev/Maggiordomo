@@ -18,13 +18,15 @@ public class PatternFilterInteraction extends FilterInteraction {
     }
 
     @Override
-    protected void onInputReceived(Settings settings, ModalInteractionEvent e) {
+    protected boolean onInputReceived(Settings settings, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("input");
         if (mapping != null) {
             try {
                 Pattern pattern = Pattern.compile(mapping.getAsString());
                 settings.modifyFilters(FilterType.REGEX, set -> set.add(pattern.pattern()));
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
+
+                return true;
             } catch (PatternSyntaxException ex) {
                 e.reply(Translations.string(Messages.FILTER_PATTERN_ERROR, settings.getLanguage())
                                 + "\n"
@@ -33,6 +35,8 @@ public class PatternFilterInteraction extends FilterInteraction {
                         .queue();
             }
         }
+
+        return false;
     }
 
     @Override
