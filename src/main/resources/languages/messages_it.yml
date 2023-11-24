@@ -268,11 +268,10 @@ commands:
         content: |-
           Seleziona il ruolo che tutti gli utenti devono avere per usare il bot (anche everyone è supportato).
           Se hai già impostato il ruolo, puoi cliccare sul pulsante 'Continua'.
-          Il ruolo pubblico attuale è `%s`
+          Il ruolo pubblico attuale è %s
 
         reset_button: "Resetta a @everyone"
         role_selector_placeholder: "Seleziona un ruolo"
-        updated: ">>> Ruolo aggiornato :white_check_mark:"
 
       interface:
         content: |-

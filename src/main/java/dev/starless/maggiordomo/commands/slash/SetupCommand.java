@@ -26,6 +26,7 @@ import net.dv8tion.jda.api.events.interaction.component.EntitySelectInteractionE
 import net.dv8tion.jda.api.events.interaction.component.GenericComponentInteractionCreateEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.EntitySelectMenu;
@@ -60,6 +61,7 @@ public class SetupCommand implements Slash, Interaction {
                 .setContent(Translations.string(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage()))
                 .setActionRow(Button.primary("setup:role", Translations.string(Messages.COMMAND_SETUP_START_BUTTON_LABEL, settings.getLanguage())))
                 .setSuppressEmbeds(true)
+                .setAllowedMentions(Collections.emptyList())
                 .build();
 
         e.reply(message).queue();
@@ -94,7 +96,12 @@ public class SetupCommand implements Slash, Interaction {
                 }
                 case "reset_role" -> {
                     updatePublicRole(e, settings, e.getGuild().getPublicRole());
-                    return null;
+
+                    content = Translations.string(
+                            Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
+                            settings.getLanguage(), e.getGuild().getPublicRole().getAsMention()
+                    );
+                    rows.addAll(e.getMessage().getActionRows());
                 }
                 case "embed" -> {
                     content = Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_CONTENT, settings.getLanguage());
@@ -158,12 +165,11 @@ public class SetupCommand implements Slash, Interaction {
 
             if (e.getInteraction().isAcknowledged()) {
                 e.getMessage().delete().queue();
-            } else {
-                e.deferReply().queue(success -> e.getInteraction().getHook().deleteOriginal().queue());
             }
 
             if (content != null) {
-                e.getMessage().editMessage(builder.setContent(content)
+                e.editMessage(builder.setContent(content)
+                                .setAllowedMentions(Collections.emptyList())
                                 .setComponents(rows)
                                 .build())
                         .setReplace(true)
@@ -244,27 +250,22 @@ public class SetupCommand implements Slash, Interaction {
                 if (roles.isEmpty()) return null;
 
                 updatePublicRole(e, settings, roles.get(0));
+                e.editMessage(Translations.string(
+                        Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
+                        settings.getLanguage(),
+                        roles.get(0).getAsMention())
+                ).queue();
             }
         }
 
         return null;
     }
 
-    private void updatePublicRole(GenericComponentInteractionCreateEvent e, Settings settings, Role newRole) {
-        Message message = e.getMessage();
-        Perms.updatePublicPerms(message.getGuild(), settings, message.getGuild().getRoleById(settings.getPublicRole()), newRole);
+    private void updatePublicRole(IReplyCallback event, Settings settings, Role newRole) {
+        Perms.updatePublicPerms(event.getGuild(), settings, event.getGuild().getRoleById(settings.getPublicRole()), newRole);
 
         settings.setPublicRole(newRole.getId());
         Bot.getInstance().getCore().getSettingsMapper().update(settings);
-
-        String content = Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
-                settings.getLanguage(),
-                References.roleName(e.getGuild(), settings.getPublicRole()));
-
-        e.getMessage().editMessage(content)
-                .queue(success -> e.reply(Translations.string(Messages.COMMAND_SETUP_STEPS_ROLE_UPDATED, settings.getLanguage()))
-                        .setEphemeral(true)
-                        .queue());
     }
 
     private void completeSetup(Guild guild, InteractionHook hook, Settings settings) {
