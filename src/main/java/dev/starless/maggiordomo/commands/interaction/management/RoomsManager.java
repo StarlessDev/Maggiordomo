@@ -41,7 +41,7 @@ public class RoomsManager extends AManagementInteraction {
         }
 
         List<ActionRow> rows = new ArrayList<>();
-        if (active != 0) {
+        if (!dropdown.getOptions().isEmpty()) {
             rows.add(ActionRow.of(dropdown.build()));
         }
         rows.add(ActionRow.of(PageUtils.getShortBackButton("admin", settings.getLanguage())));
