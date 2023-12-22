@@ -32,7 +32,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1") // Gson
 
     implementation("com.vdurmont:semver4j:3.1.0") // Semantic versioning util
-    implementation("ch.qos.logback:logback-classic:1.4.7") // Logger implementation
+    implementation("ch.qos.logback:logback-classic:1.4.11") // Logger implementation
     implementation("com.anyascii:anyascii:0.3.2") // AnyAscii (finds the best ascii character match of unicode characters)
 }
 
