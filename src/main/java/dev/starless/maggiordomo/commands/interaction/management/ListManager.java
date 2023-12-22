@@ -62,11 +62,13 @@ public class ListManager extends AManagementInteraction {
             supplier.get(settings).addAll(roles.stream().map(Role::getId).toList());
             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
-            e.editMessage(getMainMenu(settings)
+            e.getMessage().editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())
                             .setReplace(true)
                             .build())
-                    .queue(success -> e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ROLE_ADDED, settings.getLanguage())).setEphemeral(true).queue());
+                    .queue(success -> e.reply(Translations.string(Messages.COMMAND_MANAGEMENT_LISTS_ROLE_ADDED, settings.getLanguage()))
+                            .setEphemeral(true)
+                            .queue());
 
             if (successAction != null) {
                 successAction.accept(roles, false);
