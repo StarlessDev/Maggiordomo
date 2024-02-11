@@ -71,7 +71,7 @@ public class VC {
     }
 
     public void addPlayerRecord(RecordType type, String id) {
-        UserRecord record = new UserRecord(type, guild, channel, id);
+        UserRecord record = new UserRecord(type, id);
         consumeSet(type, set -> set.add(record));
     }
 

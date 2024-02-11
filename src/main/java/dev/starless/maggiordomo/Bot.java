@@ -104,8 +104,11 @@ public class Bot implements Service {
         client.dispatcher().executorService().shutdown();
 
         if (server != null) {
+            BotLogger.info("Shutting down HTTP server");
             server.stop();
         }
+
+        BotLogger.info("Shutdown complete. Bye!");
     }
 
     @SubscribeEvent

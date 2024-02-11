@@ -2,5 +2,5 @@ package dev.starless.maggiordomo.data.user;
 
 import dev.starless.maggiordomo.data.enums.RecordType;
 
-public record UserRecord(RecordType type, String guild, String channel, String user) {
+public record UserRecord(RecordType type, String user) {
 }
