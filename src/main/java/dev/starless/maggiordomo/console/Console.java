@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.console.impl.Guilds;
 import dev.starless.maggiordomo.console.impl.ResetGlobalCommand;
 import dev.starless.maggiordomo.console.impl.Stats;
 import dev.starless.maggiordomo.console.impl.Stop;
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.BotLogger;
 
 import java.util.Arrays;
 import java.util.List;

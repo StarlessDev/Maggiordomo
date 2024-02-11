@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Statistics;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.BotLogger;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.RestUtils;

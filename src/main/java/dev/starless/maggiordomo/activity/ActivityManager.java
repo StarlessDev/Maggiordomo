@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.activity;
 
 import dev.starless.maggiordomo.interfaces.Service;
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.BotLogger;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 

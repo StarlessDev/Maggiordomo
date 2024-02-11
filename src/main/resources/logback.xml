@@ -1,14 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <logger name="org.mongodb.driver" level="OFF" />
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <charset>UTF-8</charset>
-            <pattern>%blue%-5level | [%date{dd/MM}] \(%date{HH:mm:ss, CET}\) %msg{nolookups}%n</pattern>
+            <pattern>%-5level | [%date{dd/MM}] \(%date{HH:mm:ss, CET}\) %msg%n</pattern>
         </encoder>
     </appender>
 
-    <root level="info">
-        <appender-ref ref="STDOUT" />
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/latest.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>logs/%d{dd-MM-yyyy}-%i.log</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>500MB</totalSizeCap>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%-5level | [%date{dd/MM}] \(%date{HH:mm:ss, CET}\) %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>

@@ -1,10 +1,9 @@
 package dev.starless.maggiordomo.localization;
 
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.BotLogger;
 import dev.starless.maggiordomo.utils.ConfigUtils;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.utils.FileUpload;
-import net.dv8tion.jda.internal.utils.IOUtil;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 

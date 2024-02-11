@@ -5,7 +5,7 @@ import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Cooldown;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.BotLogger;
 import dev.starless.mongo.api.QueryBuilder;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;

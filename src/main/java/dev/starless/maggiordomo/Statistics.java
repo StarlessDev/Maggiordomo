@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo;
 
-import dev.starless.maggiordomo.logging.BotLogger;
 import dev.starless.maggiordomo.utils.ConfigUtils;
 import lombok.Getter;
 import org.spongepowered.configurate.CommentedConfigurationNode;

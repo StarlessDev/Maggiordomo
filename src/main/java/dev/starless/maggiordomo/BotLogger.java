@@ -1,4 +1,4 @@
-package dev.starless.maggiordomo.logging;
+package dev.starless.maggiordomo;
 
 import ch.qos.logback.classic.Logger;
 import lombok.Getter;
@@ -9,11 +9,6 @@ import org.slf4j.LoggerFactory;
 public class BotLogger {
 
     @Getter private final Logger logger = (Logger) LoggerFactory.getLogger("Maggiordomo");
-
-    public void setup() {
-        System.setProperty("LOG4J_FORMAT_MSG_NO_LOOKUPS", "true"); // Log4J CVEs fix
-        logger.addAppender(new FileAppender());
-    }
 
     public void info(String message, Object... objects) {
         logger.info(String.format(message, objects));

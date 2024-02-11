@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.console.impl;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.console.ConsoleCommand;
-import dev.starless.maggiordomo.logging.BotLogger;
+import dev.starless.maggiordomo.BotLogger;
 
 import java.util.Collections;
 import java.util.List;

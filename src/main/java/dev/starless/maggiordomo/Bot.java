@@ -4,7 +4,6 @@ import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.console.Console;
 import dev.starless.maggiordomo.interfaces.Service;
-import dev.starless.maggiordomo.logging.BotLogger;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
@@ -36,7 +35,6 @@ public class Bot implements Service {
     @Override
     public void start() throws InvalidTokenException, IllegalArgumentException {
         ready = false;
-        BotLogger.setup();
 
         // Inizializza le funzioni del bot
         Config config = new Config();
@@ -52,10 +50,12 @@ public class Bot implements Service {
 
         // Effettua il login
         jda = JDABuilder.createDefault(config.getString(ConfigEntry.TOKEN))
-                .enableIntents(GUILD_MESSAGES,
+                .enableIntents(
+                        GUILD_MESSAGES,
                         GUILD_VOICE_STATES,
                         GUILD_MEMBERS)
-                .disableIntents(DIRECT_MESSAGES,
+                .disableIntents(
+                        DIRECT_MESSAGES,
                         GUILD_MODERATION,
                         GUILD_PRESENCES,
                         GUILD_EMOJIS_AND_STICKERS,
@@ -73,7 +73,7 @@ public class Bot implements Service {
                         CLIENT_STATUS,
                         ROLE_TAGS,
                         FORUM_TAGS)
-                .setMemberCachePolicy(MemberCachePolicy.ALL)
+                .setMemberCachePolicy(MemberCachePolicy.DEFAULT)
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setActivity(Activity.watching("Your rooms 👀"))
                 .setEventManager(new AnnotatedEventManager())

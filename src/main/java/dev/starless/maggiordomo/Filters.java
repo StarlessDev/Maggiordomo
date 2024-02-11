@@ -53,8 +53,8 @@ public class Filters {
     }
 
     private String normalize(String input) {
-        // Remove characters that could interfere with a MongoDB query
-        // and get the best translation to an ascii string of the input
+        // Try to switch unicode characters with their best ascii representation.
+        // For example: 🅾 will be translated to 'O'
         String transliteration = AnyAscii.transliterate(input);
 
         // The emojis will get translated to something like this: :rofl:.
@@ -70,7 +70,7 @@ public class Filters {
             @Override
             public void accept(MatchResult match) {
                 // The offset accounts for previously deleted chars.
-                // I substracted 2 from match.end() since it's exclusive
+                // I subtracted 2 from match.end() since it's exclusive
                 // and to account for the char just deleted
                 normalized.deleteCharAt(match.start() - offset).deleteCharAt(match.end() - offset - 2);
                 offset += 2;
