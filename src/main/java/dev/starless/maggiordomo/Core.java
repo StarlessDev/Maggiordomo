@@ -94,7 +94,7 @@ public class Core implements Module {
     public Core(Config config) {
         // Translations are already needed for the Settings schema
         Translations.init();
-        // Statistics for api purposes
+        // Stats for nerds (they do not have much of a purpose right now)
         Statistics.getInstance().load();
 
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))

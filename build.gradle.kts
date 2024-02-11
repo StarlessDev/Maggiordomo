@@ -2,7 +2,7 @@ plugins {
     id("java")
 
     id("application")
-    id("io.freefair.lombok") version "8.0.1"
+    id("io.freefair.lombok") version "8.4"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
