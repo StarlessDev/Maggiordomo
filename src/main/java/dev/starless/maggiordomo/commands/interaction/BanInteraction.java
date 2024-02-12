@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
@@ -49,11 +49,11 @@ public class BanInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasPlayerRecord(RecordType.BAN, member.getId())) {
+            } else if (vc.hasPlayerRecord(UserRole.BAN, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_ALREADY_BANNED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasPlayerRecord(RecordType.TRUST, member.getId())) {
+            } else if (vc.hasPlayerRecord(UserRole.TRUST, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
@@ -68,7 +68,7 @@ public class BanInteraction implements Interaction {
             } else {
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 boolean isChannelCreated = channel != null;
-                vc.addPlayerRecord(RecordType.BAN, member.getId());
+                vc.addPlayerRecord(UserRole.BAN, member.getId());
 
                 // Rispondi alla richiesta
                 e.replyEmbeds(new EmbedBuilder()

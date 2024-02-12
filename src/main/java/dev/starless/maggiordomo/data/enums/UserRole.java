@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.data.enums;
 
-public enum RecordType {
+public enum UserRole {
 
     TRUST,
     BAN

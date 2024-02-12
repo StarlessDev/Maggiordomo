@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
@@ -39,7 +39,7 @@ public class UnbanInteraction implements Interaction {
             return null;
         }
 
-        Set<UserRecord> records = vc.getTotalRecords();
+        Set<UserRecord<UserRole>> records = vc.getTotalRecords();
         int recordsNumber = records.size();
 
         MessageCreateBuilder builder = new MessageCreateBuilder();
@@ -50,7 +50,7 @@ public class UnbanInteraction implements Interaction {
                     .setPlaceholder(Translations.string(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
 
             records.stream()
-                    .filter(record -> record.type().equals(RecordType.BAN))
+                    .filter(record -> record.type().equals(UserRole.BAN))
                     .skip((long) PageUtils.DROPDOWN_MAX_ENTRIES * page)
                     .limit(10)
                     .forEach(record -> {
@@ -95,7 +95,7 @@ public class UnbanInteraction implements Interaction {
                 return vc;
             }
 
-            vc.removePlayerRecord(RecordType.BAN, member.getId());
+            vc.removePlayerRecord(UserRole.BAN, member.getId());
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()

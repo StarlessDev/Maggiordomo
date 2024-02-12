@@ -2,9 +2,8 @@ package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.filter.FilterResult;
-import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
@@ -107,7 +106,7 @@ public class RoomInspector extends AManagementInteraction {
                         String memberTargetID = values.get(0);
                         boolean modifyTrusted = action.equals("trust");
 
-                        targetVC.removePlayerRecord(modifyTrusted ? RecordType.TRUST : RecordType.BAN, memberTargetID);
+                        targetVC.removePlayerRecord(modifyTrusted ? UserRole.TRUST : UserRole.BAN, memberTargetID);
                         if (targetVC.hasChannel()) {
                             Member targetMember = e.getGuild().getMemberById(memberTargetID);
                             if (targetMember != null) {
@@ -229,8 +228,8 @@ public class RoomInspector extends AManagementInteraction {
             ));
 
             List<ItemComponent> lastRow = new ArrayList<>();
-            Set<UserRecord> trusted = vc.getTrusted();
-            Set<UserRecord> banned = vc.getBanned();
+            Set<String> trusted = vc.getTrusted();
+            Set<String> banned = vc.getBanned();
             if (!trusted.isEmpty()) {
                 lastRow.add(createUserMenu("trust", vc.getChannel(),
                         Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DROPDOWNS_TRUSTED_PLACEHOLDER, language),
@@ -255,10 +254,10 @@ public class RoomInspector extends AManagementInteraction {
     }
 
     private StringSelectMenu createUserMenu(String name, String id, String placeholder, String language,
-                                            Guild guild, Set<UserRecord> records) {
+                                            Guild guild, Set<String> records) {
         StringSelectMenu.Builder builder = StringSelectMenu.create("inspector:" + id + ":" + name);
         records.forEach(record -> {
-            User user = guild.getJDA().getUserById(record.user());
+            User user = guild.getJDA().getUserById(record);
             String username;
             String nickname;
 
@@ -276,7 +275,7 @@ public class RoomInspector extends AManagementInteraction {
                 nickname = Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_DEFAULT_NICKNAME, language);
             }
 
-            builder.addOption(nickname, record.user(), Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_AKA, language) + " @" + username);
+            builder.addOption(nickname, record, Translations.string(Messages.COMMAND_MANAGEMENT_ROOMS_AKA, language) + " @" + username);
         });
 
         return builder.setPlaceholder(placeholder).build();

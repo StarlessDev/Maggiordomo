@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.data.user;
 
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.enums.VCStatus;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.entities.Member;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -35,8 +34,8 @@ public class VC {
     @Setter private Instant lastJoin;
 
     // Questi sono i permessi
-    private final Set<UserRecord> trusted;
-    private final Set<UserRecord> banned;
+    private final Set<String> trusted;
+    private final Set<String> banned;
 
     private String title;
     private int size;
@@ -70,18 +69,17 @@ public class VC {
                 Translations.string(Messages.VC_NAME, language, member.getEffectiveName()));
     }
 
-    public void addPlayerRecord(RecordType type, String id) {
-        UserRecord record = new UserRecord(type, id);
-        consumeSet(type, set -> set.add(record));
+    public void addPlayerRecord(UserRole type, String id) {
+        consumeSet(type, set -> set.add(id));
     }
 
-    public void removePlayerRecord(RecordType type, String id) {
-        consumeSet(type, set -> set.removeIf(record -> record.type().equals(type) && record.user().equals(id)));
+    public void removePlayerRecord(UserRole type, String id) {
+        consumeSet(type, set -> set.remove(id));
     }
 
-    public boolean hasPlayerRecord(RecordType type, String id) {
+    public boolean hasPlayerRecord(UserRole type, String id) {
         AtomicBoolean check = new AtomicBoolean(false);
-        consumeSet(type, set -> check.set(set.stream().anyMatch(record -> record.user().equals(id))));
+        consumeSet(type, set -> check.set(set.contains(id)));
         return check.get();
     }
 
@@ -89,13 +87,22 @@ public class VC {
         return !channel.equals("-1");
     }
 
-    public void consumeSet(RecordType type, Consumer<Set<UserRecord>> consumer) {
-        consumer.accept(type.equals(RecordType.BAN) ? banned : trusted);
+    public void consumeSet(UserRole type, Consumer<Set<String>> consumer) {
+        consumer.accept(type.equals(UserRole.BAN) ? banned : trusted);
     }
 
-    public Set<UserRecord> getTotalRecords() {
-        Set<UserRecord> total = new HashSet<>(banned);
-        total.addAll(trusted);
+    public Set<UserRecord<UserRole>> getTotalRecords() {
+        Set<UserRecord<UserRole>> total = new HashSet<>();
+        // Add banned users
+        total.addAll(banned.stream()
+                .map(str -> new UserRecord<>(UserRole.BAN, str))
+                .toList());
+
+        // Add trusted users
+        total.addAll(trusted.stream()
+                .map(str -> new UserRecord<>(UserRole.TRUST, str))
+                .toList());
+
         return total;
     }
 

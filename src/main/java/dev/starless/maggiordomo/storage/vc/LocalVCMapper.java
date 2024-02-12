@@ -176,14 +176,14 @@ public class LocalVCMapper implements IMapper<VC> {
                 }
 
                 // Trusta gli utenti
-                for (UserRecord record : vc.getTrusted()) {
-                    Member member = category.getGuild().getMemberById(record.user());
+                for (String trustedId : vc.getTrusted()) {
+                    Member member = category.getGuild().getMemberById(trustedId);
                     if (member != null) manager = Perms.trust(member, manager);
                 }
 
                 // Banna gli utenti
-                for (UserRecord record : vc.getBanned()) {
-                    Member member = category.getGuild().getMemberById(record.user());
+                for (String bannedId : vc.getBanned()) {
+                    Member member = category.getGuild().getMemberById(bannedId);
                     if (member != null) manager = Perms.ban(member, manager);
                 }
 

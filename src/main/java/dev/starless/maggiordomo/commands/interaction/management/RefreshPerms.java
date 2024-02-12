@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
@@ -57,7 +57,7 @@ public class RefreshPerms extends AManagementInteraction {
                             for (UserRecord record : vc.getTotalRecords()) {
                                 Member targetRecord = e.getGuild().getMemberById(record.user());
                                 if (targetRecord != null) {
-                                    if (record.type().equals(RecordType.TRUST)) {
+                                    if (record.type().equals(UserRole.TRUST)) {
                                         manager = Perms.trust(targetRecord, manager);
                                     } else {
                                         manager = Perms.ban(targetRecord, manager);

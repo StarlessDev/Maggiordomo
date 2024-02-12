@@ -12,7 +12,7 @@ import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.data.Cooldown;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.interfaces.Module;
@@ -30,6 +30,7 @@ import dev.starless.mongo.api.Query;
 import dev.starless.mongo.api.QueryBuilder;
 import dev.starless.mongo.schema.MigrationSchema;
 import dev.starless.mongo.schema.suppliers.FixedKeySupplier;
+import dev.starless.mongo.schema.suppliers.ValueSupplier;
 import dev.starless.mongo.schema.suppliers.impl.SimpleSupplier;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -388,7 +389,7 @@ public class Core implements Module {
 
                 List<String> trusted = vc.getTotalRecords()
                         .stream()
-                        .filter(record -> record.type().equals(RecordType.TRUST))
+                        .filter(record -> record.type().equals(UserRole.TRUST))
                         .map(UserRecord::user)
                         .toList();
 
@@ -579,7 +580,7 @@ public class Core implements Module {
 
         // Kick the user if they are banned from the vc they are trying to join
         // (This should not be needed, since banned users do not see the vc they are banned from)
-        if (vc.hasPlayerRecord(RecordType.BAN, member.getId())) {
+        if (vc.hasPlayerRecord(UserRole.BAN, member.getId())) {
             guild.kickVoiceMember(member).queue(
                     RestUtils.emptyConsumer(),
                     RestUtils.throwableConsumer("Something went wrong when kicking: " + References.user(member.getUser()))

@@ -4,7 +4,7 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.enums.VCStatus;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
@@ -110,8 +110,8 @@ public class RecoverCommand implements Slash {
                         isLocked ? VCStatus.LOCKED : VCStatus.OPEN,
                         boolMapping.getAsBoolean());
 
-                trusted.forEach(string -> vc.addPlayerRecord(RecordType.TRUST, string));
-                banned.forEach(string -> vc.addPlayerRecord(RecordType.BAN, string));
+                trusted.forEach(string -> vc.addPlayerRecord(UserRole.TRUST, string));
+                banned.forEach(string -> vc.addPlayerRecord(UserRole.BAN, string));
 
                 localMapper.search(QueryBuilder.init()
                                 .add("guild", guild)

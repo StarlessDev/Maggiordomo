@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
@@ -38,7 +38,7 @@ public class UntrustInteraction implements Interaction {
             return null;
         }
 
-        Set<UserRecord> records = vc.getTotalRecords();
+        Set<UserRecord<UserRole>> records = vc.getTotalRecords();
         int recordsNumber = records.size();
 
         MessageCreateBuilder builder = new MessageCreateBuilder();
@@ -49,7 +49,7 @@ public class UntrustInteraction implements Interaction {
                     .setPlaceholder(Translations.string(Messages.USER_SELECTION_PLACEHOLDER, settings.getLanguage()));
 
             records.stream()
-                    .filter(record -> record.type().equals(RecordType.TRUST))
+                    .filter(record -> record.type().equals(UserRole.TRUST))
                     .skip((long) PageUtils.DROPDOWN_MAX_ENTRIES * page)
                     .limit(PageUtils.DROPDOWN_MAX_ENTRIES)
                     .forEach(record -> {
@@ -87,7 +87,7 @@ public class UntrustInteraction implements Interaction {
             String memberId = e.getValues().get(0);
             Member member = e.getGuild().getMemberById(memberId);
             if (member == null) {
-                vc.removePlayerRecord(RecordType.TRUST, member.getId());
+                vc.removePlayerRecord(UserRole.TRUST, member.getId());
 
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.MEMBER_NOT_FOUND, settings.getLanguage())))
                         .setEphemeral(true)
@@ -96,7 +96,7 @@ public class UntrustInteraction implements Interaction {
                 return vc;
             }
 
-            vc.removePlayerRecord(RecordType.TRUST, member.getId());
+            vc.removePlayerRecord(UserRole.TRUST, member.getId());
 
             // Rispondi alla richiesta
             e.replyEmbeds(new EmbedBuilder()

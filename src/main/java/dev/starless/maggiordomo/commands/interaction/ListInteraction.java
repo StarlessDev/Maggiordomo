@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.RecordType;
+import dev.starless.maggiordomo.data.enums.UserRole;
 import dev.starless.maggiordomo.data.user.UserRecord;
 import dev.starless.maggiordomo.data.user.VC;
 import dev.starless.maggiordomo.localization.Translations;
@@ -14,13 +14,9 @@ import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.buttons.ButtonStyle;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.utils.messages.MessageCreateBuilder;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -53,9 +49,9 @@ public class ListInteraction implements Interaction {
                 page = 0;
             }
 
-            RecordType type;
+            UserRole type;
             try {
-                type = RecordType.valueOf(label); // Ottieni il tipo selezionato...
+                type = UserRole.valueOf(label); // Ottieni il tipo selezionato...
             } catch (IllegalArgumentException ex) {
                 // ...se per qualche motivo ambiguo non esiste
                 // mandiamo un messaggio di errore altrettanto ambiguo
@@ -70,7 +66,7 @@ public class ListInteraction implements Interaction {
             AtomicInteger integer = new AtomicInteger(0); // Numero iniziale di record
 
             // Filtra i record e forma il messaggio
-            Set<UserRecord> records = vc.getTotalRecords();
+            Set<UserRecord<UserRole>> records = vc.getTotalRecords();
             int elementsNumber = records.size();
             long skippedElements = (long) PageUtils.DROPDOWN_MAX_ENTRIES * page;
             records.stream()
@@ -93,7 +89,7 @@ public class ListInteraction implements Interaction {
             int streamCount = integer.get();
             if (streamCount == 0) {
                 // Messaggio nel caso che non ci sia nessuno
-                sb.append(Translations.string(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(RecordType.BAN) ? ":rainbow: " : ":cry:");
+                sb.append(Translations.string(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(UserRole.BAN) ? ":rainbow: " : ":cry:");
             } else {
                 sb.setLength(sb.length() - 2);
 
