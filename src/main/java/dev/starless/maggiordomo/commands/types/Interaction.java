@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.commands.types;
 
 import dev.starless.maggiordomo.commands.Command;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.VC;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;

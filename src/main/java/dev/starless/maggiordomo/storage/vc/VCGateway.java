@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.storage.vc;
 
 import com.mongodb.client.model.Filters;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.mongo.MongoStorage;
 import dev.starless.mongo.api.Query;
 import dev.starless.mongo.api.gateway.GatewayImpl;

@@ -2,8 +2,8 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserRole;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.enums.UserState;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Matcher;
@@ -49,11 +49,11 @@ public class BanInteraction implements Interaction {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_SELF_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasPlayerRecord(UserRole.BAN, member.getId())) {
+            } else if (vc.hasPlayerRecord(UserState.BAN, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_ALREADY_BANNED, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
-            } else if (vc.hasPlayerRecord(UserRole.TRUST, member.getId())) {
+            } else if (vc.hasPlayerRecord(UserState.TRUST, member.getId())) {
                 e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.INTERACTION_BAN_TRUSTED_ERROR, settings.getLanguage())))
                         .setEphemeral(true)
                         .queue();
@@ -68,7 +68,7 @@ public class BanInteraction implements Interaction {
             } else {
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 boolean isChannelCreated = channel != null;
-                vc.addPlayerRecord(UserRole.BAN, member.getId());
+                vc.addPlayerRecord(UserState.BAN, member.getId());
 
                 // Rispondi alla richiesta
                 e.replyEmbeds(new EmbedBuilder()

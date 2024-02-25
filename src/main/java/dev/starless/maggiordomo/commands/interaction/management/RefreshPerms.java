@@ -2,8 +2,8 @@ package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserRole;
-import dev.starless.maggiordomo.data.user.UserRecord;
+import dev.starless.maggiordomo.data.enums.UserState;
+import dev.starless.maggiordomo.data.UserRecord;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
@@ -54,10 +54,10 @@ public class RefreshPerms extends AManagementInteraction {
                             }
 
                             // Trusted & untrusted
-                            for (UserRecord record : vc.getTotalRecords()) {
+                            for (UserRecord record : vc.getRoleRecords()) {
                                 Member targetRecord = e.getGuild().getMemberById(record.user());
                                 if (targetRecord != null) {
-                                    if (record.type().equals(UserRole.TRUST)) {
+                                    if (record.type().equals(UserState.TRUST)) {
                                         manager = Perms.trust(targetRecord, manager);
                                     } else {
                                         manager = Perms.ban(targetRecord, manager);
@@ -68,7 +68,7 @@ public class RefreshPerms extends AManagementInteraction {
                             // PublicRole
                             Role role = e.getGuild().getRoleById(settings.getPublicRole());
                             if (role != null) {
-                                manager = Perms.setPublicPerms(manager, vc.getStatus(), role, !channel.getMembers().isEmpty());
+                                manager = Perms.setPublicPerms(manager, vc.getState(), role, !channel.getMembers().isEmpty());
                             }
 
                             manager.queueAfter(count.incrementAndGet() * 250L, TimeUnit.MILLISECONDS);

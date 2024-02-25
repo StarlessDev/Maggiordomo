@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.activity;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.mongo.api.QueryBuilder;
 import lombok.RequiredArgsConstructor;

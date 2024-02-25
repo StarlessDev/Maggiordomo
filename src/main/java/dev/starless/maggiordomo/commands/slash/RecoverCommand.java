@@ -4,13 +4,13 @@ import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserRole;
-import dev.starless.maggiordomo.data.enums.VCStatus;
+import dev.starless.maggiordomo.data.enums.UserState;
+import dev.starless.maggiordomo.data.enums.VCState;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
 import dev.starless.maggiordomo.utils.discord.Embeds;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.mongo.api.QueryBuilder;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -107,11 +107,11 @@ public class RecoverCommand implements Slash {
                         category.getId(),
                         voiceChannel.getName(),
                         limit,
-                        isLocked ? VCStatus.LOCKED : VCStatus.OPEN,
+                        isLocked ? VCState.LOCKED : VCState.OPEN,
                         boolMapping.getAsBoolean());
 
-                trusted.forEach(string -> vc.addPlayerRecord(UserRole.TRUST, string));
-                banned.forEach(string -> vc.addPlayerRecord(UserRole.BAN, string));
+                trusted.forEach(string -> vc.addPlayerRecord(UserState.TRUST, string));
+                banned.forEach(string -> vc.addPlayerRecord(UserState.BAN, string));
 
                 localMapper.search(QueryBuilder.init()
                                 .add("guild", guild)

@@ -2,9 +2,9 @@ package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserRole;
+import dev.starless.maggiordomo.data.enums.UserState;
 import dev.starless.maggiordomo.data.filter.FilterResult;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
@@ -106,7 +106,7 @@ public class RoomInspector extends AManagementInteraction {
                         String memberTargetID = values.get(0);
                         boolean modifyTrusted = action.equals("trust");
 
-                        targetVC.removePlayerRecord(modifyTrusted ? UserRole.TRUST : UserRole.BAN, memberTargetID);
+                        targetVC.removePlayerRecord(modifyTrusted ? UserState.TRUST : UserState.BAN, memberTargetID);
                         if (targetVC.hasChannel()) {
                             Member targetMember = e.getGuild().getMemberById(memberTargetID);
                             if (targetMember != null) {

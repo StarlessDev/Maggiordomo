@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.utils.discord;
 
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.VCStatus;
+import dev.starless.maggiordomo.data.enums.VCState;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
@@ -168,7 +168,7 @@ public class Perms {
         }
     }
 
-    public VoiceChannelManager setPublicPerms(VoiceChannelManager manager, VCStatus status, Role publicRole, boolean visible) {
+    public VoiceChannelManager setPublicPerms(VoiceChannelManager manager, VCState status, Role publicRole, boolean visible) {
         if (manager == null || publicRole == null) return manager;
 
         Role everyone = publicRole.getGuild().getPublicRole();
@@ -182,7 +182,7 @@ public class Perms {
         List<Permission> denied = new ArrayList<>(voicePublicDeniedPerms);
 
         // Status della stanza
-        if (status.equals(VCStatus.LOCKED)) {
+        if (status.equals(VCState.LOCKED)) {
             denied.add(Permission.VOICE_CONNECT);
         }
 
@@ -211,7 +211,7 @@ public class Perms {
     public void reset(IPermissionHolder holder, VoiceChannelManager manager) {
         if (manager == null) return;
 
-       manager.removePermissionOverride(holder).queue();
+        manager.removePermissionOverride(holder).queue();
     }
 
     public boolean isAdmin(Member member) {

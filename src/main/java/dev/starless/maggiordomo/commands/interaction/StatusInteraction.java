@@ -2,8 +2,8 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.VCStatus;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.enums.VCState;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.discord.Embeds;
@@ -27,15 +27,15 @@ public class StatusInteraction implements Interaction {
     public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String open = Translations.string(Messages.VC_OPEN_STATUS, settings.getLanguage());
         String locked = Translations.string(Messages.VC_LOCKED_STATUS, settings.getLanguage());
-        String content = Translations.string(Messages.INTERACTION_STATUS_CURRENT, settings.getLanguage(), (vc.getStatus().equals(VCStatus.OPEN) ? open : locked).toLowerCase());
+        String content = Translations.string(Messages.INTERACTION_STATUS_CURRENT, settings.getLanguage(), (vc.getState().equals(VCState.OPEN) ? open : locked).toLowerCase());
 
         e.reply(new MessageCreateBuilder()
                         .setContent(content)
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
                                 .setMaxValues(1)
                                 .setPlaceholder(Translations.string(Messages.INTERACTION_STATUS_SELECTION_TITLE, settings.getLanguage()))
-                                .addOption(open, VCStatus.OPEN.name())
-                                .addOption(locked, VCStatus.LOCKED.name())
+                                .addOption(open, VCState.OPEN.name())
+                                .addOption(locked, VCState.LOCKED.name())
                                 .build()))
                         .build())
                 .setEphemeral(true)
@@ -59,15 +59,15 @@ public class StatusInteraction implements Interaction {
             }
 
             try {
-                VCStatus status = VCStatus.valueOf(label);
-                vc.setStatus(status);
+                VCState status = VCState.valueOf(label);
+                vc.setState(status);
 
                 // Cambia i permessi della stanza, se presente
                 VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());
                 if(channel != null) {
                     PermissionOverrideAction everyonePerms = channel.upsertPermissionOverride(usersRole);
 
-                    if(vc.getStatus().equals(VCStatus.LOCKED)) {
+                    if(vc.getState().equals(VCState.LOCKED)) {
                         everyonePerms = everyonePerms.setDenied(Permission.VOICE_CONNECT);
                     } else {
                         everyonePerms = everyonePerms.setAllowed(Permission.VOICE_CONNECT);
@@ -83,8 +83,8 @@ public class StatusInteraction implements Interaction {
                 }
 
                 // Setta il messaggio di risposta
-                Messages successMessage = status.equals(VCStatus.OPEN) ? Messages.INTERACTION_STATUS_SUCCESS_OPEN : Messages.INTERACTION_STATUS_SUCCESS_LOCKED;
-                Color embedColor = status.equals(VCStatus.OPEN) ? new Color(239, 210, 95) : new Color(100, 160, 94);
+                Messages successMessage = status.equals(VCState.OPEN) ? Messages.INTERACTION_STATUS_SUCCESS_OPEN : Messages.INTERACTION_STATUS_SUCCESS_LOCKED;
+                Color embedColor = status.equals(VCState.OPEN) ? new Color(239, 210, 95) : new Color(100, 160, 94);
                 e.replyEmbeds(new EmbedBuilder()
                                 .setDescription(Translations.string(successMessage, settings.getLanguage()))
                                 .setColor(embedColor)

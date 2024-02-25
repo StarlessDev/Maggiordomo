@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.data.enums;
 
-public enum VCStatus {
+public enum UserState {
 
-    OPEN,
-    LOCKED
+    TRUST,
+    BAN,
 }

@@ -1,9 +1,9 @@
-package dev.starless.maggiordomo.data.user;
+package dev.starless.maggiordomo.data;
 
-import dev.starless.maggiordomo.data.enums.UserRole;
-import dev.starless.maggiordomo.data.enums.VCStatus;
-import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.data.enums.UserState;
+import dev.starless.maggiordomo.data.enums.VCState;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.mongo.api.annotations.MongoKey;
 import dev.starless.mongo.api.annotations.MongoObject;
 import lombok.EqualsAndHashCode;
@@ -33,16 +33,15 @@ public class VC {
     @Setter private String category;
     @Setter private Instant lastJoin;
 
-    // Questi sono i permessi
     private final Set<String> trusted;
     private final Set<String> banned;
 
     private String title;
     private int size;
-    @Setter private VCStatus status;
+    @Setter private VCState state;
     @Setter private boolean pinned;
 
-    public VC(String guild, String user, String channel, String category, String name, int limit, VCStatus status, boolean pinned) {
+    public VC(String guild, String user, String channel, String category, String name, int limit, VCState state, boolean pinned) {
         this.guild = guild;
         this.user = user;
         this.channel = channel;
@@ -54,12 +53,12 @@ public class VC {
 
         this.title = name.length() > 99 ? name.substring(0, 100) : name;
         this.size = limit;
-        this.status = status;
+        this.state = state;
         this.pinned = pinned;
     }
 
     public VC(String guild, String user, String channel, String name) {
-        this(guild, user, channel, "-1", name, 2, VCStatus.LOCKED, false);
+        this(guild, user, channel, "-1", name, 2, VCState.LOCKED, false);
     }
 
     public VC(Member member, String language) {
@@ -69,41 +68,45 @@ public class VC {
                 Translations.string(Messages.VC_NAME, language, member.getEffectiveName()));
     }
 
-    public void addPlayerRecord(UserRole type, String id) {
+    public void addPlayerRecord(UserState type, String id) {
         consumeSet(type, set -> set.add(id));
     }
 
-    public void removePlayerRecord(UserRole type, String id) {
+    public void removePlayerRecord(UserState type, String id) {
         consumeSet(type, set -> set.remove(id));
     }
 
-    public boolean hasPlayerRecord(UserRole type, String id) {
+    public boolean hasPlayerRecord(UserState type, String id) {
         AtomicBoolean check = new AtomicBoolean(false);
         consumeSet(type, set -> check.set(set.contains(id)));
         return check.get();
     }
 
-    public boolean hasChannel() {
-        return !channel.equals("-1");
+    public void consumeSet(UserState type, Consumer<Set<String>> consumer) {
+        consumer.accept(switch (type) {
+            case BAN -> banned;
+            case TRUST -> trusted;
+        });
     }
 
-    public void consumeSet(UserRole type, Consumer<Set<String>> consumer) {
-        consumer.accept(type.equals(UserRole.BAN) ? banned : trusted);
+    public Set<UserRecord<UserState>> getRoleRecords() {
+        return getRecordsByStates(UserState.TRUST, UserState.BAN);
     }
 
-    public Set<UserRecord<UserRole>> getTotalRecords() {
-        Set<UserRecord<UserRole>> total = new HashSet<>();
-        // Add banned users
-        total.addAll(banned.stream()
-                .map(str -> new UserRecord<>(UserRole.BAN, str))
-                .toList());
+    public Set<UserRecord<UserState>> getRecordsByStates(UserState... states) {
+        Set<UserRecord<UserState>> total = new HashSet<>();
 
-        // Add trusted users
-        total.addAll(trusted.stream()
-                .map(str -> new UserRecord<>(UserRole.TRUST, str))
-                .toList());
+        for (UserState state : states) {
+            consumeSet(state, set -> total.addAll(set.stream()
+                    .map(id -> new UserRecord<>(state, id))
+                    .toList()));
+        }
 
         return total;
+    }
+
+    public boolean hasChannel() {
+        return !channel.equals("-1");
     }
 
     public void setTitle(String title) {

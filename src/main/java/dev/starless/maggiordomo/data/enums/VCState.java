@@ -1,7 +1,7 @@
 package dev.starless.maggiordomo.data.enums;
 
-public enum UserRole {
+public enum VCState {
 
-    TRUST,
-    BAN
+    OPEN,
+    LOCKED
 }

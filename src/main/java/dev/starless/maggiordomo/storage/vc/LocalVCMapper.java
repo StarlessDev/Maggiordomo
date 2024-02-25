@@ -2,8 +2,7 @@ package dev.starless.maggiordomo.storage.vc;
 
 import dev.starless.maggiordomo.Statistics;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.user.UserRecord;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.BotLogger;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
@@ -165,7 +164,7 @@ public class LocalVCMapper implements IMapper<VC> {
 
                 // Aggiungi i permessi per @everyone tenendo in conto
                 // dello status della stanza
-                manager = Perms.setPublicPerms(manager, vc.getStatus(), publicRole, true);
+                manager = Perms.setPublicPerms(manager, vc.getState(), publicRole, true);
 
                 // Aggiungi i ruoli bannati
                 for (String bannedRole : bannedRoles) {

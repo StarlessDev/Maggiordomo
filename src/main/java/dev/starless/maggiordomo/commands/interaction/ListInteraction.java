@@ -2,9 +2,9 @@ package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserRole;
-import dev.starless.maggiordomo.data.user.UserRecord;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.enums.UserState;
+import dev.starless.maggiordomo.data.UserRecord;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.utils.PageUtils;
@@ -49,9 +49,9 @@ public class ListInteraction implements Interaction {
                 page = 0;
             }
 
-            UserRole type;
+            UserState type;
             try {
-                type = UserRole.valueOf(label); // Ottieni il tipo selezionato...
+                type = UserState.valueOf(label); // Ottieni il tipo selezionato...
             } catch (IllegalArgumentException ex) {
                 // ...se per qualche motivo ambiguo non esiste
                 // mandiamo un messaggio di errore altrettanto ambiguo
@@ -66,7 +66,7 @@ public class ListInteraction implements Interaction {
             AtomicInteger integer = new AtomicInteger(0); // Numero iniziale di record
 
             // Filtra i record e forma il messaggio
-            Set<UserRecord<UserRole>> records = vc.getTotalRecords();
+            Set<UserRecord<UserState>> records = vc.getRoleRecords();
             int elementsNumber = records.size();
             long skippedElements = (long) PageUtils.DROPDOWN_MAX_ENTRIES * page;
             records.stream()
@@ -89,7 +89,7 @@ public class ListInteraction implements Interaction {
             int streamCount = integer.get();
             if (streamCount == 0) {
                 // Messaggio nel caso che non ci sia nessuno
-                sb.append(Translations.string(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(UserRole.BAN) ? ":rainbow: " : ":cry:");
+                sb.append(Translations.string(Messages.INTERACTION_LIST_EMPTY, settings.getLanguage())).append(type.equals(UserState.BAN) ? ":rainbow: " : ":cry:");
             } else {
                 sb.setLength(sb.length() - 2);
 

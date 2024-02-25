@@ -12,9 +12,9 @@ import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.data.Cooldown;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserRole;
-import dev.starless.maggiordomo.data.user.UserRecord;
-import dev.starless.maggiordomo.data.user.VC;
+import dev.starless.maggiordomo.data.enums.UserState;
+import dev.starless.maggiordomo.data.UserRecord;
+import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.interfaces.Module;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
@@ -30,7 +30,6 @@ import dev.starless.mongo.api.Query;
 import dev.starless.mongo.api.QueryBuilder;
 import dev.starless.mongo.schema.MigrationSchema;
 import dev.starless.mongo.schema.suppliers.FixedKeySupplier;
-import dev.starless.mongo.schema.suppliers.ValueSupplier;
 import dev.starless.mongo.schema.suppliers.impl.SimpleSupplier;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -387,9 +386,9 @@ public class Core implements Module {
                         .map(Member::getId)
                         .toList();
 
-                List<String> trusted = vc.getTotalRecords()
+                List<String> trusted = vc.getRoleRecords()
                         .stream()
-                        .filter(record -> record.type().equals(UserRole.TRUST))
+                        .filter(record -> record.type().equals(UserState.TRUST))
                         .map(UserRecord::user)
                         .toList();
 
@@ -580,7 +579,7 @@ public class Core implements Module {
 
         // Kick the user if they are banned from the vc they are trying to join
         // (This should not be needed, since banned users do not see the vc they are banned from)
-        if (vc.hasPlayerRecord(UserRole.BAN, member.getId())) {
+        if (vc.hasPlayerRecord(UserState.BAN, member.getId())) {
             guild.kickVoiceMember(member).queue(
                     RestUtils.emptyConsumer(),
                     RestUtils.throwableConsumer("Something went wrong when kicking: " + References.user(member.getUser()))
@@ -615,7 +614,7 @@ public class Core implements Module {
 
                             // Setta i permessi nuovi
                             Perms.setPublicPerms(voiceChannel.getManager(),
-                                            vc.getStatus(),
+                                            vc.getState(),
                                             guild.getRoleById(settings.getPublicRole()),
                                             false)
                                     .queue(RestUtils.emptyConsumer(), RestUtils.emptyConsumer());
