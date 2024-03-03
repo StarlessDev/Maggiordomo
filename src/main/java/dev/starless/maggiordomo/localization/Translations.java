@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.localization;
 
-import dev.starless.maggiordomo.BotLogger;
+import dev.starless.maggiordomo.utils.BotLogger;
 import dev.starless.maggiordomo.utils.ConfigUtils;
 import lombok.experimental.UtilityClass;
 import net.dv8tion.jda.api.utils.FileUpload;

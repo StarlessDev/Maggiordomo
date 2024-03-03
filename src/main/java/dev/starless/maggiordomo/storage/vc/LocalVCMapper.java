@@ -3,7 +3,7 @@ package dev.starless.maggiordomo.storage.vc;
 import dev.starless.maggiordomo.Statistics;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
-import dev.starless.maggiordomo.BotLogger;
+import dev.starless.maggiordomo.utils.BotLogger;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import dev.starless.maggiordomo.utils.discord.RestUtils;

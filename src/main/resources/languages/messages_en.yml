@@ -126,11 +126,19 @@ commands:
       buttons:
         premium_roles: "💎 Premium Roles"
         banned_roles: "❌ Banned roles"
+        boosters_status: "😇 Boosters: {STATE}" # {STATE} will be replaced with "premium" or "normal"
         filters: "📜 Filters"
         refresh_perms: "🔁 Refresh permissions"
         room_manager: "💼 Manage rooms"
 
     sections:
+      boosters_status:
+        normal_state: "normal users" # how we are calling not-premium users
+        premium_state: "premium users"
+
+        # Message used after the setting was changed
+        message: "Server boosters are now considered: **{STATE}**"
+
       # Strings used in the banned (and trusted) roles manager
       lists:
         add_selection_placeholder: "Choose a role to add"

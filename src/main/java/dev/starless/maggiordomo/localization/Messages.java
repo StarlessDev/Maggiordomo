@@ -54,9 +54,15 @@ public enum Messages {
     COMMAND_MANAGEMENT_MENU_CONTENT("commands.management.menu.content"),
     COMMAND_MANAGEMENT_MENU_PREMIUM_ROLES_BUTTON("commands.management.menu.buttons.premium_roles"),
     COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON("commands.management.menu.buttons.banned_roles"),
+    COMMAND_MANAGEMENT_MENU_BOOSTERS_STATE_BUTTON("commands.management.menu.buttons.boosters_status"),
     COMMAND_MANAGEMENT_MENU_FILTERS_BUTTON("commands.management.menu.buttons.filters"),
     COMMAND_MANAGEMENT_MENU_REFRESH_PERMS_BUTTON("commands.management.menu.buttons.refresh_perms"),
     COMMAND_MANAGEMENT_MENU_MANAGE_ROOMS_BUTTON("commands.management.menu.buttons.room_manager"),
+
+    // Sections of the boosters command
+    COMMAND_MANAGEMENT_BOOSTERS_NORMAL_STATE("commands.management.sections.boosters_status.normal_state"),
+    COMMAND_MANAGEMENT_BOOSTERS_PREMIUM_STATE("commands.management.sections.boosters_status.premium_state"),
+    COMMAND_MANAGEMENT_BOOSTERS_MESSAGE("commands.management.sections.boosters_status.message"),
 
     // Sections of the management command
     COMMAND_MANAGEMENT_LISTS_ADD_SELECTION_PLACEHOLDER("commands.management.sections.lists.add_selection_placeholder"),

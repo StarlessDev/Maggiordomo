@@ -7,7 +7,7 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
-import dev.starless.maggiordomo.BotLogger;
+import dev.starless.maggiordomo.utils.BotLogger;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
 import net.dv8tion.jda.api.Permission;
@@ -196,7 +196,7 @@ public class SetupCommand implements Slash, Interaction {
 
                 // Se il menu è già stato mandato, aggiornalo
                 if (!settings.getMenuID().equals("-1")) {
-                    Bot.getInstance().getCore().updateMenu(e.getGuild(), settings);
+                    Bot.getInstance().getCore().updateUserMenu(e.getGuild(), settings);
                 }
 
                 Bot.getInstance().getCore().getSettingsMapper().update(settings);
@@ -327,7 +327,7 @@ public class SetupCommand implements Slash, Interaction {
                             Bot.getInstance().getCore().getSettingsMapper().update(settings);
 
                             // Manda il menu nel canale testuale
-                            MessageCreateData data = Bot.getInstance().getCore().createMenu(guild.getId());
+                            MessageCreateData data = Bot.getInstance().getCore().createUserMenu(guild.getId());
                             if (data != null) {
                                 textChannel.sendMessage(data).queue(message -> {
                                     settings.setMenuID(message.getId());

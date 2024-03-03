@@ -51,8 +51,15 @@ public class PinInteraction implements Interaction {
 
     @Override
     public boolean hasPermission(Member member, Settings settings) {
-        return member.hasPermission(Permission.ADMINISTRATOR) || // Se ha il permesso di amministratore
-                settings.getPremiumRoles() // oppure se ha un altro dei ruoli settati
+        /*
+        This command is executable by users who:
+        - have the administrator permission
+        - are boosting the server (if the option in the settings is enabled)
+        - have a "premium role"
+         */
+        return member.hasPermission(Permission.ADMINISTRATOR) ||
+                (settings.isBoosterPremium() && member.isBoosting()) ||
+                settings.getPremiumRoles()
                         .stream()
                         .anyMatch(id -> member.getRoles()
                                 .stream()

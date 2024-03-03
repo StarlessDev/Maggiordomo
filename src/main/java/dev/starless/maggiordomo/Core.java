@@ -21,6 +21,7 @@ import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.storage.VCManager;
 import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
+import dev.starless.maggiordomo.utils.BotLogger;
 import dev.starless.maggiordomo.utils.discord.Embeds;
 import dev.starless.maggiordomo.utils.discord.Perms;
 import dev.starless.maggiordomo.utils.discord.References;
@@ -115,7 +116,8 @@ public class Core implements Module {
                         })
                         .entry("menuChannelID", new SimpleSupplier("channelID", "-1"))
                         .entry("voiceGeneratorID", new SimpleSupplier("voiceID", "-1"))
-                        .entry("language", "en"));
+                        .entry("language", "en")
+                        .entry("boosterPremium", true));
 
         filters = new Filters();
     }
@@ -219,6 +221,7 @@ public class Core implements Module {
                 .interaction(new RefreshPerms())
                 .interaction(new RoomsManager())
                 .interaction(new RoomInspector())
+                .interaction(new BoosterInteraction())
                 // Interaction for users
                 .interaction(new BanInteraction())
                 .interaction(new UnbanInteraction())
@@ -425,7 +428,7 @@ public class Core implements Module {
             }
 
             // Change the guide
-            updateMenu(guild, settings);
+            updateUserMenu(guild, settings);
 
             // Set the new language
             settings.setLanguage(newLanguage);
@@ -440,7 +443,7 @@ public class Core implements Module {
         return false;
     }
 
-    public MessageCreateData createMenu(String guild) {
+    public MessageCreateData createUserMenu(String guild) {
         Optional<Settings> op = settingsMapper.search(QueryBuilder.init()
                 .add("guild", guild)
                 .create());
@@ -481,7 +484,7 @@ public class Core implements Module {
         return builder.build();
     }
 
-    public void updateMenu(Guild guild, Settings settings) {
+    public void updateUserMenu(Guild guild, Settings settings) {
         if (settings.hasNoMenuChannel() || settings.hasNoMenu()) return;
 
         TextChannel channel = guild.getTextChannelById(settings.getMenuChannelID());
@@ -489,7 +492,7 @@ public class Core implements Module {
             channel.retrieveMessageById(settings.getMenuID()).queue(message -> {
                 message.delete().queue();
 
-                MessageCreateData data = Bot.getInstance().getCore().createMenu(guild.getId());
+                MessageCreateData data = Bot.getInstance().getCore().createUserMenu(guild.getId());
                 if (data != null) {
                     channel.sendMessage(data).queue(updatedMessage -> {
                         settings.setMenuID(updatedMessage.getId());
@@ -502,6 +505,29 @@ public class Core implements Module {
         } else {
             BotLogger.warn("Could not update the menu of the guild (invalid channel): " + guild.getName());
         }
+    }
+
+    public MessageCreateData getManagementMenu(Guild guild, Settings settings) {
+        String content = Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_MENU_CONTENT, settings.getLanguage(),
+                "publicRole", References.role(guild, settings.getPublicRole()),
+                "days", settings.getMaxInactivity() == -1 ? "∞" : settings.getMaxInactivity());
+        return new MessageCreateBuilder()
+                .setContent(content)
+                .addActionRow(
+                        Button.primary("premium", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_PREMIUM_ROLES_BUTTON, settings.getLanguage())),
+                        Button.primary("blacklist", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_BANNED_ROLES_BUTTON, settings.getLanguage())),
+                        Button.of(settings.isBoosterPremium() ? ButtonStyle.SUCCESS : ButtonStyle.DANGER,
+                                "boosters",
+                                Translations.stringFormatted(Messages.COMMAND_MANAGEMENT_MENU_BOOSTERS_STATE_BUTTON, settings.getLanguage(),
+                                        "state", settings.isBoosterPremium() ? "💎" : "😐"))
+                )
+                .addActionRow(
+                        Button.secondary("filters", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_FILTERS_BUTTON, settings.getLanguage())),
+                        Button.secondary("manage", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_MANAGE_ROOMS_BUTTON, settings.getLanguage())),
+                        Button.danger("refreshperms", Translations.string(Messages.COMMAND_MANAGEMENT_MENU_REFRESH_PERMS_BUTTON, settings.getLanguage()))
+                )
+                .setAllowedMentions(Collections.emptyList())
+                .build();
     }
 
     private void handleJoin(Guild guild, AudioChannel channel, Member member) {

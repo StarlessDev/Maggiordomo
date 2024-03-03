@@ -3,7 +3,7 @@ package dev.starless.maggiordomo.console.impl;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.Statistics;
 import dev.starless.maggiordomo.console.ConsoleCommand;
-import dev.starless.maggiordomo.BotLogger;
+import dev.starless.maggiordomo.utils.BotLogger;
 import net.dv8tion.jda.api.entities.Guild;
 
 import java.util.Collections;

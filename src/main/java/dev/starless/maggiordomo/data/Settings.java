@@ -40,6 +40,7 @@ public class Settings {
     private String publicRole;
     private String language;
     private long maxInactivity;
+    private boolean boosterPremium;
 
     private String title;
     private String descriptionRaw;
@@ -50,10 +51,8 @@ public class Settings {
         this.premiumRoles = new HashSet<>();
         this.bannedRoles = new HashSet<>();
         this.filterStrings = new HashMap<>();
-        // In genere CopyOnWriteArrayList è molto pesante quando si tratta di
-        // operazioni di scrittura, ma dato che abbiamo pochi elementi e
-        // la maggior parte delle volte leggiamo da questa lista
-        // dovrebbe essere accettabile come soluzione.
+        // We are going to do more read than write operations,
+        // so we should be fine with using this implementation
         this.categories = new CopyOnWriteArrayList<>();
 
         this.menuChannelID = "-1";
@@ -62,6 +61,7 @@ public class Settings {
         this.publicRole = everyone;
         this.language = "en";
         this.maxInactivity = -1L;
+        this.boosterPremium = true;
 
         this.title = Translations.string(Messages.SETTINGS_INTERFACE_TITLE, language);
         this.descriptionRaw = Translations.string(Messages.SETTINGS_INTERFACE_DESCRIPTION, language);

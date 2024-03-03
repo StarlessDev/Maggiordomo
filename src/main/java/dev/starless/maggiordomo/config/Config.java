@@ -2,7 +2,7 @@ package dev.starless.maggiordomo.config;
 
 import com.vdurmont.semver4j.Semver;
 import dev.starless.maggiordomo.Main;
-import dev.starless.maggiordomo.BotLogger;
+import dev.starless.maggiordomo.utils.BotLogger;
 import dev.starless.maggiordomo.utils.ConfigUtils;
 import lombok.Getter;
 import org.spongepowered.configurate.CommentedConfigurationNode;

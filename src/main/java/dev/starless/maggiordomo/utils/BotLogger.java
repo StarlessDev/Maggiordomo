@@ -1,4 +1,4 @@
-package dev.starless.maggiordomo;
+package dev.starless.maggiordomo.utils;
 
 import ch.qos.logback.classic.Logger;
 import lombok.Getter;

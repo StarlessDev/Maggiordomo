@@ -20,7 +20,7 @@ public class MenuCommand implements Slash {
         if (e.getChannelType().isMessage() && e.getMessageChannel() instanceof TextChannel channel) {
             e.deferReply(true).queue();
 
-            MessageCreateData data = Bot.getInstance().getCore().createMenu(channel.getGuild().getId());
+            MessageCreateData data = Bot.getInstance().getCore().createUserMenu(channel.getGuild().getId());
             if (data != null) {
                 channel.sendMessage(data).queue(message -> {
                     settings.setMenuChannelID(channel.getId());

@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.utils.discord;
 
-import dev.starless.maggiordomo.BotLogger;
+import dev.starless.maggiordomo.utils.BotLogger;
 import lombok.experimental.UtilityClass;
 
 import java.util.function.Consumer;

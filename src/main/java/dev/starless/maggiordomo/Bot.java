@@ -4,6 +4,7 @@ import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.console.Console;
 import dev.starless.maggiordomo.interfaces.Service;
+import dev.starless.maggiordomo.utils.BotLogger;
 import lombok.Getter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
