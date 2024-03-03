@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterResult;
@@ -23,7 +24,7 @@ import java.awt.*;
 public class TitleInteraction implements Interaction {
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:title");
         if (mapping == null) {
             e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
@@ -31,7 +32,7 @@ public class TitleInteraction implements Interaction {
                     .queue();
         } else {
             String input = mapping.getAsString();
-            FilterResult result = Bot.getInstance().getCore().getFilters().check(settings, input);
+            FilterResult result = core.getFilters().check(settings, input);
             if (result.flagged()) {
                 e.reply(Translations.string(Messages.FILTER_FLAG_PREFIX, settings.getLanguage()) + " " + result.data())
                         .setEphemeral(true)
@@ -59,7 +60,7 @@ public class TitleInteraction implements Interaction {
     }
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String fullID, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), Translations.string(Messages.INTERACTION_TITLE_MODAL_TITLE, settings.getLanguage()))
                         .addActionRow(TextInput.create("vc:title", Translations.string(Messages.INTERACTION_TITLE_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
                                 .setRequired(true)

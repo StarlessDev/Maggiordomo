@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
@@ -21,7 +22,7 @@ import java.awt.*;
 public class SizeInteraction implements Interaction {
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:size");
         if (mapping == null) {
             e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
@@ -61,7 +62,7 @@ public class SizeInteraction implements Interaction {
     }
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), Translations.string(Messages.FILTER_MENU_TITLE, settings.getLanguage()))
                         .addActionRow(TextInput.create("vc:size", "Number", TextInputStyle.SHORT)
                                 .setRequiredRange(1, 2)

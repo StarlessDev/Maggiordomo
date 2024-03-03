@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.UserState;
 import dev.starless.maggiordomo.data.filter.FilterResult;
@@ -34,13 +35,13 @@ import java.util.*;
 public class RoomInspector extends AManagementInteraction {
 
     @Override
-    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(Core core, Settings settings, String[] parts, ButtonInteractionEvent e) {
         if (parts.length < 2) return null;
 
         String id = parts[0];
         String action = parts[1];
 
-        LocalVCMapper mapper = Bot.getInstance().getCore().getChannelMapper().getMapper(e.getGuild().getId());
+        LocalVCMapper mapper = core.getChannelMapper().getMapper(e.getGuild().getId());
         Optional<VC> op = mapper.searchByID(QueryBuilder.init()
                 .add("guild", e.getGuild().getId())
                 .add("channel", id)
@@ -86,7 +87,7 @@ public class RoomInspector extends AManagementInteraction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         List<String> values = e.getValues();
         if (!values.isEmpty()) {
             if (id.contains(":")) {
@@ -95,7 +96,7 @@ public class RoomInspector extends AManagementInteraction {
                     String channel = parts[1];
                     String action = parts[2];
 
-                    LocalVCMapper mapper = Bot.getInstance().getCore().getChannelMapper().getMapper(e.getGuild().getId());
+                    LocalVCMapper mapper = core.getChannelMapper().getMapper(e.getGuild().getId());
                     Optional<VC> op = mapper.searchByID(QueryBuilder.init()
                             .add("guild", e.getGuild().getId())
                             .add("channel", channel)
@@ -142,7 +143,7 @@ public class RoomInspector extends AManagementInteraction {
     }
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("title");
         if (mapping == null) return null;
 

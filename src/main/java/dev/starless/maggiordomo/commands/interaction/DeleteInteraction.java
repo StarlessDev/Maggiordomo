@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.interaction;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
@@ -20,7 +21,7 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 public class DeleteInteraction implements Interaction {
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), Translations.string(Messages.CONFIRMATION_MODAL_TITLE, settings.getLanguage()))
                         .addActionRow(TextInput.create("vc:confirmation", Translations.string(Messages.CONFIRMATION_MODAL_INPUT_LABEL, settings.getLanguage()), TextInputStyle.SHORT)
                                 .setMaxLength(31)
@@ -33,17 +34,14 @@ public class DeleteInteraction implements Interaction {
     }
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("vc:confirmation");
         if (mapping == null) {
             e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
                     .setEphemeral(true)
                     .queue();
         } else if (mapping.getAsString().equalsIgnoreCase(Translations.string(Messages.CONFIRMATION_VALUE, settings.getLanguage()))) {
-            LocalVCMapper localMapper = Bot.getInstance().getCore()
-                    .getChannelMapper()
-                    .getMapper(e.getGuild());
-
+            LocalVCMapper localMapper = core.getChannelMapper().getMapper(e.getGuild());
             localMapper.delete(vc);
 
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());

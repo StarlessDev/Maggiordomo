@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
-import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Messages;
@@ -40,7 +40,7 @@ public class ListManager extends AManagementInteraction {
     }
 
     @Override
-    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(Core core, Settings settings, String[] parts, ButtonInteractionEvent e) {
         String id = parts.length > 0 ? parts[0] : "";
         MessageEditBuilder edit;
 
@@ -54,13 +54,13 @@ public class ListManager extends AManagementInteraction {
     }
 
     @Override
-    public VC onEntitySelected(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
+    public VC onEntitySelected(Core core, VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
         List<Role> roles = e.getMentions().getRoles();
         if (roles.isEmpty()) {
             e.reply(Translations.string(Messages.NO_SELECTION, settings.getLanguage())).setEphemeral(true).queue();
         } else {
             supplier.get(settings).addAll(roles.stream().map(Role::getId).toList());
-            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+            core.getSettingsMapper().update(settings);
 
             e.getMessage().editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())
@@ -79,13 +79,13 @@ public class ListManager extends AManagementInteraction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         List<String> ids = e.getValues();
         if (ids.isEmpty()) {
             e.reply(Translations.string(Messages.NO_SELECTION, settings.getLanguage())).setEphemeral(true).queue();
         } else {
             ids.forEach(supplier.get(settings)::remove);
-            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+            core.getSettingsMapper().update(settings);
 
             e.getMessage().editMessage(getMainMenu(settings)
                             .setAllowedMentions(Collections.emptyList())

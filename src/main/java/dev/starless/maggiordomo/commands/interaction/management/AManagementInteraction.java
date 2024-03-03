@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
@@ -14,9 +15,9 @@ import java.util.Collections;
 public abstract class AManagementInteraction implements Interaction {
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String[] parts = id.split(":");
-        MessageEditBuilder edit = handle(e, settings, parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0]);
+        MessageEditBuilder edit = handle(core, settings, parts.length > 1 ? Arrays.copyOfRange(parts, 1, parts.length) : new String[0], e);
         if (edit != null) {
             edit.setAllowedMentions(Collections.emptyList()).setReplace(true);
 
@@ -30,7 +31,7 @@ public abstract class AManagementInteraction implements Interaction {
         return null;
     }
 
-    protected abstract MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts);
+    protected abstract MessageEditBuilder handle(Core core, Settings settings, String[] parts, ButtonInteractionEvent e);
 
     protected String getFullId(String[] parts) {
         StringBuilder sb = new StringBuilder(getName());

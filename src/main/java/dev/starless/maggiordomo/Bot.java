@@ -74,7 +74,7 @@ public class Bot implements Service {
                         CLIENT_STATUS,
                         ROLE_TAGS,
                         FORUM_TAGS)
-                .setMemberCachePolicy(MemberCachePolicy.DEFAULT)
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .setChunkingFilter(ChunkingFilter.ALL)
                 .setActivity(Activity.watching("Your rooms 👀"))
                 .setEventManager(new AnnotatedEventManager())

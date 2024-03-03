@@ -3,6 +3,7 @@ package dev.starless.maggiordomo.commands.interaction.filter;
 import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
+import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
@@ -15,7 +16,7 @@ public class ContainsFilterInteraction extends FilterInteraction {
     }
 
     @Override
-    protected boolean onInputReceived(Settings settings, ModalInteractionEvent e) {
+    protected boolean onInputReceived(SettingsMapper settingsMapper, Settings settings, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("input");
         if (mapping != null) {
             String[] words = mapping.getAsString().split("\n");
@@ -26,7 +27,7 @@ public class ContainsFilterInteraction extends FilterInteraction {
                 settings.modifyFilters(FilterType.BASIC, set -> set.add(trimmed));
             }
 
-            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+            settingsMapper.update(settings);
 
             return true;
         }

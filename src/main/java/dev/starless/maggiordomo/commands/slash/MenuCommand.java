@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.localization.Translations;
@@ -16,16 +17,16 @@ import java.awt.*;
 public class MenuCommand implements Slash {
 
     @Override
-    public void execute(Settings settings, SlashCommandInteractionEvent e) {
+    public void execute(Core core, Settings settings, SlashCommandInteractionEvent e) {
         if (e.getChannelType().isMessage() && e.getMessageChannel() instanceof TextChannel channel) {
             e.deferReply(true).queue();
 
-            MessageCreateData data = Bot.getInstance().getCore().createUserMenu(channel.getGuild().getId());
+            MessageCreateData data = core.createUserMenu(channel.getGuild().getId());
             if (data != null) {
                 channel.sendMessage(data).queue(message -> {
                     settings.setMenuChannelID(channel.getId());
                     settings.setMenuID(message.getId());
-                    Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                    core.getSettingsMapper().update(settings);
 
                     e.getInteraction().getHook().sendMessageEmbeds(new EmbedBuilder()
                                     .setDescription(Translations.string(Messages.COMMAND_MENU_SUCCESS, settings.getLanguage()))

@@ -1,6 +1,6 @@
 package dev.starless.maggiordomo.commands.slash;
 
-import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
@@ -53,7 +53,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public void execute(Settings settings, SlashCommandInteractionEvent e) {
+    public void execute(Core core, Settings settings, SlashCommandInteractionEvent e) {
         MessageCreateData message = new MessageCreateBuilder()
                 .setContent(Translations.string(Messages.COMMAND_SETUP_EXPLANATION, settings.getLanguage()))
                 .setActionRow(Button.primary("setup:role", Translations.string(Messages.COMMAND_SETUP_START_BUTTON_LABEL, settings.getLanguage())))
@@ -65,7 +65,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -92,7 +92,7 @@ public class SetupCommand implements Slash, Interaction {
                     ));
                 }
                 case "reset_role" -> {
-                    updatePublicRole(e, settings, e.getGuild().getPublicRole());
+                    updatePublicRole(core, e, settings, e.getGuild().getPublicRole());
 
                     content = Translations.string(
                             Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
@@ -153,7 +153,7 @@ public class SetupCommand implements Slash, Interaction {
                 case "inactivity_impl" -> {
                     e.deferReply(true).queue();
 
-                    completeSetup(e.getGuild(), e.getHook(), settings);
+                    completeSetup(core, e.getGuild(), e.getHook(), settings);
                 }
                 default -> {
                     return null;
@@ -178,7 +178,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -196,10 +196,10 @@ public class SetupCommand implements Slash, Interaction {
 
                 // Se il menu è già stato mandato, aggiornalo
                 if (!settings.getMenuID().equals("-1")) {
-                    Bot.getInstance().getCore().updateUserMenu(e.getGuild(), settings);
+                   core.updateUserMenu(e.getGuild(), settings);
                 }
 
-                Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                core.getSettingsMapper().update(settings);
 
                 e.reply(Translations.string(Messages.COMMAND_SETUP_STEPS_INTERFACE_UPDATED, settings.getLanguage()))
                         .setEphemeral(true)
@@ -211,7 +211,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -222,7 +222,7 @@ public class SetupCommand implements Slash, Interaction {
                 String days = selections.get(0);
                 try {
                     settings.setMaxInactivity(Long.parseLong(days));
-                    Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                    core.getSettingsMapper().update(settings);
                 } catch (NumberFormatException ignored) {
                     // ignorala
                 }
@@ -230,7 +230,7 @@ public class SetupCommand implements Slash, Interaction {
                 e.getMessage().delete().queue();
                 e.deferReply(true).queue();
 
-                completeSetup(e.getGuild(), e.getHook(), settings);
+                completeSetup(core, e.getGuild(), e.getHook(), settings);
             }
         }
 
@@ -238,7 +238,7 @@ public class SetupCommand implements Slash, Interaction {
     }
 
     @Override
-    public VC onEntitySelected(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
+    public VC onEntitySelected(Core core, VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
         String[] args = id.split(":");
         if (args.length >= 2) {
             String element = args[1];
@@ -246,7 +246,7 @@ public class SetupCommand implements Slash, Interaction {
                 List<Role> roles = e.getMentions().getRoles();
                 if (roles.isEmpty()) return null;
 
-                updatePublicRole(e, settings, roles.get(0));
+                updatePublicRole(core, e, settings, roles.get(0));
                 e.editMessage(Translations.string(
                         Messages.COMMAND_SETUP_STEPS_ROLE_CONTENT,
                         settings.getLanguage(),
@@ -258,14 +258,14 @@ public class SetupCommand implements Slash, Interaction {
         return null;
     }
 
-    private void updatePublicRole(IReplyCallback event, Settings settings, Role newRole) {
+    private void updatePublicRole(Core core, IReplyCallback event, Settings settings, Role newRole) {
         Perms.updatePublicPerms(event.getGuild(), settings, event.getGuild().getRoleById(settings.getPublicRole()), newRole);
 
         settings.setPublicRole(newRole.getId());
-        Bot.getInstance().getCore().getSettingsMapper().update(settings);
+        core.getSettingsMapper().update(settings);
     }
 
-    private void completeSetup(Guild guild, InteractionHook hook, Settings settings) {
+    private void completeSetup(Core core, Guild guild, InteractionHook hook, Settings settings) {
         Consumer<Throwable> errorHandler = throwable -> {
             BotLogger.error("Something went wrong (%s) while setting up the guild '%s'",
                     throwable.getMessage(),
@@ -287,7 +287,7 @@ public class SetupCommand implements Slash, Interaction {
                 // Vieta la visione a @everyone se non è il ruolo pubblico scelto
                 Role everyone = guild.getPublicRole();
                 boolean excludeEveryone = !everyone.getId().equals(usersRole.getId());
-                long selfID = Bot.getInstance().getJda().getSelfUser().getIdLong();
+                long selfID = guild.getJDA().getSelfUser().getIdLong();
 
                 Category category = settings.createCategory(guild);
                 if (category != null) {
@@ -324,14 +324,14 @@ public class SetupCommand implements Slash, Interaction {
                             settings.setVoiceGeneratorID(voiceChannel.getId());
 
                             // Aggiorna la cache e il documento nel db
-                            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                            core.getSettingsMapper().update(settings);
 
                             // Manda il menu nel canale testuale
-                            MessageCreateData data = Bot.getInstance().getCore().createUserMenu(guild.getId());
+                            MessageCreateData data = core.createUserMenu(guild.getId());
                             if (data != null) {
                                 textChannel.sendMessage(data).queue(message -> {
                                     settings.setMenuID(message.getId());
-                                    Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                                    core.getSettingsMapper().update(settings);
                                 });
                             } else {
                                 textChannel.sendMessage(new MessageCreateBuilder()
@@ -356,7 +356,7 @@ public class SetupCommand implements Slash, Interaction {
         } else {
             // Se arriviamo qua significa che deve essere aggiornata solo la maxInactivity
             // quindi facciamo partire un check forzato per rendere effettivi i cambiamenti da subito
-            Bot.getInstance().getCore().getActivityManager().forceCheck(guild);
+            core.getActivityManager().forceCheck(guild);
 
             hook.sendMessage(">>> " + Translations.string(Messages.COMMAND_SETUP_SUCCESS, settings.getLanguage()))
                     .setEphemeral(true)

@@ -1,9 +1,9 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
-import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserState;
 import dev.starless.maggiordomo.data.UserRecord;
+import dev.starless.maggiordomo.data.enums.UserState;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.storage.vc.LocalVCMapper;
@@ -23,12 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RefreshPerms extends AManagementInteraction {
 
     @Override
-    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(Core core, Settings settings, String[] parts, ButtonInteractionEvent e) {
         AtomicInteger count = new AtomicInteger(0);
-
-        LocalVCMapper localMapper = Bot.getInstance().getCore()
-                .getChannelMapper()
-                .getMapper(e.getGuild());
+        LocalVCMapper localMapper = core.getChannelMapper().getMapper(e.getGuild());
 
         e.reply(Translations.string(Messages.COMMAND_RELOAD_PERMS_WAITING, settings.getLanguage()))
                 .setEphemeral(true)

@@ -1,12 +1,14 @@
 package dev.starless.maggiordomo.commands.interaction.filter;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import dev.starless.maggiordomo.utils.PageUtils;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -29,7 +31,7 @@ public abstract class FilterInteraction implements Interaction {
     private final FilterType type;
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if (page == -1) { // If the button is not a valid "go back" or "go forward" button
             TextInputStyle textStyle = type.equals(FilterType.BASIC) ? TextInputStyle.PARAGRAPH : TextInputStyle.SHORT;
@@ -51,8 +53,8 @@ public abstract class FilterInteraction implements Interaction {
     }
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
-        if (onInputReceived(settings, e)) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
+        if (onInputReceived(core.getSettingsMapper(), settings, e)) {
             e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
                     .setReplace(true)
                     .queue();
@@ -71,11 +73,11 @@ public abstract class FilterInteraction implements Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         if (!e.getSelectedOptions().isEmpty()) {
             e.getSelectedOptions().forEach(option -> settings.modifyFilters(type, set -> set.remove(option.getValue())));
 
-            Bot.getInstance().getCore().getSettingsMapper().update(settings);
+            core.getSettingsMapper().update(settings);
 
             e.getMessage().editMessage(MessageEditData.fromCreateData(createMenu(settings, 0)))
                     .setReplace(true)
@@ -101,7 +103,7 @@ public abstract class FilterInteraction implements Interaction {
         return false;
     }
 
-    protected abstract boolean onInputReceived(Settings settings, ModalInteractionEvent e);
+    protected abstract boolean onInputReceived(SettingsMapper mapper, Settings settings, ModalInteractionEvent e);
 
     protected MessageCreateData createMenu(Settings settings, int page) {
         Set<String> words = settings.getFilterWords(type);

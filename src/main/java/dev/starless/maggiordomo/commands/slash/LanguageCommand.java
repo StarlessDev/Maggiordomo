@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
@@ -18,11 +19,11 @@ import java.util.List;
 public class LanguageCommand implements Slash {
 
     @Override
-    public void execute(Settings settings, SlashCommandInteractionEvent e) {
+    public void execute(Core core, Settings settings, SlashCommandInteractionEvent e) {
         OptionMapping mapping = e.getOption("lang"); // this should never be null
 
         String code = mapping.getAsString();
-        boolean success = Bot.getInstance().getCore().updateLanguage(e.getGuild(), settings, code);
+        boolean success = core.updateLanguage(e.getGuild(), settings, code);
         if (success) {
             String langName = DefaultLanguages.fromCode(code).map(DefaultLanguages::getName).orElse(code);
             e.reply(Translations.string(Messages.COMMAND_LANGUAGE_SUCCESS, settings.getLanguage(), langName))

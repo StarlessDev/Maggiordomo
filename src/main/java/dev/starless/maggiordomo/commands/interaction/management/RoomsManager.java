@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
 import dev.starless.maggiordomo.localization.Messages;
@@ -19,10 +20,8 @@ import java.util.List;
 public class RoomsManager extends AManagementInteraction {
 
     @Override
-    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
-        List<VC> vcs = Bot.getInstance().getCore().getChannelMapper()
-                .getMapper(e.getGuild())
-                .getCreatedVCs();
+    protected MessageEditBuilder handle(Core core, Settings settings, String[] parts, ButtonInteractionEvent e) {
+        List<VC> vcs = core.getChannelMapper().getMapper(e.getGuild()).getCreatedVCs();
 
         int totalVCs = vcs.size();
         int page = PageUtils.getPageFromInt(parts.length > 0 ? parts[0] : "0");

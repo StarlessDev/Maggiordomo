@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.VCState;
@@ -24,7 +25,7 @@ import java.awt.*;
 public class StatusInteraction implements Interaction {
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         String open = Translations.string(Messages.VC_OPEN_STATUS, settings.getLanguage());
         String locked = Translations.string(Messages.VC_LOCKED_STATUS, settings.getLanguage());
         String content = Translations.string(Messages.INTERACTION_STATUS_CURRENT, settings.getLanguage(), (vc.getState().equals(VCState.OPEN) ? open : locked).toLowerCase());
@@ -45,7 +46,7 @@ public class StatusInteraction implements Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         if (!e.getValues().isEmpty()) {
             String label = e.getValues().get(0);
             // Controlla se il ruolo esiste

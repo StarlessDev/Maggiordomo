@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.UserState;
@@ -28,7 +29,7 @@ public class UntrustInteraction implements Interaction {
 
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         int page = PageUtils.getPageFromId(id);
         if(page == -1) {
             e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.GENERIC_ERROR, settings.getLanguage())))
@@ -82,7 +83,7 @@ public class UntrustInteraction implements Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         if (!e.getValues().isEmpty()) {
             String memberId = e.getValues().get(0);
             Member member = e.getGuild().getMemberById(memberId);

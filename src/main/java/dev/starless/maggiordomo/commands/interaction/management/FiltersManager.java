@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
@@ -11,7 +12,7 @@ import net.dv8tion.jda.api.utils.messages.MessageEditBuilder;
 public class FiltersManager extends AManagementInteraction {
 
     @Override
-    protected MessageEditBuilder handle(ButtonInteractionEvent e, Settings settings, String[] parts) {
+    protected MessageEditBuilder handle(Core core, Settings settings, String[] parts, ButtonInteractionEvent e) {
         return new MessageEditBuilder()
                 .setContent(Translations.string(Messages.COMMAND_FILTERS_MESSAGE_CONTENT, settings.getLanguage()))
                 .setActionRow(

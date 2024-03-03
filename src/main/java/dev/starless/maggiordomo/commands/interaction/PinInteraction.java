@@ -1,11 +1,11 @@
 package dev.starless.maggiordomo.commands.interaction;
 
-import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
-import dev.starless.maggiordomo.localization.Translations;
 import dev.starless.maggiordomo.localization.Messages;
+import dev.starless.maggiordomo.localization.Translations;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
@@ -17,11 +17,8 @@ import java.awt.*;
 public class PinInteraction implements Interaction {
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
-        Bot.getInstance().getCore()
-                .getChannelMapper()
-                .getMapper(e.getGuild())
-                .togglePinStatus(e.getGuild(), settings, vc);
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+        core.getChannelMapper().getMapper(e.getGuild()).togglePinStatus(e.getGuild(), settings, vc);
 
         Messages message = vc.isPinned() ? Messages.INTERACTION_PIN_PINNED : Messages.INTERACTION_PIN_UNPINNED;
         e.replyEmbeds(new EmbedBuilder()

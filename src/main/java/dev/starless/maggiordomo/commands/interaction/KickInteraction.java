@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
@@ -24,7 +25,7 @@ import java.util.List;
 public class KickInteraction implements Interaction {
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         VoiceChannel voiceChannel = e.getGuild().getVoiceChannelById(vc.getChannel());
         if (voiceChannel != null) {
             List<Member> joinedMembers = voiceChannel.getMembers();
@@ -84,7 +85,7 @@ public class KickInteraction implements Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         if (!e.getValues().isEmpty()) {
             String label = e.getValues().get(0);
             VoiceChannel channel = e.getGuild().getVoiceChannelById(vc.getChannel());

@@ -12,9 +12,9 @@ import dev.starless.maggiordomo.config.Config;
 import dev.starless.maggiordomo.config.ConfigEntry;
 import dev.starless.maggiordomo.data.Cooldown;
 import dev.starless.maggiordomo.data.Settings;
-import dev.starless.maggiordomo.data.enums.UserState;
 import dev.starless.maggiordomo.data.UserRecord;
 import dev.starless.maggiordomo.data.VC;
+import dev.starless.maggiordomo.data.enums.UserState;
 import dev.starless.maggiordomo.interfaces.Module;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
@@ -696,7 +696,7 @@ public class Core implements Module {
                                             command.getName(),
                                             References.guild(e.getGuild().getId()));
 
-                                    command.execute(settings, e);
+                                    command.execute(this, settings, e);
                                 } else {
                                     e.replyEmbeds(Embeds.errorEmbed(Translations.string(Messages.NO_PERMISSION, settings.getLanguage())))
                                             .setEphemeral(true)
@@ -829,14 +829,14 @@ public class Core implements Module {
                                 .setEphemeral(true)
                                 .queue();
                     } else {
-                        vc = interaction.onButtonInteraction(vc, settings, id, e);
+                        vc = interaction.onButtonInteraction(this, vc, settings, id, e);
                     }
                 } else if (event instanceof ModalInteractionEvent e) {
-                    vc = interaction.onModalInteraction(vc, settings, id, e);
+                    vc = interaction.onModalInteraction(this, vc, settings, id, e);
                 } else if (event instanceof StringSelectInteractionEvent e) {
-                    vc = interaction.onStringSelected(vc, settings, id, e);
+                    vc = interaction.onStringSelected(this, vc, settings, id, e);
                 } else if (event instanceof EntitySelectInteractionEvent e) {
-                    vc = interaction.onEntitySelected(vc, settings, id, e);
+                    vc = interaction.onEntitySelected(this, vc, settings, id, e);
                 } else {
                     return false;
                 }

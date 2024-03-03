@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.UserState;
@@ -23,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ListInteraction implements Interaction {
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.reply(new MessageCreateBuilder()
                         .setContent(Translations.string(Messages.INTERACTION_LIST_SELECTION_CONTENT, settings.getLanguage()))
                         .addComponents(ActionRow.of(StringSelectMenu.create(getName())
@@ -39,7 +40,7 @@ public class ListInteraction implements Interaction {
     }
 
     @Override
-    public VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    public VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         if (!e.getValues().isEmpty()) {
             String label = e.getValues().get(0);
             int page;

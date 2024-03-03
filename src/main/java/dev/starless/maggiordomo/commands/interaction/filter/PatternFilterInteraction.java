@@ -5,6 +5,7 @@ import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.filter.FilterType;
 import dev.starless.maggiordomo.localization.Messages;
 import dev.starless.maggiordomo.localization.Translations;
+import dev.starless.maggiordomo.storage.settings.SettingsMapper;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 
@@ -18,13 +19,13 @@ public class PatternFilterInteraction extends FilterInteraction {
     }
 
     @Override
-    protected boolean onInputReceived(Settings settings, ModalInteractionEvent e) {
+    protected boolean onInputReceived(SettingsMapper settingsMapper, Settings settings, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("input");
         if (mapping != null) {
             try {
                 Pattern pattern = Pattern.compile(mapping.getAsString());
                 settings.modifyFilters(FilterType.REGEX, set -> set.add(pattern.pattern()));
-                Bot.getInstance().getCore().getSettingsMapper().update(settings);
+                settingsMapper.update(settings);
 
                 return true;
             } catch (PatternSyntaxException ex) {

@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.types;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.Command;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;
@@ -11,19 +12,19 @@ import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionE
 
 public interface Interaction extends Command {
 
-    default VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    default VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         return vc;
     }
 
-    default VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    default VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         return vc;
     }
 
-    default VC onStringSelected(VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
+    default VC onStringSelected(Core core, VC vc, Settings settings, String id, StringSelectInteractionEvent e) {
         return vc;
     }
 
-    default VC onEntitySelected(VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
+    default VC onEntitySelected(Core core, VC vc, Settings settings, String id, EntitySelectInteractionEvent e) {
         return vc;
     }
 

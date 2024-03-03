@@ -1,6 +1,7 @@
 package dev.starless.maggiordomo.commands.slash;
 
 import dev.starless.maggiordomo.Bot;
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.Parameter;
 import dev.starless.maggiordomo.commands.types.Slash;
 import dev.starless.maggiordomo.data.Settings;
@@ -31,7 +32,7 @@ import java.util.List;
 public class RecoverCommand implements Slash {
 
     @Override
-    public void execute(Settings settings, SlashCommandInteractionEvent e) {
+    public void execute(Core core, Settings settings, SlashCommandInteractionEvent e) {
         OptionMapping voiceMapping = e.getOption("voice");
         OptionMapping boolMapping = e.getOption("pinned");
         if (voiceMapping == null || boolMapping == null) return;
@@ -49,9 +50,7 @@ public class RecoverCommand implements Slash {
             Category category = Objects.requireNonNullElse(voiceChannel.getParentCategory(), settings.getAvailableCategory(e.getGuild()));
 
             String guild = e.getGuild().getId();
-            LocalVCMapper localMapper = Bot.getInstance().getCore()
-                    .getChannelMapper()
-                    .getMapper(guild);
+            LocalVCMapper localMapper = core.getChannelMapper().getMapper(guild);
 
             boolean notFound = localMapper.search(QueryBuilder.init()
                             .add("guild", guild)

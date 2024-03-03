@@ -1,5 +1,6 @@
 package dev.starless.maggiordomo.commands.interaction;
 
+import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.commands.types.Interaction;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.enums.UserState;
@@ -27,7 +28,7 @@ import java.util.Optional;
 public class TrustInteraction implements Interaction {
 
     @Override
-    public VC onModalInteraction(VC vc, Settings settings, String id, ModalInteractionEvent e) {
+    public VC onModalInteraction(Core core, VC vc, Settings settings, String id, ModalInteractionEvent e) {
         ModalMapping mapping = e.getValue("trust:id");
         if (mapping == null) {
             e.replyEmbeds(Embeds.defaultErrorEmbed(settings.getLanguage()))
@@ -100,7 +101,7 @@ public class TrustInteraction implements Interaction {
     }
 
     @Override
-    public VC onButtonInteraction(VC vc, Settings settings, String id, ButtonInteractionEvent e) {
+    public VC onButtonInteraction(Core core, VC vc, Settings settings, String id, ButtonInteractionEvent e) {
         e.replyModal(Modal.create(getName(), Translations.string(Messages.MEMBER_MODAL_TITLE, settings.getLanguage()))
                         .addActionRow(TextInput.create("trust:id", "user", TextInputStyle.SHORT)
                                 .setValue(Translations.string(Messages.MEMBER_MODAL_INPUT_VALUE, settings.getLanguage()))
