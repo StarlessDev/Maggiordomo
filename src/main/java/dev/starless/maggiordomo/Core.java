@@ -838,6 +838,7 @@ public class Core implements Module {
                 } else if (event instanceof EntitySelectInteractionEvent e) {
                     vc = interaction.onEntitySelected(this, vc, settings, id, e);
                 } else {
+                    BotLogger.warn("Tried to respond to an unsupported event: " + event.getClass().getSimpleName());
                     return false;
                 }
 

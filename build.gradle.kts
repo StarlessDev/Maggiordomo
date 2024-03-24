@@ -9,7 +9,7 @@ plugins {
 group = "dev.starless.maggiordomo"
 version = "2.1.2"
 
-var jdaVersion = "5.0.0-beta.20"
+var jdaVersion = "5.0.0-beta.21"
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
@@ -24,15 +24,15 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion") // JDA
-    implementation("io.javalin:javalin:6.0.0") // Javalin
-    implementation("org.mongodb:mongodb-driver-sync:4.11.0") // MongoDB driver
-    implementation("com.github.StarlessDev:MongoStorage:1.0.7") // MongoDB (de)serialization library
+    implementation("io.javalin:javalin:6.1.3") // Javalin
+    implementation("org.mongodb:mongodb-driver-sync:5.0.0") // MongoDB driver
+    implementation("com.github.StarlessDev:MongoStorage:1.0.8") // MongoDB (de)serialization library
 
     implementation("org.spongepowered:configurate-yaml:4.2.0-SNAPSHOT") // Configurate
     implementation("com.google.code.gson:gson:2.10.1") // Gson
 
     implementation("com.vdurmont:semver4j:3.1.0") // Semantic versioning util
-    implementation("ch.qos.logback:logback-classic:1.4.14") // Logger implementation
+    implementation("ch.qos.logback:logback-classic:1.5.3") // Logger implementation
     implementation("com.anyascii:anyascii:0.3.2") // AnyAscii (finds the best ascii character match of unicode characters)
 }
 
