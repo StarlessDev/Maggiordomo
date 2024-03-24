@@ -99,6 +99,13 @@ public class Core implements Module {
         Statistics.getInstance().load();
 
         storage = new MongoStorage(BotLogger.getLogger(), config.getString(ConfigEntry.MONGO))
+                .migrationSchema(new MigrationSchema(VC.class)
+                        .entry("state", new FixedKeySupplier("status") {
+                            @Override
+                            public Object supply(Document document) {
+                                return document.getString(deprecatedKey());
+                            }
+                        }))
                 .migrationSchema(new MigrationSchema(Settings.class)
                         .entry("filterStrings", new HashMap<>())
                         .entry("categories", new FixedKeySupplier("categoryID") {
