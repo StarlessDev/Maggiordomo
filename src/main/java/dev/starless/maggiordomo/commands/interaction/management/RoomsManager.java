@@ -1,6 +1,5 @@
 package dev.starless.maggiordomo.commands.interaction.management;
 
-import dev.starless.maggiordomo.Bot;
 import dev.starless.maggiordomo.Core;
 import dev.starless.maggiordomo.data.Settings;
 import dev.starless.maggiordomo.data.VC;

@@ -258,6 +258,8 @@ public class RoomInspector extends AManagementInteraction {
                                             Guild guild, Set<String> records) {
         StringSelectMenu.Builder builder = StringSelectMenu.create("inspector:" + id + ":" + name);
         records.forEach(record -> {
+            if (builder.getOptions().size() == 25) return;
+
             User user = guild.getJDA().getUserById(record);
             String username;
             String nickname;
